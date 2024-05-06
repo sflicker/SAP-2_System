@@ -27,6 +27,11 @@ entity proc_top is
           phase_out : out STD_LOGIC_VECTOR(5 downto 0);
           clear_out : out STD_LOGIC;
           step_out : out STD_LOGIC
+
+         o_address : out STD_LOGIC_VECTOR(15 downto 0);         -- 16 bit output address
+         io_data : inout STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
+
+
     );
     attribute MARK_DEBUG : string;
     attribute MARK_DEBUG of S5_clear_start : signal is "true";
@@ -141,6 +146,8 @@ begin
      
    -- phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage_counter_sig - 1));
     
+
+    -- TODO move out
     GENERATING_CLOCK_CONVERTER:
         if SIMULATION_MODE
         generate
@@ -160,6 +167,7 @@ begin
             );
         end generate;
 
+    -- TODO move out        
     CLOCK_CTRL : entity work.clock_controller 
 
         port map (
@@ -181,6 +189,9 @@ begin
     --         pulse_out => clock_pulse
     --     );
 
+    --REDO to separate address and data
+    -- also ram abd io ports are moving out of the processor but the 
+    -- registers are staying. so this is more the internal data buss.
     w_bus : entity work.w_bus
         port map(
             sel_default => wbus_sel_sig,
@@ -306,6 +317,7 @@ begin
     --         input_port_2 => in_port_2,
     --         input_port_out => input_port_data_in_sig);
 
+    --TODO MOVE OUT
     ram_bank_input : entity work.memory_input_multiplexer            
          port map(prog_run_select => S2_prog_run_switch,
                  prog_data_in => S3_data_in,
@@ -322,6 +334,7 @@ begin
                  select_write_enable => selected_ram_write_enable_sig
              );
 
+    --TODO MOVE OUT
     ram_bank : entity work.ram_bank
         port map(
             clk => ram_clk_in_sig,
@@ -466,6 +479,7 @@ begin
 --    display_data(3 downto 0) <= IR_operand_sig when running;
 --    display_data(11 downto 8) <= pc_data_sig when running;
         
+    -- TODO Move Out
     GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
         generate  
             display_controller : entity work.display_controller
