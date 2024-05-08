@@ -6,31 +6,31 @@ entity proc_top is
     generic (
         SIMULATION_MODE : boolean := false
     );
-    port( clk_ext : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
+    port( i_clk : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
                                 -- for simulation TB should generate clk of 1HZ
-          S1_addr_in : in STD_LOGIC_VECTOR(15 downto 0);       -- address setting - S1 in ref
-          S2_prog_run_switch : in STD_LOGIC;       -- prog / run switch (prog=0, run=1)
-          S3_data_in : in STD_LOGIC_VECTOR(7 downto 0);       -- data setting      S3 in ref
-          S4_read_write_switch : in STD_LOGIC;       -- read/write toggle   -- 1 to write values to ram. 0 to read. needs to be 0 for run mode
-          S5_clear_start : in STD_LOGIC;       -- start/clear (reset)  -- 
-          S6_step_toggle : in STD_LOGIC;       -- single step -- 1 for a single step
-          S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
-          memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
+--          S1_addr_in : in STD_LOGIC_VECTOR(15 downto 0);       -- address setting - S1 in ref
+--          S2_prog_run_switch : in STD_LOGIC;       -- prog / run switch (prog=0, run=1)
+--          S3_data_in : in STD_LOGIC_VECTOR(7 downto 0);       -- data setting      S3 in ref
+--          S4_read_write_switch : in STD_LOGIC;       -- read/write toggle   -- 1 to write values to ram. 0 to read. needs to be 0 for run mode
+--          S5_clear_start : in STD_LOGIC;       -- start/clear (reset)  -- 
+--          S6_step_toggle : in STD_LOGIC;       -- single step -- 1 for a single step
+--          S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
+--          memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
           in_port_1 : in STD_LOGIC_VECTOR(7 downto 0);
           in_port_2 : in STD_LOGIC_VECTOR(7 downto 0);
           out_port_3 : out STD_LOGIC_VECTOR(7 downto 0);
           out_port_4 : out STD_LOGIC_VECTOR(7 downto 0);
-          data_out : out STD_LOGIC_VECTOR(7 downto 0);
+          --data_out : out STD_LOGIC_VECTOR(7 downto 0);
           running : out STD_LOGIC;
-          s7_anodes_out : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
-          s7_cathodes_out : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
-          phase_out : out STD_LOGIC_VECTOR(5 downto 0);
+        --   s7_anodes_out : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
+        --   s7_cathodes_out : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
+     --     phase_out : out STD_LOGIC_VECTOR(5 downto 0);
           clear_out : out STD_LOGIC;
           step_out : out STD_LOGIC
 
          o_address : out STD_LOGIC_VECTOR(15 downto 0);         -- 16 bit output address
-         io_data : inout STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
-
+         i_data : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
+        o_data: out STD_LOGIC_VECTOR(7 downto 0);
 
     );
     attribute MARK_DEBUG : string;
@@ -148,38 +148,38 @@ begin
     
 
     -- TODO move out
-    GENERATING_CLOCK_CONVERTER:
-        if SIMULATION_MODE
-        generate
-            passthrough_clock_converter : entity work.passthrough_clock_converter
-            port map (
-                clrbar => clrbar_sig,
-                clk_in => clk_ext,   -- simulation test bench should generate a 1HZ clock
-                clk_out => clk_ext_converted_sig
-            );
-        else generate
-            FPGA_clock_converter : entity work.clock_converter
-            port map (
-                clrbar => clrbar_sig,
-                clk_in_100MHZ => clk_ext,
-                clk_out_1HZ => clk_ext_converted_sig,
-                clk_out_1KHZ => clk_disp_refresh_1KHZ_sig
-            );
-        end generate;
+    -- GENERATING_CLOCK_CONVERTER:
+    --     if SIMULATION_MODE
+    --     generate
+    --         passthrough_clock_converter : entity work.passthrough_clock_converter
+    --         port map (
+    --             clrbar => clrbar_sig,
+    --             clk_in => clk_ext,   -- simulation test bench should generate a 1HZ clock
+    --             clk_out => clk_ext_converted_sig
+    --         );
+    --     else generate
+    --         FPGA_clock_converter : entity work.clock_converter
+    --         port map (
+    --             clrbar => clrbar_sig,
+    --             clk_in_100MHZ => clk_ext,
+    --             clk_out_1HZ => clk_ext_converted_sig,
+    --             clk_out_1KHZ => clk_disp_refresh_1KHZ_sig
+    --         );
+    --     end generate;
 
-    -- TODO move out        
-    CLOCK_CTRL : entity work.clock_controller 
+    -- -- TODO move out        
+    -- CLOCK_CTRL : entity work.clock_controller 
 
-        port map (
-            clk_in => clk_ext_converted_sig,
-            prog_run_switch => S2_prog_run_switch,
-            step_toggle => S6_step_toggle,
-            manual_auto_switch => S7_manual_auto_switch,
-            hltbar => hltbar_sig,
-            clrbar => clrbar_sig,
-            clk_out => clk_sys_sig,
-            clkbar_out => clkbar_sys_sig
-        );
+    --     port map (
+    --         clk_in => clk_ext_converted_sig,
+    --         prog_run_switch => S2_prog_run_switch,
+    --         step_toggle => S6_step_toggle,
+    --         manual_auto_switch => S7_manual_auto_switch,
+    --         hltbar => hltbar_sig,
+    --         clrbar => clrbar_sig,
+    --         clk_out => clk_sys_sig,
+    --         clkbar_out => clkbar_sys_sig
+    --     );
 
     
     -- single_pulse_generator : entity work.single_pulse_generator
@@ -317,32 +317,32 @@ begin
     --         input_port_2 => in_port_2,
     --         input_port_out => input_port_data_in_sig);
 
-    --TODO MOVE OUT
-    ram_bank_input : entity work.memory_input_multiplexer            
-         port map(prog_run_select => S2_prog_run_switch,
-                 prog_data_in => S3_data_in,
-                 run_data_in => mdr_tm_data_out_sig,
-                 prog_addr_in => S1_addr_in,
-                 run_addr_in => mar_addr_sig,
-                 prog_clk_in => memory_access_clk,
-                 run_clk_in => clk_sys_sig,
-                 prog_write_enable => S4_read_write_switch,
-                 run_write_enable => ram_write_enable_sig,
-                 select_data_in => ram_data_in_sig,
-                 select_addr_in => ram_addr_in_sig,
-                 select_clk_in => ram_clk_in_sig,
-                 select_write_enable => selected_ram_write_enable_sig
-             );
+    -- --TODO MOVE OUT
+    -- ram_bank_input : entity work.memory_input_multiplexer            
+    --      port map(prog_run_select => S2_prog_run_switch,
+    --              prog_data_in => S3_data_in,
+    --              run_data_in => mdr_tm_data_out_sig,
+    --              prog_addr_in => S1_addr_in,
+    --              run_addr_in => mar_addr_sig,
+    --              prog_clk_in => memory_access_clk,
+    --              run_clk_in => clk_sys_sig,
+    --              prog_write_enable => S4_read_write_switch,
+    --              run_write_enable => ram_write_enable_sig,
+    --              select_data_in => ram_data_in_sig,
+    --              select_addr_in => ram_addr_in_sig,
+    --              select_clk_in => ram_clk_in_sig,
+    --              select_write_enable => selected_ram_write_enable_sig
+    --          );
 
-    --TODO MOVE OUT
-    ram_bank : entity work.ram_bank
-        port map(
-            clk => ram_clk_in_sig,
-            addr => ram_addr_in_sig,
-            data_in => ram_data_in_sig,
-            write_enable => selected_ram_write_enable_sig,
-            data_out => ram_data_out_sig
-        );
+    -- --TODO MOVE OUT
+    -- ram_bank : entity work.ram_bank
+    --     port map(
+    --         clk => ram_clk_in_sig,
+    --         addr => ram_addr_in_sig,
+    --         data_in => ram_data_in_sig,
+    --         write_enable => selected_ram_write_enable_sig,
+    --         data_out => ram_data_out_sig
+    --     );
 
     proc_controller : entity work.proc_controller
         port map(
@@ -480,17 +480,17 @@ begin
 --    display_data(11 downto 8) <= pc_data_sig when running;
         
     -- TODO Move Out
-    GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
-        generate  
-            display_controller : entity work.display_controller
-            port map(
-               clk => clk_disp_refresh_1KHZ_sig,
-               rst => clr_sig,
-               data_in => display_data,
-               anodes_out => s7_anodes_out,
-               cathodes_out => s7_cathodes_out
-           );
-       end generate;                        
+    -- GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
+    --     generate  
+    --         display_controller : entity work.display_controller
+    --         port map(
+    --            clk => clk_disp_refresh_1KHZ_sig,
+    --            rst => clr_sig,
+    --            data_in => display_data,
+    --            anodes_out => s7_anodes_out,
+    --            cathodes_out => s7_cathodes_out
+    --        );
+    --    end generate;                        
 
 end behavior;
     
