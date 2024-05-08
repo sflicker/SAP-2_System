@@ -16,8 +16,8 @@ entity system_top is
         memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
         i_rx_serial;    -- input to receive serial.
         i_tx_serial;    -- output to send serial.
-        s7_anodes_out : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
-        s7_cathodes_out : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
+        o_led_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
+        o_led_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
 
     );
 end system_top;
