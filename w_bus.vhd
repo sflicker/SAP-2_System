@@ -24,15 +24,15 @@ entity w_bus is
         c_write_enable : out STD_LOGIC;
         tmp_write_enable : out STD_LOGIC;
         mar_write_enable : out STD_LOGIC;
-        pc_write_enable : out STD_LOGIC;
+        o_pc_write_enable : out STD_LOGIC;
         mdr_tm_write_enable : out STD_LOGIC;
         ir_opcode_write_enable : out STD_LOGIC;
         ir_operand_low_write_enable : out STD_LOGIC;
         ir_operand_high_write_enable : out STD_LOGIC;
         out_port_3_write_enable : out STD_LOGIC;
         out_port_4_write_enable : out STD_LOGIC;
-        pc_write_enable_low : out STD_LOGIC;
-        pc_write_enable_high : out STD_LOGIC
+        o_pc_write_enable_low : out STD_LOGIC;
+        o_o_pc_write_enable_high : out STD_LOGIC
   );
 end w_bus;
 
@@ -72,14 +72,14 @@ begin
         c_write_enable <= we_sel_active_sig(2);
         tmp_write_enable <= we_sel_active_sig(3);
         mar_write_enable <= we_sel_active_sig(4);
-        pc_write_enable <= we_sel_active_sig(5);
+        o_pc_write_enable <= we_sel_active_sig(5);
         mdr_tm_write_enable <= we_sel_active_sig(6);
         ir_opcode_write_enable <= we_sel_active_sig(7);
         ir_operand_low_write_enable <= we_sel_active_sig(8);
         ir_operand_high_write_enable <= we_sel_active_sig(9);
         out_port_3_write_enable <= we_sel_active_sig(10);
         out_port_4_write_enable <= we_sel_active_sig(11);
-        pc_write_enable_low <= we_sel_active_sig(12);
-        pc_write_enable_high <= we_sel_active_sig(13);
+        o_pc_write_enable_low <= we_sel_active_sig(12);
+        o_pc_write_enable_high <= we_sel_active_sig(13);
     end process;
 end behavioral;

@@ -3,14 +3,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity ALU is
-    Port ( clr : in STD_LOGIC;
-           op : in STD_LOGIC_VECTOR(3 downto 0);
-           input_1 : in STD_LOGIC_VECTOR(7 downto 0);
-           input_2 : in STD_LOGIC_VECTOR(7 downto 0);
-           update_status_flags : in STD_LOGIC;
-           alu_out : out STD_LOGIC_VECTOR(7 downto 0);
-           minus_flag : out STD_LOGIC;
-           equal_flag : out STD_LOGIC
+    Port ( i_clr : in STD_LOGIC;
+           i_op : in STD_LOGIC_VECTOR(3 downto 0);
+           i_input_1 : in STD_LOGIC_VECTOR(7 downto 0);
+           i_input_2 : in STD_LOGIC_VECTOR(7 downto 0);
+           i_update_status_flags : in STD_LOGIC;
+           o_out : out STD_LOGIC_VECTOR(7 downto 0);
+           o_minus_flag : out STD_LOGIC;
+           o_equal_flag : out STD_LOGIC
     );
 end ALU;
 
@@ -28,43 +28,43 @@ architecture Behavioral of ALU is
     end procedure;
 begin
 
-    process (clr, input_1, input_2, op)
+    process (i_clr, i_input_1, i_input_2, i_op)
         variable result : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
     begin
-        if clr = '1' then
+        if i_clr = '1' then
             result := (others => '0');
-        elsif op = "0001" then -- ADD
-            result := std_logic_vector(unsigned(input_1) + unsigned(input_2));
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0010" then  -- SUB
-            result := std_logic_vector(unsigned(input_1) - unsigned(input_2));
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0011" then  -- INC
+        elsif i_op = "0001" then -- ADD
+            result := std_logic_vector(unsigned(i_input_1) + unsigned(i_input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0010" then  -- SUB
+            result := std_logic_vector(unsigned(i_input_1) - unsigned(i_input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0011" then  -- INC
             result := std_logic_vector(unsigned(input_2) + 1);
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0100" then  -- DEC
-            result := std_logic_vector(unsigned(input_2) - 1);
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0101" then  -- AND
-            result := std_logic_vector(unsigned(input_1) AND unsigned(input_2));
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0110" then  -- OR
-            result := std_logic_vector(unsigned(input_1) OR unsigned(input_2));
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "0111" then  -- XOR
-            result := std_logic_vector(unsigned(input_1) XOR unsigned(input_2));
-            update_flags(result, minus_flag, equal_flag, update_status_flags);
-        elsif op = "1000" then  -- Complement
-            result := std_logic_vector(not unsigned(input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0100" then  -- DEC
+            result := std_logic_vector(unsigned(i_input_2) - 1);
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0101" then  -- AND
+            result := std_logic_vector(unsigned(i_input_1) AND unsigned(i_input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0110" then  -- OR
+            result := std_logic_vector(unsigned(i_input_1) OR unsigned(i_input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "0111" then  -- XOR
+            result := std_logic_vector(unsigned(i_input_1) XOR unsigned(i_input_2));
+            update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
+        elsif i_op = "1000" then  -- Complement
+            result := std_logic_vector(not unsigned(i_input_2));
             -- do not update flags in this case
-        elsif op = "1001" then -- rotate left
-            result := input_2(6 downto 0) & input_2(7);
-        elsif op = "1010" then -- rotate right
-            result := input_2(0) & input_2(7 downto 1);
+        elsif i_op = "1001" then -- rotate left
+            result := i_input_2(6 downto 0) & i_input_2(7);
+        elsif i_op = "1010" then -- rotate right
+            result := i_input_2(0) & i_input_2(7 downto 1);
         else
             result := result;
             -- no action. typically this would be op = 0
         end if;
-        alu_out <= result;
+        o_alu <= result;
     end process;
 end Behavioral;

@@ -16,8 +16,8 @@ entity system_top is
         memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
         i_rx_serial;    -- input to receive serial.
         i_tx_serial;    -- output to send serial.
-        o_led_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
-        o_led_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
+        o_seven_segment_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
+        o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
 
     );
 end system_top;
@@ -25,9 +25,10 @@ end system_top;
 architecture behavioral of system_top is
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_processor_clock_1MHZ : STD_LOGIC;
+    signal r_reset : STD_LOGIC := '1';
 
 begin
-    display_clock_divider : entity work.clock_divider
+    display_clock_divider_1KHZ : entity work.clock_divider
         generic map(g_DIV_FACTOR => 100000)
         port map(
             i_clk => i_clk,
@@ -35,7 +36,7 @@ begin
             o_clk => w_clk_display_refresh_1kHZ;
         );
 
-    processor_clock_divider : entity work.clock_divider
+    processor_clock_divider_1MHZ : entity work.clock_divider
         generic map(g_DIV_FACTOR => 100)
         port map(
             i_clk => i_clk,
@@ -45,23 +46,23 @@ begin
 
     processor_clock_controller : entity work.clock_controller
         port map (
-            clk_in => w_processor_clock_1MHZ,
+            clk_in => w_cpu_clock_1MHZ,
             prog_run_switch => S2_prog_run_switch,
             step_toggle => S6_step_toggle,
             manual_auto_switch => S7_manual_auto_switch,
             hltbar => hltbar_sig,
             clrbar => clrbar_sig,
-            clk_out => clk_sys_sig,
+            clk_out => w_cpu_gated_clock_1MHZ,
             clkbar_out => clkbar_sys_sig
         );
 
     system_mem : entity work.ram_bank
         port map (
-            i_clk =>
-            i_addr => w_ram_addr
-            i_data => w_ram_data
+            i_clk => w_processor_clock_1MHZ,
+            i_addr => w_ram_addr,
+            i_data => w_ram_data_in, 
             i_write_enable => w_ram_write_enable
-            o_data =>
+            o_data => w_ram_data_out
         );
 
     ram_bank_input : entity work.memory_input_multiplexer            
@@ -85,8 +86,8 @@ begin
 
     mem_loader : entity work.memory_loader
         port map(
-            i_clk =>
-            i_reset =>
+            i_clk => w_processor_clock_1MHZ,
+            i_reset => r_reset, 
             i_prog_run_mode => S2_prog_run_switch
         )
 
@@ -140,7 +141,24 @@ begin
 
     soft_core : entity work.proc_top
         port map (
-            i_clk => clk_sys_sig,
+            i_clk => w_cpu_gated_clock_1MHZ,
+            i_reset => r_reset,
+            i_data =>
+            o_data =>
+            o_address =>
         );
     
+
+    startup : process(i_clk, i_reset)
+    begin
+        if rising_edge(i_clk) then
+            if i_reset = '1' then
+                r_reset <= '1';
+            else 
+                r_reset <= '0';
+            end if;
+        end if;
+    end;
+
+
 end behavioral;

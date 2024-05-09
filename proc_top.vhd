@@ -6,7 +6,8 @@ entity proc_top is
     generic (
         SIMULATION_MODE : boolean := false
     );
-    port( i_clk : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
+    port( i_clk : in STD_LOGIC;
+          i_reset : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
                                 -- for simulation TB should generate clk of 1HZ
 --          S1_addr_in : in STD_LOGIC_VECTOR(15 downto 0);       -- address setting - S1 in ref
 --          S2_prog_run_switch : in STD_LOGIC;       -- prog / run switch (prog=0, run=1)
@@ -46,8 +47,7 @@ architecture behavior of proc_top is
 --    attribute MARK_DEBUG : string;
 
     signal clk_ext_converted_sig : STD_LOGIC;
-    signal clk_sys_sig : std_logic;
-    signal clkbar_sys_sig : std_logic;
+    signal w_clkbar : std_logic;
     signal clk_disp_refresh_1KHZ_sig : std_logic;
     signal hltbar_sig : std_logic := '1';
     signal clr_sig : STD_LOGIC;
@@ -72,7 +72,7 @@ architecture behavior of proc_top is
     signal stage_counter_sig : INTEGER;
     signal output_1_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal output_2_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal write_enable_PC_sig : STD_LOGIC;
+    signal w_write_enable_PC : STD_LOGIC;
     signal pc_increment_sig : STD_LOGIC;
     signal write_enable_ir_opcode_sig : STD_LOGIC;
     signal write_enable_low_sig : STD_LOGIC;
@@ -116,12 +116,12 @@ architecture behavior of proc_top is
     signal sp_increment_sig : STD_LOGIC;
     signal sp_decrement_sig : STD_LOGIC;
     signal sp_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
-    signal pc_write_enable_low_sig : STD_LOGIC;
-    signal pc_write_enable_high_sig : STD_LOGIC;
+    signal w_pc_write_enable_low : STD_LOGIC;
+    signal w_pc_write_enable_high : STD_LOGIC;
 
     attribute MARK_DEBUG of clk_ext_converted_sig : signal is "true";
-    attribute MARK_DEBUG of clk_sys_sig : signal is "true";
-    attribute MARK_DEBUG of clkbar_sys_sig : signal is "true";
+    attribute MARK_DEBUG of i_clk : signal is "true";
+    attribute MARK_DEBUG of w_clkbar : signal is "true";
     
     attribute MARK_DEBUG of hltbar_sig : signal is "true";
     attribute MARK_DEBUG of clrbar_sig : signal is "true";
@@ -141,6 +141,8 @@ begin
     clear_out <= S5_clear_start;
     step_out <= S6_step_toggle; 
     data_out <= ram_data_out_sig;
+
+    w_clkbar <= not i_clk
 
     IR_operand_sig <= operand_high_out_sig & operand_low_out_sig;
      
@@ -177,8 +179,8 @@ begin
     --         manual_auto_switch => S7_manual_auto_switch,
     --         hltbar => hltbar_sig,
     --         clrbar => clrbar_sig,
-    --         clk_out => clk_sys_sig,
-    --         clkbar_out => clkbar_sys_sig
+    --         clk_out => i_clk,
+    --         clkbar_out => w_clkbar
     --     );
 
     
@@ -216,35 +218,35 @@ begin
             c_write_enable => write_enable_C_sig,
             tmp_write_enable => write_enable_tmp_sig,
             mar_write_enable => write_enable_mar_sig,
-            pc_write_enable => write_enable_PC_sig,
+            o_pc_write_enable => w_write_enable_PC,
             mdr_tm_write_enable => write_enable_mdr_tm_sig,
             ir_opcode_write_enable => write_enable_ir_opcode_sig,
             ir_operand_low_write_enable => write_enable_low_sig,
             ir_operand_high_write_enable => write_enable_high_sig,
             out_port_3_write_enable => out_port_3_write_enable_sig,
             out_port_4_write_enable => out_port_4_write_enable_sig,
-            pc_write_enable_low => pc_write_enable_low_sig,
-            pc_write_enable_high => pc_write_enable_high_sig
+            o_pc_write_enable_low => w_pc_write_enable_low,
+            o_pc_write_enable_high => w_pc_write_enable_high
         );
 
     PC : entity work.ProgramCounter
         Generic Map(16)
         port map(
-            clk => clkbar_sys_sig,
-            clr => clr_sig,
-            write_enable_full => write_enable_PC_sig,
-            write_enable_low => pc_write_enable_low_sig,
-            write_enable_high => pc_write_enable_high_sig,
-            increment => pc_increment_sig,
-            data_in => w_bus_data_out_sig,
-            data_out => pc_data_out_sig
+            i_clk => w_clkbar,
+            i_reset => i_reset,
+            i_write_enable_full => w_write_enable_PC,
+            i_write_enable_low => w_pc_write_enable_low,
+            i_write_enable_high => w_pc_write_enable_high,
+            i_increment => pc_increment_sig,
+            i_data => w_bus_data_out_sig,
+            o_data => pc_data_out_sig
         );
 
     -- MEMORY ADDRESS REGISTER
     MAR : entity work.DataRegister
         Generic Map(16)
         port map(
-            clk => clk_sys_sig,
+            clk => i_clk,
             clr => clr_sig,
             write_enable => write_enable_mar_sig,
             data_in => w_bus_data_out_sig,
@@ -255,7 +257,7 @@ begin
     MDR_FM : entity work.DataRegister
         Generic Map(8)
         port map(
-            clk => clk_sys_sig,
+            clk => i_clk,
             clr => clr_sig,
             -- write enable for both modes
             write_enable => write_enable_mdr_fm_sig,
@@ -269,7 +271,7 @@ begin
     MDR_TM : entity work.DataRegister
     Generic Map(8)
     port map(
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         -- write enable for both modes
         write_enable => write_enable_mdr_tm_sig,
@@ -282,7 +284,7 @@ begin
     IR : entity work.DataRegister
         generic map(8)
         port map(
-            clk => clk_sys_sig,
+            clk => i_clk,
             clr => ir_clear_sig,
             write_enable => write_enable_ir_opcode_sig,
             data_in => w_bus_data_out_sig(7 downto 0),
@@ -291,7 +293,7 @@ begin
 
     IR_Operand : entity work.IR_operand_latch
             port map(
-                clk => clk_sys_sig,
+                clk => i_clk,
                 clr => ir_clear_sig,
                 ir_operand_in => w_bus_data_out_sig(7 downto 0),
                 write_enable_low => write_enable_low_sig,
@@ -302,7 +304,7 @@ begin
 
     SP : entity work.StackPointer
             port map(
-                clk => clk_sys_sig,
+                clk => i_clk,
                 clr => clr_sig,
                 increment => sp_increment_sig,
                 decrement => sp_decrement_sig,
@@ -325,7 +327,7 @@ begin
     --              prog_addr_in => S1_addr_in,
     --              run_addr_in => mar_addr_sig,
     --              prog_clk_in => memory_access_clk,
-    --              run_clk_in => clk_sys_sig,
+    --              run_clk_in => i_clk,
     --              prog_write_enable => S4_read_write_switch,
     --              run_write_enable => ram_write_enable_sig,
     --              select_data_in => ram_data_in_sig,
@@ -346,7 +348,7 @@ begin
 
     proc_controller : entity work.proc_controller
         port map(
-            clk => clkbar_sys_sig,
+            clk => w_clkbar,
             clrbar => clrbar_sig,
             opcode => IR_opcode_sig,
             minus_flag => minus_flag_sig,
@@ -369,7 +371,7 @@ begin
     acc : entity work.DataRegister 
         Generic Map(8)
         Port Map (
-            clk => clk_sys_sig,
+            clk => i_clk,
             clr => clr_sig,
             write_enable => write_enable_acc_sig,
             data_in => w_bus_data_out_sig(7 downto 0),
@@ -379,7 +381,7 @@ begin
     B : entity work.DataRegister 
     Generic Map(8)
     Port Map (
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         write_enable => write_enable_B_sig,
         data_in => w_bus_data_out_sig(7 downto 0),
@@ -390,7 +392,7 @@ begin
     C : entity work.DataRegister 
     Generic Map(8)
     Port Map (
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         write_enable => write_enable_C_sig,
         data_in => w_bus_data_out_sig(7 downto 0),
@@ -401,7 +403,7 @@ begin
     TMP : entity work.DataRegister 
     Generic Map(8)
     Port Map (
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         write_enable => write_enable_tmp_sig,
         data_in => w_bus_data_out_sig(7 downto 0),
@@ -423,7 +425,7 @@ begin
     OUTPUT_PORT_3 : entity work.DataRegister
     Generic Map(8)
     port map (
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         write_enable => out_port_3_write_enable_sig,
         data_in => w_bus_data_out_sig(7 downto 0),
@@ -433,7 +435,7 @@ begin
     OUTPUT_PORT_4 : entity work.DataRegister
     Generic Map(8)
     port map (
-        clk => clk_sys_sig,
+        clk => i_clk,
         clr => clr_sig,
         write_enable => out_port_4_write_enable_sig,
         data_in => w_bus_data_out_sig(7 downto 0),
@@ -442,7 +444,7 @@ begin
 
     IO : entity work.IO_controller
         Port map(
-            clk => clkbar_sys_sig,
+            clk => w_clkbar,
             rst => clr_sig,
             opcode => IR_opcode_sig,
             portnum => IR_operand_sig(2 downto 0),
@@ -451,7 +453,7 @@ begin
             active => io_active_sig
         );
 
-    REGISTER_LOG : process(clk_sys_sig)
+    REGISTER_LOG : process(i_clk)
     begin
         Report "Current Simulation Time: " & time'image(now)
             & ", PC: " & to_string(pc_data_out_sig)
@@ -465,7 +467,7 @@ begin
 
     -- OUTPUT_REG : entity work.output
     --         port map (
-    --             clk => clk_sys_sig,
+    --             clk => i_clk,
     --             clr => clr_sig,
     --             load_OUT_bar => enable_write_output_sig,
     --             output_in => w_bus_data_out_sig(7 downto 0),
