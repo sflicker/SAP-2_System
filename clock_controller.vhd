@@ -5,21 +5,21 @@ use IEEE.numeric_std.all;
 entity clock_controller is
 
     Port(
-        clk_in : IN STD_LOGIC;
-        prog_run_switch : IN STD_LOGIC;  -- prog / run switch (prog=0, run=1)
-        step_toggle : IN STD_LOGIC;        -- single step  when high
-        manual_auto_switch : IN STD_LOGIC;        -- manual/auto mode. 0 manual, 1 auto
-        hltbar : in STD_LOGIC;      -- 
-        clrbar : in STD_LOGIC;
-        clk_out : OUT STD_LOGIC;
-        clkbar_out : OUT STD_LOGIC
+        i_clk : IN STD_LOGIC;
+        i_prog_run_switch : IN STD_LOGIC;  -- prog / run switch (prog=0, run=1)
+        i_step_toggle : IN STD_LOGIC;        -- single step  when high
+        i_manual_auto_switch : IN STD_LOGIC;        -- manual/auto mode. 0 manual, 1 auto
+        i_hltbar : in STD_LOGIC;      -- 
+        i_clrbar : in STD_LOGIC;
+        o_clk : OUT STD_LOGIC;
+        o_clkbar : OUT STD_LOGIC
     );
 end clock_controller;
 
 architecture behavioral of clock_controller is
-    signal or_out : STD_LOGIC;
-    signal and1_out : STD_LOGIC;
-    signal and2_out : STD_LOGIC;
+    signal r_manual_or_auto_w_h : STD_LOGIC;
+    signal r_auto_w_h : STD_LOGIC;
+    signal r_manual_w_h : STD_LOGIC;
 begin
 
     -- single_pulse_generator : entity work.single_pulse_generator
@@ -29,11 +29,11 @@ begin
     --         pulse_out => clock_pulse
     --     );
     
-    clk_out <= or_out and hltbar and prog_run_switch;
-    clkbar_out <= not clk_out;
-    or_out <= and1_out or and2_out;
-    and2_out <= not manual_auto_switch and step_toggle and hltbar;
-    and1_out <= clk_in and manual_auto_switch and hltbar and clrbar;
+    o_clk <= r_manual_or_auto_w_h and i_hltbar and i_prog_run_switch;
+    o_clkbar <= not o_clk;
+    r_manual_or_auto_w_h <= r_auto_w_h or r_manual_w_h;
+    r_manual_w_h <= not i_manual_auto_switch and i_step_toggle;
+    r_auto_w_h <= i_clk and i_manual_auto_switch and i_clrbar;
     
     
 end architecture behavioral;

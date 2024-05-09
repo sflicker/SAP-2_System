@@ -243,7 +243,7 @@ begin
         );
 
     -- MEMORY ADDRESS REGISTER
-    MAR : entity work.DataRegister
+    MAR : entity work.data_register
         Generic Map(16)
         port map(
             clk => i_clk,
