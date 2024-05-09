@@ -254,7 +254,7 @@ begin
             );
             
     -- MEMORY DATA_REGISTER - From Ram        
-    MDR_FM : entity work.DataRegister
+    MDR_FM : entity work.data_register
         Generic Map(8)
         port map(
             clk => i_clk,
@@ -268,7 +268,7 @@ begin
         );              
 
             -- MEMORY DATA_REGISTER - To Ram        
-    MDR_TM : entity work.DataRegister
+    MDR_TM : entity work.data_register
     Generic Map(8)
     port map(
         clk => i_clk,
@@ -281,7 +281,7 @@ begin
         data_out => mdr_tm_data_out_sig
     );              
 
-    IR : entity work.DataRegister
+    IR : entity work.data_register
         generic map(8)
         port map(
             clk => i_clk,
