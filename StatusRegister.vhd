@@ -7,16 +7,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity StatusRegister is
     Port (
-        clk : in STD_LOGIC;
-        clr : in STD_LOGIC;
-        minus_flag_we : in STD_LOGIC;
-        minus_flag_in : in STD_LOGIC;
+        i_clk : in STD_LOGIC;
+        i_rst : in STD_LOGIC;
+        i_minus_flag_we : in STD_LOGIC;
+        i_minus_flag_in : in STD_LOGIC;
         minus_flag_out : out STD_LOGIC;
-        equal_flag_we : in STD_LOGIC;
-        equal_flag_in : in STD_LOGIC;
+        i_equal_flag_we : in STD_LOGIC;
+        i_equal_flag_in : in STD_LOGIC;
         equal_flag_out : in STD_LOGIC;
-        status_flags_we : in STD_LOGIC;
-        status_flags_in : in STD_LOGIC_VECTOR(7 downto 0);
+        i_status_flags_we : in STD_LOGIC;
+        i_status_flags_in : in STD_LOGIC_VECTOR(7 downto 0);
         status_flags_out : in STD_LOGIC_VECTOR(7 downto 0)
     );
 end StatusRegister;
@@ -26,12 +26,12 @@ architecture behavior of StatusRegister is
     signal equal_flag : STD_LOGIC;
     signal status_flags : STD_LOGIC_VECTOR(1 downto 0);
 begin
-    process(clk) 
+    process(i_clk) 
         variable equal_flag_var : STD_LOGIC := '0';
         variable minus_flag_var : STD_LOGIC := '0';
     begin
-        if rising_edge(clk) then
-            if clr = '1' then
+        if rising_edge(i_clk) then
+            if i_rst = '1' then
                 minus_flag_var := '0';
                 equal_flag_var := '0';
             end if;
