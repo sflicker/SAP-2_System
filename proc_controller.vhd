@@ -103,15 +103,15 @@ use std.textio.all;
 entity proc_controller is
   Port (
     -- inputs
-    clk : in STD_LOGIC;
-    clrbar : in STD_LOGIC;
-    opcode : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit opcodes
-    minus_flag : in STD_LOGIC;
-    equal_flag : in STD_LOGIC;
+    i_clk : in STD_LOGIC;
+    i_clrbar : in STD_LOGIC;
+    i_opcode : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit opcodes
+    i_minus_flag : in STD_LOGIC;
+    i_equal_flag : in STD_LOGIC;
 
     -- outputs
-    wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
-    alu_op : out STD_LOGIC_VECTOR(3 downto 0);
+    o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
+    o_alu_op : out STD_LOGIC_VECTOR(3 downto 0);
     wbus_output_connected_components_write_enable: out STD_LOGIC_VECTOR(0 to 13);
     pc_increment : out STD_LOGIC;
     mdr_fm_write_enable : out STD_LOGIC;
@@ -138,13 +138,13 @@ architecture Behavioral of proc_controller is
 --    stage_counter : out integer
 
 
-    type ADDRESS_ROM_TYPE is array(0 to 255) of std_logic_vector(9 downto 0);
-    type CONTROL_ROM_TYPE is array(0 to 1023) of STD_LOGIC_VECTOR(0 to 32);
+    type t_address_rom is array(0 to 255) of std_logic_vector(9 downto 0);
+    type t_control_rom is array(0 to 1023) of STD_LOGIC_VECTOR(0 to 32);
 
-    impure function init_address_rom return ADDRESS_ROM_TYPE is
+    impure function init_address_rom return t_address_rom is
         file text_file : text open read_mode is "instruction_index.txt";
         variable text_line : line;
-        variable rom_content : ADDRESS_ROM_TYPE;
+        variable rom_content : t_address_rom;
     begin
         for i in 0 to 255 loop 
             readline(text_file, text_line);
@@ -154,10 +154,10 @@ architecture Behavioral of proc_controller is
         return rom_content;
     end function;
 
-    impure function init_control_rom return CONTROL_ROM_TYPE is
+    impure function init_control_rom return t_control_rom is
         file text_file : text open read_mode is "control_rom.txt";
         variable text_line : line;
-        variable rom_content : CONTROL_ROM_TYPE;
+        variable rom_content : t_control_rom;
     begin
         for i in 0 to 1023 loop 
             readline(text_file, text_line);
@@ -167,19 +167,19 @@ architecture Behavioral of proc_controller is
         return rom_content;
     end function;
 
-    constant ADDRESS_ROM_CONTENTS : ADDRESS_ROM_TYPE := init_address_rom;
+    constant ADDRESS_ROM_CONTENTS : t_address_rom := init_address_rom;
 
     constant NOP : STD_LOGIC_VECTOR(0 to 32) := "000000000000000000000000000000000";
 
-    constant CONTROL_ROM : CONTROL_ROM_TYPE := init_control_rom;
+    constant CONTROL_ROM : t_control_rom := init_control_rom;
 
     procedure output_control_word(
         variable stage_var : integer := 1;
         variable control_word : std_logic_vector(0 to 32)) is
     begin
         Report "Stage: " & to_string(stage_var) 
-            & ", wbus_sel: " & to_string(control_word(0 to 3))
-            & ", alu_op: " & to_string(control_word(4 to 7))
+            & ", o_wbus_sel: " & to_string(control_word(0 to 3))
+            & ", o_alu_op: " & to_string(control_word(4 to 7))
             & ", pc_increment: " & to_string(control_word(8))
             & ", ir_clear: " & to_string(control_word(9))
             & ", acc_write_enable: " & to_string(control_word(10))
@@ -214,21 +214,21 @@ begin
     stage_out <= stage_sig;
 
     run_mode_process:
-        process(clk, clrbar, opcode)
+        process(i_clk, i_clrbar, i_opcode)
             variable stage_var : integer := 1;
             variable control_word_index : std_logic_vector(9 downto 0);
             variable control_word : std_logic_vector(0 to 32);
         begin
 
-            if CLRBAR = '0' then
+            if i_clrbar = '0' then
                 stage_var := 1;
                 stage_sig <= stage_var;
-            elsif rising_edge(clk) then
-                if stage_var = 1 then
+            elsif rising_edge(i_clk) then
+                if stage_var = 1 then       -- reset for fetch
                     control_word_index := "0000000000";
-                elsif stage_var = 5 then
-                    control_word_index := ADDRESS_ROM_CONTENTS(to_integer(unsigned(opcode)));
-                else 
+                elsif stage_var = 5 then    -- start the control for the opcode
+                    control_word_index := ADDRESS_ROM_CONTENTS(to_integer(unsigned(i_opcode)));
+                else                        -- increment the index for the next control word
                     control_word_index := std_logic_vector(unsigned(control_word_index) + 1);
                 end if;
 
@@ -237,24 +237,26 @@ begin
 
                 Report "Stage: " & to_string(stage_var) 
                     & ", control_word_index: " & to_string(control_word_index) 
-                    & ", control_word: " & to_string(control_word) & ", opcode: " & to_string(opcode);
+                    & ", control_word: " & to_string(control_word) & ", opcode: " & to_string(i_opcode);
 
-                if control_word = NOP or 
-                    (control_word(27) = '1' and minus_flag = '0') or
-                    (control_word(28) = '1' and equal_flag = '0') or
-                    (control_word(29) = '1' and equal_flag = '1')  then
+                -- exit OP control program if NOP reached and reset stage to 1.
+                if control_word = NOP or        -- if the control word is NOP then abort the op and go to next fext
+                    (control_word(27) = '1' and i_minus_flag = '0') or    -- also abort op for conditional jumps
+                    (control_word(28) = '1' and i_equal_flag = '0') or
+                    (control_word(29) = '1' and i_equal_flag = '1') then
                         Report "NOP detected moving to next instruction";
                         stage_var := 1;
                         stage_sig <= stage_var;
     --                    stage_counter <= stage;
                 else
-                    --TODO bits need updating for SAP-2 architecture
+                    -- if not finished with control program..
+                    -- translate control word to output control signals 
                     output_control_word(stage_var, control_word);
                     control_word_signal <= control_word;
                     control_word_index_signal <= control_word_index;
 
-                    wbus_sel <= control_word(0 to 3);
-                    alu_op <= control_word(4 to 7);
+                    o_wbus_sel <= control_word(0 to 3);
+                    o_alu_op <= control_word(4 to 7);
                     pc_increment <= control_word(8);
                     ir_clear <= control_word(9);
                     wbus_output_connected_components_write_enable <= control_word(10 to 23);
@@ -268,10 +270,12 @@ begin
                     stack_pointer_dec <= control_word(32);
 --                    stage_counter <= stage;
         
-                    if stage_var >= 30 then
+                    if stage_var >= 30 then     -- all op controls should end in a NOP so should never be true.
+                        REPORT "WARNING stage maximum reached!!!!";
                         stage_var := 1;
                         stage_sig <= stage_var;
                     else
+                        -- increment stage
                         stage_var := stage_var + 1; 
                         stage_sig <= stage_var;
                     end if;
