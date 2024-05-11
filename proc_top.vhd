@@ -206,30 +206,30 @@ begin
             i_io_controller_active => io_active_sig,
             i_pc_data => pc_data_out_sig,
             i_sp_data => sp_data_out_sig,
-            i_ir_operand => IR_operand_sig,
+            i_ir_operand_full => IR_operand_sig,
             i_acc_data => acc_data_sig,
             i_alu_data => alu_data_sig,
             i_mdr_fm_data => mdr_fm_data_out_sig,
             i_b_data => b_data_sig,
             i_c_data => c_data_sig, 
-            tmp_dai_tmp_dataa_in => tmp_data_sig,
+            i_tmp_data => tmp_data_sig,
             i_input_port_1_data => input_port_1_data_in_sig,
             i_input_port_2_data => input_port_2_data_in_sig,
             o_bus_data => w_bus_data_out_sig,
-            acc_write_enable => write_enable_acc_sig,
-            b_write_enable => write_enable_B_sig,
-            c_write_enable => write_enable_C_sig,
-            tmp_write_enable => write_enable_tmp_sig,
-            mar_write_enable => w_write_enable_mar,
-            o_pc_write_enable => w_write_enable_PC,
-            mdr_tm_write_enable => write_enable_mdr_tm_sig,
-            ir_opcode_write_enable => write_enable_ir_opcode_sig,
-            ir_operand_low_write_enable => write_enable_low_sig,
-            ir_operand_high_write_enable => write_enable_high_sig,
-            out_port_3_write_enable => out_port_3_write_enable_sig,
-            out_port_4_write_enable => out_port_4_write_enable_sig,
-            o_pc_write_enable_low => w_pc_write_enable_low,
-            o_pc_write_enable_high => w_pc_write_enable_high
+            o_acc_we => write_enable_acc_sig,
+            o_b_we => write_enable_B_sig,
+            o_c_we => write_enable_C_sig,
+            o_tmp_we => write_enable_tmp_sig,
+            o_mar_we => w_write_enable_mar,
+            o_pc_we_full => w_write_enable_PC,
+            o_pc_we_low => w_pc_write_enable_low,
+            o_pc_we_high => w_pc_write_enable_high
+            o_mdr_tm_we => write_enable_mdr_tm_sig,
+            o_ir_opcode_we => write_enable_ir_opcode_sig,
+            o_ir_operand_we_low => write_enable_low_sig,
+            o_ir_operand_we_high => write_enable_high_sig,
+            o_out_port_3_we => out_port_3_write_enable_sig,
+            o_out_port_4_we => out_port_4_write_enable_sig,
         );
 
     PC : entity work.program_counter
@@ -371,7 +371,7 @@ begin
             stage_out => stage_counter_sig
         );
         
-    acc : entity w.data_register 
+    acc : entity work.data_register 
         Generic Map(8)
         Port Map (
             clk => i_clk,
@@ -381,7 +381,7 @@ begin
             data_out => acc_data_sig
         ); 
 
-    B : entity w.data_register 
+    B : entity work.data_register 
     Generic Map(8)
     Port Map (
         clk => i_clk,
@@ -392,7 +392,7 @@ begin
     );
 
 
-    C : entity w.data_register 
+    C : entity work.data_register 
     Generic Map(8)
     Port Map (
         clk => i_clk,
@@ -403,7 +403,7 @@ begin
     );
 
 
-    TMP : entity w.data_register 
+    TMP : entity work.data_register 
     Generic Map(8)
     Port Map (
         clk => i_clk,
@@ -425,7 +425,7 @@ begin
             equal_flag => w_equal_flag
             );
 
-    OUTPUT_PORT_3 : entity w.data_register
+    OUTPUT_PORT_3 : entity work.data_register
     Generic Map(8)
     port map (
         clk => i_clk,
@@ -435,7 +435,7 @@ begin
         data_out => output_1_sig
     );
 
-    OUTPUT_PORT_4 : entity w.data_register
+    OUTPUT_PORT_4 : entity work.data_register
     Generic Map(8)
     port map (
         clk => i_clk,

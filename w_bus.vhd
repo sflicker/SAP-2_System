@@ -9,7 +9,7 @@ entity w_bus is
         i_io_controller_active : in STD_LOGIC;                                   -- '1' when IO controller is active and driving the bus. otherwise main controller drives
         i_pc_data : in STD_LOGIC_VECTOR(15 downto 0);
         i_sp_data : in STD_LOGIC_VECTOR(15 downto 0);
-        i_ir_operand : in STD_LOGIC_VECTOR(15 downto 0);
+        i_ir_operand_full : in STD_LOGIC_VECTOR(15 downto 0);
         i_acc_data : in STD_LOGIC_VECTOR(7 downto 0);
         i_alu_data  : in STD_LOGIC_VECTOR(7 downto 0);
         i_mdr_fm_data : in STD_LOGIC_VECTOR(7 downto 0);
@@ -22,17 +22,17 @@ entity w_bus is
         o_acc_we : out STD_LOGIC;
         o_b_we : out STD_LOGIC;
         o_c_we : out STD_LOGIC;
-        tmp_write_enable : out STD_LOGIC;
-        mar_write_enable : out STD_LOGIC;
-        o_pc_write_enable : out STD_LOGIC;
-        mdr_tm_write_enable : out STD_LOGIC;
-        ir_opcode_write_enable : out STD_LOGIC;
-        ir_operand_low_write_enable : out STD_LOGIC;
-        ir_operand_high_write_enable : out STD_LOGIC;
-        out_port_3_write_enable : out STD_LOGIC;
-        out_port_4_write_enable : out STD_LOGIC;
-        o_pc_write_enable_low : out STD_LOGIC;
-        o_pc_write_enable_high : out STD_LOGIC
+        o_tmp_we : out STD_LOGIC;
+        o_mar_we : out STD_LOGIC;
+        o_pc_we_full : out STD_LOGIC;
+        o_pc_we_low : out STD_LOGIC;
+        o_pc_we_high : out STD_LOGIC;
+        o_mdr_tm_we : out STD_LOGIC;
+        o_ir_opcode_we : out STD_LOGIC;
+        o_ir_operand_we_low : out STD_LOGIC;
+        o_ir_operand_we_high : out STD_LOGIC;
+        o_out_port_3_we : out STD_LOGIC;
+        o_out_port_4_we : out STD_LOGIC
   );
 end w_bus;
 
@@ -49,7 +49,7 @@ begin
         case r_driver_sel is
             when "0000" => o_bus_data <= (others => '0');  -- zero
             when "0001" => o_bus_data <= i_pc_data;
-            when "0010" => o_bus_data <= i_ir_operand;
+            when "0010" => o_bus_data <= i_ir_operand_full;
             when "0011" => o_bus_data <= ("00000000" & i_alu_data);
             when "0100" => o_bus_data <= ("00000000" & i_mdr_fm_data);
             when "0101" => o_bus_data <= ("00000000" & i_acc_data);
@@ -70,15 +70,15 @@ begin
         o_acc_we <= r_we_sel(0);
         o_b_we <= r_we_sel(1);
         o_c_we <= r_we_sel(2);
-        tmp_write_enable <= r_we_sel(3);
-        mar_write_enable <= r_we_sel(4);
+        o_tmp_we <= r_we_sel(3);
+        o_mar_we <= r_we_sel(4);
         o_pc_write_enable <= r_we_sel(5);
-        mdr_tm_write_enable <= r_we_sel(6);
-        ir_opcode_write_enable <= r_we_sel(7);
-        ir_operand_low_write_enable <= r_we_sel(8);
-        ir_operand_high_write_enable <= r_we_sel(9);
-        out_port_3_write_enable <= r_we_sel(10);
-        out_port_4_write_enable <= r_we_sel(11);
+        o_mdr_tm_we <= r_we_sel(6);
+        o_ir_opcode_we <= r_we_sel(7);
+        o_ir_operand_we_low <= r_we_sel(8);
+        o_ir_operand_we_high <= r_we_sel(9);
+        o_out_port_3_we <= r_we_sel(10);
+        o_out_port_4_we <= r_we_sel(11);
         o_pc_write_enable_low <= r_we_sel(12);
         o_pc_write_enable_high <= r_we_sel(13);
     end process;
