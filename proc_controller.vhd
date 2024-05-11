@@ -112,7 +112,7 @@ entity proc_controller is
     -- outputs
     o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
     o_alu_op : out STD_LOGIC_VECTOR(3 downto 0);
-    wbus_output_connected_components_write_enable: out STD_LOGIC_VECTOR(0 to 13);
+    o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 13);
     pc_increment : out STD_LOGIC;
     mdr_fm_write_enable : out STD_LOGIC;
     ram_write_enable : out STD_LOGIC;
@@ -259,7 +259,7 @@ begin
                     o_alu_op <= control_word(4 to 7);
                     pc_increment <= control_word(8);
                     ir_clear <= control_word(9);
-                    wbus_output_connected_components_write_enable <= control_word(10 to 23);
+                    o_wbus_control_word <= control_word(10 to 23);
                     mdr_fm_write_enable <= control_word(24);
                     ram_write_enable <= control_word(25);
 

@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
 -- 16 bit program counter 
-entity ProgramCounter is
+entity program_counter is
     generic (
         WIDTH : integer := 16
     );
@@ -18,9 +18,9 @@ entity ProgramCounter is
         o_data : out STD_LOGIC_VECTOR(WIDTH-1 downto 0)
     );
    
-end ProgramCounter;
+end program_counter;
 
-architecture Behavioral of ProgramCounter is
+architecture Behavioral of program_counter is
 begin
 
     process(i_clk, i_reset)

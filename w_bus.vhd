@@ -2,26 +2,26 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity w_bus is
-  Port (sel_default : in STD_LOGIC_VECTOR(3 downto 0); 
-        sel_io : in STD_LOGIC_VECTOR(3 downto 0);
-        we_sel_default : in STD_LOGIC_VECTOR(0 to 13);
-        we_sel_io : in STD_LOGIC_VECTOR(0 to 13);
-        io_active : in STD_LOGIC;
-        pc_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
-        stack_pointer_in : in STD_LOGIC_VECTOR(15 downto 0);
-        IR_operand_in : in STD_LOGIC_VECTOR(15 downto 0);
-        acc_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        alu_data_in  : in STD_LOGIC_VECTOR(7 downto 0);
-        MDR_fm_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        B_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        C_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        tmp_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        input_port_1_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        input_port_2_data_in : in STD_LOGIC_VECTOR(7 downto 0);
-        bus_out : out STD_LOGIC_VECTOR(15 downto 0);
-        acc_write_enable : out STD_LOGIC;
-        b_write_enable : out STD_LOGIC;
-        c_write_enable : out STD_LOGIC;
+  Port (i_driver_sel_def : in STD_LOGIC_VECTOR(3 downto 0);         -- select component to drive the bus from main controller
+        i_driver_sel_io : in STD_LOGIC_VECTOR(3 downto 0);          -- select component to drive the bus from io controller
+        i_we_sel_def : in STD_LOGIC_VECTOR(0 to 13);                -- select write enabled component from main controller
+        i_we_sel_io : in STD_LOGIC_VECTOR(0 to 13);                 -- select write enabled conponent from io controller
+        i_io_controller_active : in STD_LOGIC;                                   -- '1' when IO controller is active and driving the bus. otherwise main controller drives
+        i_pc_data : in STD_LOGIC_VECTOR(15 downto 0);
+        i_sp_data : in STD_LOGIC_VECTOR(15 downto 0);
+        i_ir_operand : in STD_LOGIC_VECTOR(15 downto 0);
+        i_acc_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_alu_data  : in STD_LOGIC_VECTOR(7 downto 0);
+        i_mdr_fm_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_b_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_c_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_tmp_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_input_port_1_data : in STD_LOGIC_VECTOR(7 downto 0);
+        i_input_port_2_data : in STD_LOGIC_VECTOR(7 downto 0);
+        o_bus_data : out STD_LOGIC_VECTOR(15 downto 0);
+        o_acc_we : out STD_LOGIC;
+        o_b_we : out STD_LOGIC;
+        o_c_we : out STD_LOGIC;
         tmp_write_enable : out STD_LOGIC;
         mar_write_enable : out STD_LOGIC;
         o_pc_write_enable : out STD_LOGIC;
@@ -32,54 +32,54 @@ entity w_bus is
         out_port_3_write_enable : out STD_LOGIC;
         out_port_4_write_enable : out STD_LOGIC;
         o_pc_write_enable_low : out STD_LOGIC;
-        o_o_pc_write_enable_high : out STD_LOGIC
+        o_pc_write_enable_high : out STD_LOGIC
   );
 end w_bus;
 
 architecture Behavioral of w_bus is
-    signal sel_active_sig : STD_LOGIC_VECTOR(3 downto 0);
-    signal we_sel_active_sig : STD_LOGIC_VECTOR(0 to 13);
+    signal r_driver_sel : STD_LOGIC_VECTOR(3 downto 0);
+    signal r_we_sel : STD_LOGIC_VECTOR(0 to 13);
 begin
 
-    sel_active_sig <= sel_io when io_active = '1' else sel_default;
-    we_sel_active_sig <= we_sel_io when io_active = '1' else we_sel_default;    
+    r_driver_sel <= i_driver_sel_io when i_io_controller_active = '1' else i_driver_sel_def;
+    r_we_sel <= i_we_sel_io when i_io_controller_active = '1' else i_we_sel_def;    
 
-    process(sel_active_sig)
+    process(r_driver_sel)
     begin
-        case sel_active_sig is
-            when "0000" => bus_out <= (others => '0');  -- zero
-            when "0001" => bus_out <= pc_addr_in;
-            when "0010" => bus_out <= IR_operand_in;
-            when "0011" => bus_out <= ("00000000" & alu_data_in);
-            when "0100" => bus_out <= ("00000000" & MDR_fm_data_in);
-            when "0101" => bus_out <= ("00000000" & acc_data_in);
-            when "0110" => bus_out <= ("00000000" & B_data_in);
-            when "0111" => bus_out <= ("00000000" & C_data_in);
-            when "1000" => bus_out <= ("00000000" & tmp_data_in);
-            when "1001" => bus_out <= ("00000000" & input_port_1_data_in);
-            when "1010" => bus_out <= ("00000000" & input_port_2_data_in);
-            when "1011" => bus_out <= ("00000000" & pc_addr_in(7 downto 0));
-            when "1100" => bus_out <= ("00000000" & pc_addr_in(15 downto 8));
-            when "1101" => bus_out <= stack_pointer_in;
-            when others => bus_out <= (others => '0');
+        case r_driver_sel is
+            when "0000" => o_bus_data <= (others => '0');  -- zero
+            when "0001" => o_bus_data <= i_pc_data;
+            when "0010" => o_bus_data <= i_ir_operand;
+            when "0011" => o_bus_data <= ("00000000" & i_alu_data);
+            when "0100" => o_bus_data <= ("00000000" & i_mdr_fm_data);
+            when "0101" => o_bus_data <= ("00000000" & i_acc_data);
+            when "0110" => o_bus_data <= ("00000000" & i_b_data);
+            when "0111" => o_bus_data <= ("00000000" & i_c_data);
+            when "1000" => o_bus_data <= ("00000000" & i_tmp_data);
+            when "1001" => o_bus_data <= ("00000000" & i_input_port_1_data);
+            when "1010" => o_bus_data <= ("00000000" & i_input_port_2_data);
+            when "1011" => o_bus_data <= ("00000000" & i_pc_data(7 downto 0));
+            when "1100" => o_bus_data <= ("00000000" & i_pc_data(15 downto 8));
+            when "1101" => o_bus_data <= i_sp_data;
+            when others => o_bus_data <= (others => '0');
         end case;
     end process;
 
-    process(we_sel_active_sig)
+    process(r_we_sel)
     begin
-        acc_write_enable <= we_sel_active_sig(0);
-        b_write_enable <= we_sel_active_sig(1);
-        c_write_enable <= we_sel_active_sig(2);
-        tmp_write_enable <= we_sel_active_sig(3);
-        mar_write_enable <= we_sel_active_sig(4);
-        o_pc_write_enable <= we_sel_active_sig(5);
-        mdr_tm_write_enable <= we_sel_active_sig(6);
-        ir_opcode_write_enable <= we_sel_active_sig(7);
-        ir_operand_low_write_enable <= we_sel_active_sig(8);
-        ir_operand_high_write_enable <= we_sel_active_sig(9);
-        out_port_3_write_enable <= we_sel_active_sig(10);
-        out_port_4_write_enable <= we_sel_active_sig(11);
-        o_pc_write_enable_low <= we_sel_active_sig(12);
-        o_pc_write_enable_high <= we_sel_active_sig(13);
+        o_acc_we <= r_we_sel(0);
+        o_b_we <= r_we_sel(1);
+        o_c_we <= r_we_sel(2);
+        tmp_write_enable <= r_we_sel(3);
+        mar_write_enable <= r_we_sel(4);
+        o_pc_write_enable <= r_we_sel(5);
+        mdr_tm_write_enable <= r_we_sel(6);
+        ir_opcode_write_enable <= r_we_sel(7);
+        ir_operand_low_write_enable <= r_we_sel(8);
+        ir_operand_high_write_enable <= r_we_sel(9);
+        out_port_3_write_enable <= r_we_sel(10);
+        out_port_4_write_enable <= r_we_sel(11);
+        o_pc_write_enable_low <= r_we_sel(12);
+        o_pc_write_enable_high <= r_we_sel(13);
     end process;
 end behavioral;

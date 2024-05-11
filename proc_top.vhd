@@ -199,23 +199,23 @@ begin
     -- registers are staying. so this is more the internal data buss.
     w_bus : entity work.w_bus
         port map(
-            sel_default => wbus_sel_sig,
-            sel_io => wbus_sel_io_sig, 
-            we_sel_default => wbus_output_we_default_sig,
-            we_sel_io => wbus_output_we_io_sig,
-            io_active => io_active_sig,
-            pc_addr_in => pc_data_out_sig,
-            stack_pointer_in => sp_data_out_sig,
-            IR_operand_in => IR_operand_sig,
-            acc_data_in => acc_data_sig,
-            alu_data_in => alu_data_sig,
-            MDR_fm_data_in => mdr_fm_data_out_sig,
-            B_data_in => b_data_sig,
-            C_data_in => c_data_sig, 
-            tmp_data_in => tmp_data_sig,
-            input_port_1_data_in => input_port_1_data_in_sig,
-            input_port_2_data_in => input_port_2_data_in_sig,
-            bus_out => w_bus_data_out_sig,
+            i_driver_sel_def => wbus_sel_sig,
+            i_driver_sel_io => wbus_sel_io_sig, 
+            i_we_sel_def => wbus_output_we_default_sig,
+            i_we_sel_io => wbus_output_we_io_sig,
+            i_io_controller_active => io_active_sig,
+            i_pc_data => pc_data_out_sig,
+            i_sp_data => sp_data_out_sig,
+            i_ir_operand => IR_operand_sig,
+            i_acc_data => acc_data_sig,
+            i_alu_data => alu_data_sig,
+            i_mdr_fm_data => mdr_fm_data_out_sig,
+            i_b_data => b_data_sig,
+            i_c_data => c_data_sig, 
+            tmp_dai_tmp_dataa_in => tmp_data_sig,
+            i_input_port_1_data => input_port_1_data_in_sig,
+            i_input_port_2_data => input_port_2_data_in_sig,
+            o_bus_data => w_bus_data_out_sig,
             acc_write_enable => write_enable_acc_sig,
             b_write_enable => write_enable_B_sig,
             c_write_enable => write_enable_C_sig,
@@ -232,7 +232,7 @@ begin
             o_pc_write_enable_high => w_pc_write_enable_high
         );
 
-    PC : entity work.ProgramCounter
+    PC : entity work.program_counter
         Generic Map(16)
         port map(
             i_clk => w_clkbar,
