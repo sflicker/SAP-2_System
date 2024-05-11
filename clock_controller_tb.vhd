@@ -6,57 +6,57 @@ entity clock_controller_tb is
 end clock_controller_tb;
 
 architecture test of clock_controller_tb is
-    signal clk : STD_LOGIC;
-    signal step_sig : STD_LOGIC := '0';
-    signal auto_sig : STD_LOGIC := '0';
-    signal hltbar_sig : STD_LOGIC := '1';
-    signal clrbar_sig : STD_LOGIC := '1';
-    signal clk_out_sig : STD_LOGIC := '1';
-    signal clkbar_out_sig : STD_LOGIC := '1'; 
+    signal w_clk : STD_LOGIC;
+    signal r_step : STD_LOGIC := '0';
+    signal r_auto : STD_LOGIC := '0';
+    signal r_hltbar : STD_LOGIC := '1';
+    signal r_clrbar : STD_LOGIC := '1';
+    signal o_clk : STD_LOGIC := '1';
+    signal o_clkbar : STD_LOGIC := '1'; 
 begin
 
     CLOCK : entity work.clock
         port map (
-            clk => clk
+            clk => w_clk
         );
 
     LUT : entity work.clock_controller
         port map(
-            clk_in => clk,
-            step => step_sig,
-            auto => auto_sig,
-            hltbar => hltbar_sig,
-            clrbar => clrbar_sig,
-            clk_out => clk_out_sig,
-            clkbar_out => clkbar_out_sig
+            clk_in => w_clk,
+            step => r_step,
+            auto => r_auto,
+            hltbar => r_hltbar,
+            clrbar => r_clrbar,
+            clk_out => o_clk,
+            clkbar_out => o_clkbar
         );
 
     TC : process
     begin
         wait for 100 ns;
-        auto_sig <= '1';
+        r_auto <= '1';
 
         wait for 200 ns;
-        auto_sig <= '0';
+        r_auto <= '0';
 
         wait for 200 ns;
-        step_sig <= '1';
+        r_step <= '1';
         wait for 250 ns;
-        step_sig <= '0';
+        r_step <= '0';
         wait for 50 ns;
 
-        auto_sig <= '1';
+        r_auto <= '1';
         wait for 200 ns;
-        hltbar_sig <= '0';
+        r_hltbar <= '0';
 
         wait for 100 ns;
-        hltbar_sig <= '1';
+        r_hltbar <= '1';
 
         wait for 100 ns;
-        clrbar_sig <= '0';
+        r_clrbar <= '0';
 
         wait for 100 ns;
-        clrbar_sig <= '1';
+        r_clrbar <= '1';
 
         wait;
     end process;

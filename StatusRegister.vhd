@@ -5,7 +5,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- equal_flag  - bit 1
 -- others bits are current zero
 
-entity StatusRegister is
+entity status_register is
     Port (
         i_clk : in STD_LOGIC;
         i_rst : in STD_LOGIC;
@@ -19,9 +19,9 @@ entity StatusRegister is
         i_status_flags_in : in STD_LOGIC_VECTOR(7 downto 0);
         status_flags_out : in STD_LOGIC_VECTOR(7 downto 0)
     );
-end StatusRegister;
+end status_register;
 
-architecture rtl of StatusRegister is
+architecture rtl of status_register is
     signal minus_flag : STD_LOGIC;
     signal equal_flag : STD_LOGIC;
     signal status_flags : STD_LOGIC_VECTOR(1 downto 0);
