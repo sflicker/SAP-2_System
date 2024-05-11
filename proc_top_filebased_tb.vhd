@@ -10,7 +10,7 @@ entity proc_top_filebased_tb is
     );
 end proc_top_filebased_tb;
 
-architecture behavioral of proc_top_filebased_tb is
+architecture test of proc_top_filebased_tb is
     signal clk_sig : STD_LOGIC;
     signal addr_in_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal data_in_sig : STD_LOGIC_VECTOR(7 downto 0);
@@ -127,4 +127,4 @@ begin
     wait;
 
 end process file_based_test;
-end architecture behavioral;
+end test behavioral;

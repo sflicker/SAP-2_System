@@ -16,7 +16,7 @@ entity clock_controller is
     );
 end clock_controller;
 
-architecture behavioral of clock_controller is
+architecture rtl of clock_controller is
     signal r_manual_or_auto_w_h : STD_LOGIC;
     signal r_auto_w_h : STD_LOGIC;
     signal r_manual_w_h : STD_LOGIC;
@@ -36,4 +36,4 @@ begin
     r_auto_w_h <= i_clk and i_manual_auto_switch and i_clrbar;
     
     
-end architecture behavioral;
+end rtl behavioral;

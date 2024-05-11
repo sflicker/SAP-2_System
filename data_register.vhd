@@ -14,7 +14,7 @@ entity data_register is
     );
 end data_register;
 
-architecture Behavioral of data_register is
+architecture rtl of data_register is
 
 begin
     process(i_clk)
@@ -30,4 +30,4 @@ begin
         end if;
         o_data <= internal_data;
     end process;
-end behavioral;
+end rtl;

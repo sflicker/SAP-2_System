@@ -21,7 +21,7 @@ entity StatusRegister is
     );
 end StatusRegister;
 
-architecture behavior of StatusRegister is
+architecture rtl of StatusRegister is
     signal minus_flag : STD_LOGIC;
     signal equal_flag : STD_LOGIC;
     signal status_flags : STD_LOGIC_VECTOR(1 downto 0);
@@ -52,4 +52,4 @@ begin
         status_flags <= '0' & '0' & '0' & '0' & '0' & '0' &
              std_logic(equal_flag_var) & std_logic(minus_flag_var);
     end process;
-end behavior;
+end rtl;

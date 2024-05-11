@@ -15,7 +15,7 @@ entity IO_controller is
     );
 end IO_controller;
 
-architecture behavioral of IO_controller is
+architecture rtl of IO_controller is
     constant c_IN_byte_OPCODE : STD_LOGIC_VECTOR(7 downto 0) := x"DB";
     constant c_OUT_byte_OPCODE : STD_LOGIC_VECTOR(7 downto 0) := x"D3";
     type t_State is (s_IDLE, s_EXECUTE, s_COOL);
@@ -88,4 +88,4 @@ begin
         end case;
     end process;
 
-end behavioral;
+end rtl;

@@ -17,7 +17,7 @@ entity stack_pointer is
     );
 end stack_pointer;
 
-architecture Behavioral of stack_pointer is
+architecture rtl of stack_pointer is
 begin
     process(i_clk, i_clr)
         variable internal_value : STD_LOGIC_VECTOR(15 downto 0) := (others => '1');
@@ -33,6 +33,6 @@ begin
         end if;
         o_data <= internal_value;
     end process;
-end Behavioral;
+end rtl;
 
          

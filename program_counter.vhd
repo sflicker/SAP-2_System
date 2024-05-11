@@ -20,7 +20,7 @@ entity program_counter is
    
 end program_counter;
 
-architecture Behavioral of program_counter is
+architecture rtl of program_counter is
 begin
 
     process(i_clk, i_reset)
@@ -42,4 +42,4 @@ begin
         o_data <= internal_value;
         
     end process;
-end Behavioral;
+end rtl;

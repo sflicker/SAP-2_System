@@ -1,24 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 03/12/2024 10:12:11 PM
--- Design Name: 
--- Module Name: proc_top_tb - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -43,7 +22,7 @@ entity proc_top_tb is
     );
 end proc_top_tb;
 
-architecture Behavioral of proc_top_tb is
+architecture test of proc_top_tb is
 signal s7_anodes_out : STD_LOGIC_VECTOR(3 downto 0);
 signal s7_cathodes_out : STD_LOGIC_VECTOR(6 downto 0);
 signal rst : STD_LOGIC;
@@ -191,4 +170,4 @@ begin
         wait;
     end process;
 
-end Behavioral;
+end test;

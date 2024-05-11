@@ -14,7 +14,7 @@ entity ALU is
     );
 end ALU;
 
-architecture Behavioral of ALU is
+architecture rtl of ALU is
     procedure update_flags(
         variable result : STD_LOGIC_VECTOR(7 downto 0);
         signal minus_flag_sig : inout STD_LOGIC;
@@ -67,4 +67,4 @@ begin
         end if;
         o_alu <= result;
     end process;
-end Behavioral;
+end rtl;

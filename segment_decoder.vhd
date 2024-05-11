@@ -7,7 +7,7 @@ entity segment_decoder is
            );
 end segment_decoder;
 
-architecture Behavioral of segment_decoder is
+architecture rtl of segment_decoder is
 
 begin
     process(i_data)
@@ -32,4 +32,4 @@ begin
             when others => o_data <= "1111111";
         end case;
     end process;
-end Behavioral;
+end rtl;

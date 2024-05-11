@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity UART_TB is
 end UART_TB;
 
-architecture behavioral of UART_TB is
+architecture test of UART_TB is
     constant c_clk_period :time := 10 ns;
     constant c_clk_per_bit : integer := 10416;
     constant c_bit_period : time := 104167 ns;
@@ -85,4 +85,4 @@ begin
 
         assert false report "Tests Completed" severity failure;
     end process;
-end behavioral;
+end test;

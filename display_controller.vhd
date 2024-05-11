@@ -10,7 +10,7 @@ entity display_controller is
            );
 end display_controller;
 
-architecture Behavioral of display_controller is
+architecture rtl of display_controller is
 signal r_data_for_digit : STD_LOGIC_VECTOR(3 downto 0);
 signal w_digit_sel : STD_LOGIC_VECTOR(3 downto 0);
 begin
@@ -38,4 +38,4 @@ begin
             o_anodes <= not w_digit_sel;
         end process;
 
-end Behavioral;
+end rtl;

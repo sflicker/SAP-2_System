@@ -20,7 +20,7 @@ entity UART_top is
     );
 end UART_TOP;
 
-architecture behavioral of UART_top is
+architecture rtl of UART_top is
     signal r_display_data : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
     signal w_clk_disp_refresh_1KHZ_sig : STD_LOGIC;
     signal r_clr_sig : STD_LOGIC := '0';
@@ -90,4 +90,4 @@ begin
 
     
 
-end behavioral;
+end rtl;

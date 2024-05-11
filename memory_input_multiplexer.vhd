@@ -23,7 +23,7 @@ entity memory_input_multiplexer is
     );
 end memory_input_multiplexer;
 
-architecture behavior of memory_input_multiplexer is
+architecture rtl of memory_input_multiplexer is
 begin
     o_data <= i_prog_data when i_prog_run_select = '0' else i_run_data;
     o_addr <= i_prog_addr when i_prog_run_select = '0' else i_run_addr;

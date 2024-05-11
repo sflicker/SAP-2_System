@@ -127,7 +127,7 @@ entity proc_controller is
     );
 end proc_controller;
 
-architecture Behavioral of proc_controller is
+architecture rtl of proc_controller is
     signal stage_sig : integer := 1;
 
     signal control_word_index_signal : std_logic_vector(9 downto 0);
@@ -284,4 +284,4 @@ begin
 --        phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage - 1));
         end process;
 
-end Behavioral;
+end rtl;

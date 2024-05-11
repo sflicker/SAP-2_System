@@ -14,7 +14,7 @@ entity clock_divider is
     );
 end clock_divider;
 
-architecture behavior of clock_divider is
+architecture rtl of clock_divider is
 
     function log2ceil(n : integer) return integer is 
       variable result : real;
@@ -44,4 +44,4 @@ begin
     end process;
 
     o_clk <= r_div_clk;
-end behavior;
+end rtl;

@@ -14,7 +14,7 @@ entity ram_bank is
            ); 
 end ram_bank;
 
-architecture Behavioral of ram_bank is
+architecture rtl of ram_bank is
     attribute ram_style : string;
     type t_RAM_TYPE is array(0 to 2**16-1) of STD_LOGIC_VECTOR(7 downto 0);
     signal r_RAM : t_RAM_TYPE := (
@@ -39,4 +39,4 @@ begin
             end if;
         end if;
     end process;
-end Behavioral;
+end rtl;

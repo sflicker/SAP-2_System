@@ -17,7 +17,7 @@ entity MemoryDataRegister is
     );
 end MemoryDataRegister;
 
-architecture behavior of MemoryDataRegister is
+architecture rtl of MemoryDataRegister is
 begin
     process(clk, clr)
         variable internal_data : STD_LOGIC_VECTOR(WIDTH-1 downto 0) := (others => '0');
@@ -35,6 +35,6 @@ begin
         end if;
         data_out <= internal_data;
     end process;
-end behavior;
+end rtl;
 
     

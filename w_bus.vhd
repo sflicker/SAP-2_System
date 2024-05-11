@@ -36,7 +36,7 @@ entity w_bus is
   );
 end w_bus;
 
-architecture Behavioral of w_bus is
+architecture rtl of w_bus is
     signal r_driver_sel : STD_LOGIC_VECTOR(3 downto 0);
     signal r_we_sel : STD_LOGIC_VECTOR(0 to 13);
 begin
@@ -82,4 +82,4 @@ begin
         o_pc_write_enable_low <= r_we_sel(12);
         o_pc_write_enable_high <= r_we_sel(13);
     end process;
-end behavioral;
+end rtl;

@@ -5,7 +5,7 @@ use IEEE.numeric_std.all;
 entity proc_controller_tb is
 end proc_controller_tb;
 
-architecture behavior of proc_controller_tb is
+architecture test of proc_controller_tb is
     signal clk_tb_sig : STD_LOGIC;
     signal clk_sys_sig : STD_LOGIC;
     signal step_sig : STD_LOGIC;
@@ -79,4 +79,4 @@ begin
         wait;
     end process;
 
-end behavior;
+end test;

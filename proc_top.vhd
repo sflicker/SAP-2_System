@@ -42,7 +42,7 @@ entity proc_top is
 
 end proc_top;
 
-architecture behavior of proc_top is
+architecture rtl of proc_top is
 
 --    attribute MARK_DEBUG : string;
 
@@ -497,6 +497,6 @@ begin
     --        );
     --    end generate;                        
 
-end behavior;
+end rtl;
     
           

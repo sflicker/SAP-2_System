@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity UART_top_tb is
 end UART_top_tb;
 
-architecture rtl of uart_top_tb is
+architecture test of uart_top_tb is
     constant c_clk_period :time := 10 ns;
     constant c_clk_per_bit : integer := 10416;
     constant c_bit_period : time := 104167 ns;
@@ -79,4 +79,4 @@ begin
         end process;
 
 
-end architecture rtl;
+end architecture test;

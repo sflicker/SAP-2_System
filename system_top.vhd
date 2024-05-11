@@ -22,7 +22,7 @@ entity system_top is
     );
 end system_top;
 
-architecture behavioral of system_top is
+architecture rtl of system_top is
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_processor_clock_1MHZ : STD_LOGIC;
     signal r_reset : STD_LOGIC := '1';
@@ -161,4 +161,4 @@ begin
     end;
 
 
-end behavioral;
+end rtl;

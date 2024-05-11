@@ -5,7 +5,7 @@ use IEEE.numeric_std.all;
 entity clock_controller_tb is
 end clock_controller_tb;
 
-architecture behavior of clock_controller_tb is
+architecture test of clock_controller_tb is
     signal clk : STD_LOGIC;
     signal step_sig : STD_LOGIC := '0';
     signal auto_sig : STD_LOGIC := '0';
@@ -60,4 +60,4 @@ begin
 
         wait;
     end process;
-end behavior;
+end test;

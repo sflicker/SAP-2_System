@@ -6,7 +6,7 @@ use std.textio.all;
 entity memory_loader_tb is
 end memory_loader_tb;
 
-architecture behavioral of memory_loader_tb is
+architecture test of memory_loader_tb is
     constant c_clk_period :time := 10 ns;
     constant c_clk_per_bit : integer := 10416;
     constant c_bit_period : time := 104167 ns;
@@ -268,5 +268,5 @@ begin
         wait;
 
     end process;
-end behavioral;
+end test;
 

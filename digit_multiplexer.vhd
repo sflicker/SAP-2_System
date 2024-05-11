@@ -8,7 +8,7 @@ entity digit_multiplexer is
            );
 end digit_multiplexer;
 
-architecture Behavioral of digit_multiplexer is
+architecture rtl of digit_multiplexer is
 
 begin
     process(i_clk, i_rst)
@@ -19,4 +19,4 @@ begin
             o_digit_sel <= o_digit_sel(2 downto 0) & o_digit_sel(3);  -- shift digits
         end if;
     end process;
-end Behavioral;
+end rtl;
