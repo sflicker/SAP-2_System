@@ -2,10 +2,10 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity internal_bus is
-  Port (i_driver_sel_def : in STD_LOGIC_VECTOR(3 downto 0);         -- select component to drive the bus from main controller
-        i_driver_sel_io : in STD_LOGIC_VECTOR(3 downto 0);          -- select component to drive the bus from io controller
-        i_we_sel_def : in STD_LOGIC_VECTOR(0 to 12);                -- select write enabled component from main controller
-        i_we_sel_io : in STD_LOGIC_VECTOR(0 to 12);                 -- select write enabled conponent from io controller
+  Port (i_src_sel_def : in STD_LOGIC_VECTOR(3 downto 0);         -- select component to drive the bus from main controller
+        i_src_sel_io : in STD_LOGIC_VECTOR(3 downto 0);          -- select component to drive the bus from io controller
+        i_dest_sel_def : in STD_LOGIC_VECTOR(0 to 12);                -- select write enabled component from main controller
+        i_dest_sel_io : in STD_LOGIC_VECTOR(0 to 12);                 -- select write enabled conponent from io controller
         i_io_controller_active : in STD_LOGIC;                                   -- '1' when IO controller is active and driving the bus. otherwise main controller drives
         i_pc_data : in STD_LOGIC_VECTOR(15 downto 0);
         i_sp_data : in STD_LOGIC_VECTOR(15 downto 0);
@@ -38,16 +38,16 @@ entity internal_bus is
 end internal_bus;
 
 architecture rtl of internal_bus is
-    signal r_driver_sel : STD_LOGIC_VECTOR(3 downto 0);
-    signal r_we_sel : STD_LOGIC_VECTOR(0 to 12);
+    signal r_src_sel : STD_LOGIC_VECTOR(3 downto 0);
+    signal r_dest_sel : STD_LOGIC_VECTOR(0 to 12);
 begin
 
-    r_driver_sel <= i_driver_sel_io when i_io_controller_active = '1' else i_driver_sel_def;
-    r_we_sel <= i_we_sel_io when i_io_controller_active = '1' else i_we_sel_def;    
+    r_src_sel <= i_src_sel_io when i_io_controller_active = '1' else i_src_sel_def;
+    r_dest_sel <= i_dest_sel_io when i_io_controller_active = '1' else i_dest_sel_def;    
 
-    process(r_driver_sel)
+    process(r_src_sel)
     begin
-        case r_driver_sel is
+        case r_src_sel is
             when "0000" => o_bus_data <= (others => '0');  -- zero
             when "0001" => o_bus_data <= i_pc_data;
             when "0010" => o_bus_data <= i_ir_operand_full;
@@ -66,22 +66,22 @@ begin
         end case;
     end process;
 
-    process(r_we_sel)
+    process(r_dest_sel)
     begin
-        o_acc_we <= r_we_sel(0);
-        o_b_we <= r_we_sel(1);
-        o_c_we <= r_we_sel(2);
-        o_tmp_we <= r_we_sel(3);
-        o_mar_we <= r_we_sel(4);
-        o_pc_we_full <= r_we_sel(5);
-        o_mdr_tm_we <= r_we_sel(6);
-        o_ir_we <= r_we_sel(7 to 8);
-        -- o_ir_opcode_we <= '1' when r_we_sel(7 to 8) = '01' else '0';
-        -- o_ir_operand_we_low <= '1' when r_we_sel(7 to 8) = '10' else '0';
-        -- o_ir_operand_we_high <= '1' when r_we_sel(7 to 8) = '11' else '0';
-        o_out_port_3_we <= r_we_sel(9);
-        o_out_port_4_we <= r_we_sel(10);
-        o_pc_we_low <= r_we_sel(11);
-        o_pc_we_high <= r_we_sel(12);
+        o_acc_we <= r_dest_sel(0);
+        o_b_we <= r_dest_sel(1);
+        o_c_we <= r_dest_sel(2);
+        o_tmp_we <= r_dest_sel(3);
+        o_mar_we <= r_dest_sel(4);
+        o_pc_we_full <= r_dest_sel(5);
+        o_mdr_tm_we <= r_dest_sel(6);
+        o_ir_we <= r_dest_sel(7 to 8);
+        -- o_ir_opcode_we <= '1' when r_dest_sel(7 to 8) = '01' else '0';
+        -- o_ir_operand_we_low <= '1' when r_dest_sel(7 to 8) = '10' else '0';
+        -- o_ir_operand_we_high <= '1' when r_dest_sel(7 to 8) = '11' else '0';
+        o_out_port_3_we <= r_dest_sel(9);
+        o_out_port_4_we <= r_dest_sel(10);
+        o_pc_we_low <= r_dest_sel(11);
+        o_pc_we_high <= r_dest_sel(12);
     end process;
 end rtl;

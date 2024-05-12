@@ -14,10 +14,10 @@ entity system_top is
         S6_step_toggle : in STD_LOGIC;       -- single step -- 1 for a single step
         S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
         memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
-        i_rx_serial;    -- input to receive serial.
-        i_tx_serial;    -- output to send serial.
+        i_rx_serial : in STD_LOGIC;    -- input to receive serial.
+        i_tx_serial : in STD_LOGIC;    -- output to send serial.
         o_seven_segment_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
-        o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
+        o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0)     -- maps to seven segment display
 
     );
 end system_top;
@@ -26,6 +26,8 @@ architecture rtl of system_top is
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_processor_clock_1MHZ : STD_LOGIC;
     signal r_reset : STD_LOGIC := '1';
+    signal w_display_data : STD_LOGIC_VECTOR(15 to 0);
+    signal w_input_data : STD_LOGIC_VECTOR(15 to 0);
 
 begin
     display_clock_divider_1KHZ : entity work.clock_divider
@@ -33,7 +35,7 @@ begin
         port map(
             i_clk => i_clk,
             i_reset => i_reset,
-            o_clk => w_clk_display_refresh_1kHZ;
+            o_clk => w_clk_display_refresh_1kHZ
         );
 
     processor_clock_divider_1MHZ : entity work.clock_divider
@@ -41,7 +43,7 @@ begin
         port map(
             i_clk => i_clk,
             i_reset => i_reset,
-            o_clk => w_processor_clock_1MHZ;
+            o_clk => w_processor_clock_1MHZ
         );  
 
     processor_clock_controller : entity work.clock_controller
@@ -61,7 +63,7 @@ begin
             i_clk => w_processor_clock_1MHZ,
             i_addr => w_ram_addr,
             i_data => w_ram_data_in, 
-            i_write_enable => w_ram_write_enable
+            i_write_enable => w_ram_write_enable,
             o_data => w_ram_data_out
         );
 
@@ -89,7 +91,7 @@ begin
             i_clk => w_processor_clock_1MHZ,
             i_reset => r_reset, 
             i_prog_run_mode => S2_prog_run_switch
-        )
+        );
 
 
     GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
@@ -98,7 +100,7 @@ begin
         port map(
             clk => clk_disp_refresh_1KHZ_sig,
             rst => clr_sig,
-            data_in => display_data,
+            data_in => w_display_data,
             anodes_out => s7_anodes_out,
             cathodes_out => s7_cathodes_out
         );
@@ -106,7 +108,7 @@ begin
         
     UART_RX_INST: entity work.UART_RX
     port map(
-        i_clk => 
+        i_clk => i_clk,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => o_rx_byte
@@ -143,9 +145,15 @@ begin
         port map (
             i_clk => w_cpu_gated_clock_1MHZ,
             i_reset => r_reset,
-            i_data =>
-            o_data =>
-            o_address =>
+            i_data => w_ram_data_out,
+            o_data => mdr_tm_data_out_sig, 
+            o_address => mar_addr_sig,
+            o_ram_we => ram_write_enable_sig,
+            in_port_1 => w_input_data(7 downto 0),
+            in_port_2 => w_input_data(15 downto 8),
+            out_port_3 => w_display_data(7 downto 0),
+            out_port_4 => w_display_data(15 downto 8),
+            o_hltbar => hltbar_sig
         );
     
 
@@ -158,7 +166,7 @@ begin
                 r_reset <= '0';
             end if;
         end if;
-    end;
+    end process;
 
 
 end rtl;

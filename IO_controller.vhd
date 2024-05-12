@@ -8,8 +8,8 @@ entity IO_controller is
         i_rst : IN STD_LOGIC;
         i_opcode : IN STD_LOGIC_VECTOR(7 downto 0);
         i_portnum : IN STD_LOGIC_VECTOR(2 downto 0);      -- portnum (0 none, 1 input 1, 2 input 2, 3 output 1, 4 output 2)
-        o_bus_selector : OUT STD_LOGIC_VECTOR(3 downto 0);
-        o_bus_control_word : OUT STD_LOGIC_VECTOR(0 to 12);
+        o_bus_src_sel : OUT STD_LOGIC_VECTOR(3 downto 0);
+        o_bus_dest_sel : OUT STD_LOGIC_VECTOR(0 to 12);
         o_active : OUT STD_LOGIC
         
     );
@@ -58,22 +58,22 @@ begin
                 if i_opcode = c_IN_BYTE_OPCODE then
                     if i_portnum = "001" then
                         o_active <= '1';
-                        o_bus_selector <= "1001";
-                        o_bus_control_word <= "1000000000000";
+                        o_bus_src_sel <= "1001";
+                        o_bus_dest_sel <= "1000000000000";
                     elsif i_portnum = "010" then
                         o_active <= '1';
-                        o_bus_selector <= "1010";
-                        o_bus_control_word <= "1000000000000";
+                        o_bus_src_sel <= "1010";
+                        o_bus_dest_sel <= "1000000000000";
                     end if;
                 elsif i_opcode = c_OUT_BYTE_OPCODE then
                     if i_portnum = "011" then
                         o_active <= '1';
-                        o_bus_selector <= "0101";
-                        o_bus_control_word <= "0000000001000";
+                        o_bus_src_sel <= "0101";
+                        o_bus_dest_sel <= "0000000001000";
                     elsif i_portnum = "100" then
                         o_active <= '1';
-                        o_bus_selector <= "0101";
-                        o_bus_control_word <= "0000000000100";
+                        o_bus_src_sel <= "0101";
+                        o_bus_dest_sel <= "0000000000100";
                     end if;
                 end if;
                 r_next_state <= s_COOL;

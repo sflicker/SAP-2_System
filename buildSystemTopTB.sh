@@ -10,6 +10,7 @@ echo "Compiling modules"
 #compile
 
 ghdl -a --std=08 -fsynopsys -v clock.vhd
+ghdl -a --std=08 -fsynopsys -v clock_divider.vhd
 #ghdl -a --std=08 -fsynopsys -v single_pulse_generator.vhd
 #ghdl -a --std=08 -fsynopsys -v clock_converter.vhd
 #ghdl -a --std=08 -fsynopsys -v status_register.vhd
@@ -38,9 +39,10 @@ ghdl -a --std=08 -fsynopsys -v IO_controller.vhd
 #ghdl -a --std=08 -fsynopsys -v output.vhd
 #ghdl -a --std=08 -fsynopsys -v presettable_counter.vhd
 ghdl -a --std=08 -fsynopsys -v ram_bank.vhd
-ghdl -a --std=08 -fsynopsys -v w_bus.vhd
+ghdl -a --std=08 -fsynopsys -v internal_bus.vhd
 ghdl -a --std=08 -fsynopsys -v proc_controller.vhd
 ghdl -a --std=08 -fsynopsys -v proc_top.vhd
+ghdl -a --std=08 -fsynopsys -v system_top.vhd
 #ghdl -a --std=08 -fsynopsys -v proc_top_tb.vhd
 #
 
