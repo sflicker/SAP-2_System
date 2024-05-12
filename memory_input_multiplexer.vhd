@@ -29,4 +29,4 @@ begin
     o_addr <= i_prog_addr when i_prog_run_select = '0' else i_run_addr;
 --    select_clk_in <= prog_clk_in when prog_run_select = '0' else run_clk_in;
     o_write_enable <= i_prog_write_enable when i_prog_run_select = '0' else i_run_write_enable;
-end behavior;
+end rtl;

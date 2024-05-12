@@ -87,6 +87,9 @@ use std.textio.all;
 -- MOV B,C      41      ; B <= C
 -- MOV C,A      4F      ; C <= Acc
 -- MOV C,B      48      ; C <= B
+-- MVI A, byte  3E      ; A <= byte
+-- MVI B, byte  06      ; B <= byte
+-- MVI C, byte  OE      ; C <= byte
 -- NOP          00      ; do nothing. all counters should be set to default (low) positions
 -- ORA B        B0      ; Acc <= Acc OR B   ; flags also set
 -- ORA C        B1      ; Acc <= Acc OR C   ; flags also set
@@ -191,27 +194,25 @@ architecture rtl of proc_controller is
             & ", mar_write_enable: " & to_string(control_word(14))
             & ", pc_write_enable: " & to_string(control_word(15))
             & ", mdr_tm_write_enable: " & to_string(control_word(16))
-            & ", ir_opcode_write_enable: " & to_string(control_word(17))
-            & ", ir_operand_low_write_enable: " & to_string(control_word(18))
-            & ", ir_operand_high_write_enable: " & to_string(control_word(19))
-            & ", out_1_write_enable: " & to_string(control_word(20))
-            & ", out_2_write_enable: " & to_string(control_word(21))
-            & ", pc_low_write_enable: " & to_string(control_word(22))
+            & ", ir_write_enable: " & to_string(control_word(17 to 18))
+            & ", out_1_write_enable: " & to_string(control_word(19))
+            & ", out_2_write_enable: " & to_string(control_word(20))
+            & ", pc_low_write_enable: " & to_string(control_word(21))
             & ", pc_high_write_enable: " & to_string(control_word(23))
-            & ", o_mdr_fm_we: " & to_string(control_word(24))
-            & ", o_ram_we: " & to_string(control_word(25))
-            & ", o_update_status_flags: " & to_string(control_word(26))
-            & ", not_m_next: " & to_string(control_word(27))
-            & ", not_z_next: " & to_string(control_word(28))
-            & ", not_nz_next: " & to_string(control_word(29))
-            & ", o_controller_wait: " & to_string(control_word(30))
-            & ", sp_inc: " & to_string(control_word(31))
-            & ", sp_dec: " & to_string(control_word(32));
+            & ", o_mdr_fm_we: " & to_string(control_word(23))
+            & ", o_ram_we: " & to_string(control_word(24))
+            & ", o_update_status_flags: " & to_string(control_word(25))
+            & ", not_m_next: " & to_string(control_word(26))
+            & ", not_z_next: " & to_string(control_word(27))
+            & ", not_nz_next: " & to_string(control_word(28))
+            & ", o_controller_wait: " & to_string(control_word(29))
+            & ", sp_inc: " & to_string(control_word(30))
+            & ", sp_dec: " & to_string(control_word(31));
 
     end procedure;
 
 begin
-    o_HLTBar <= '0' when opcode = x"76" else
+    o_HLTBar <= '0' when i_opcode = x"76" else
         '1';
     o_stage <= stage_sig;
 

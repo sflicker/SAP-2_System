@@ -9,7 +9,7 @@ entity ram_bank is
            i_clk : in STD_LOGIC;
            i_addr : in STD_LOGIC_VECTOR(15 downto 0);     -- 8 bit addr
            i_data : in STD_LOGIC_VECTOR(7 downto 0);   -- 8 bit data
-           i_write_enable : in STD_LOGIC;                 -- load data at addr - active hit
+           i_we   : in STD_LOGIC;                 -- load data at addr - active hit
            o_data : out STD_LOGIC_VECTOR(7 downto 0)  -- data out from addr
            ); 
 end ram_bank;
@@ -27,9 +27,9 @@ begin
         variable v_data : STD_LOGIC_VECTOR(7 downto 0);
     begin
         if rising_edge(i_clk) then
-            Report "Ram_Bank - i_write_enable: " & to_string(i_write_enable) &
+            Report "Ram_Bank - i_we: " & to_string(i_we) &
                 ", i_addr: " & to_string(i_addr) & ", i_data: " & to_string(i_data);
-            if i_write_enable = '1' then
+            if i_we = '1' then
                 Report "Writing Data to Memory";
                 r_RAM(to_integer(unsigned(i_addr))) <= i_data;
             else 

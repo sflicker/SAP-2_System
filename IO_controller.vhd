@@ -57,21 +57,21 @@ begin
             when s_EXECUTE =>
                 if i_opcode = c_IN_BYTE_OPCODE then
                     if i_portnum = "001" then
-                        active <= '1';
+                        o_active <= '1';
                         o_bus_selector <= "1001";
                         o_bus_control_word <= "1000000000000";
-                    elsif portnum = "010" then
-                        active <= '1';
+                    elsif i_portnum = "010" then
+                        o_active <= '1';
                         o_bus_selector <= "1010";
                         o_bus_control_word <= "1000000000000";
                     end if;
-                elsif opcode = OUT_BYTE_OPCODE then
-                    if portnum = "011" then
-                        active <= '1';
+                elsif i_opcode = c_OUT_BYTE_OPCODE then
+                    if i_portnum = "011" then
+                        o_active <= '1';
                         o_bus_selector <= "0101";
                         o_bus_control_word <= "0000000001000";
-                    elsif portnum = "100" then
-                        active <= '1';
+                    elsif i_portnum = "100" then
+                        o_active <= '1';
                         o_bus_selector <= "0101";
                         o_bus_control_word <= "0000000000100";
                     end if;

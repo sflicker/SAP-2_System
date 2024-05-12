@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity w_bus is
+entity internal_bus is
   Port (i_driver_sel_def : in STD_LOGIC_VECTOR(3 downto 0);         -- select component to drive the bus from main controller
         i_driver_sel_io : in STD_LOGIC_VECTOR(3 downto 0);          -- select component to drive the bus from io controller
         i_we_sel_def : in STD_LOGIC_VECTOR(0 to 12);                -- select write enabled component from main controller
@@ -35,11 +35,11 @@ entity w_bus is
         o_out_port_3_we : out STD_LOGIC;
         o_out_port_4_we : out STD_LOGIC
   );
-end w_bus;
+end internal_bus;
 
-architecture rtl of w_bus is
+architecture rtl of internal_bus is
     signal r_driver_sel : STD_LOGIC_VECTOR(3 downto 0);
-    signal r_we_sel : STD_LOGIC_VECTOR(0 to 13);
+    signal r_we_sel : STD_LOGIC_VECTOR(0 to 12);
 begin
 
     r_driver_sel <= i_driver_sel_io when i_io_controller_active = '1' else i_driver_sel_def;
@@ -73,7 +73,7 @@ begin
         o_c_we <= r_we_sel(2);
         o_tmp_we <= r_we_sel(3);
         o_mar_we <= r_we_sel(4);
-        o_pc_write_enable <= r_we_sel(5);
+        o_pc_we_full <= r_we_sel(5);
         o_mdr_tm_we <= r_we_sel(6);
         o_ir_we <= r_we_sel(7 to 8);
         -- o_ir_opcode_we <= '1' when r_we_sel(7 to 8) = '01' else '0';
@@ -81,7 +81,7 @@ begin
         -- o_ir_operand_we_high <= '1' when r_we_sel(7 to 8) = '11' else '0';
         o_out_port_3_we <= r_we_sel(9);
         o_out_port_4_we <= r_we_sel(10);
-        o_pc_write_enable_low <= r_we_sel(11);
-        o_pc_write_enable_high <= r_we_sel(12);
+        o_pc_we_low <= r_we_sel(11);
+        o_pc_we_high <= r_we_sel(12);
     end process;
 end rtl;

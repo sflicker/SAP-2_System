@@ -11,7 +11,7 @@ entity instruction_register is
         i_sel_we : in STD_LOGIC_VECTOR(1 downto 0);                         -- write enable selector
         o_opcode : out STD_LOGIC_VECTOR(7 downto 0);        -- outputs
         o_operand_low : out STD_LOGIC_VECTOR(7 downto 0);
-        o_operand_high : out STD_LOGIC_VECTOR(7 downto 0);
+        o_operand_high : out STD_LOGIC_VECTOR(7 downto 0)
     );
 end instruction_register;
 

@@ -40,7 +40,7 @@ begin
             result := std_logic_vector(unsigned(i_input_1) - unsigned(i_input_2));
             update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
         elsif i_op = "0011" then  -- INC
-            result := std_logic_vector(unsigned(input_2) + 1);
+            result := std_logic_vector(unsigned(i_input_2) + 1);
             update_flags(result, o_minus_flag, o_equal_flag, i_update_status_flags);
         elsif i_op = "0100" then  -- DEC
             result := std_logic_vector(unsigned(i_input_2) - 1);
@@ -65,6 +65,6 @@ begin
             result := result;
             -- no action. typically this would be op = 0
         end if;
-        o_alu <= result;
+        o_out <= result;
     end process;
 end rtl;

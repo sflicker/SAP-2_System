@@ -32,7 +32,7 @@ begin
             if i_increment = '1' then
                 internal_value := STD_LOGIC_VECTOR(unsigned(internal_value) + 1);
             elsif i_write_enable_full = '1' then
-                internal_value := i_data_in;
+                internal_value := i_data;
             elsif i_write_enable_low = '1' then
                 internal_value(7 downto 0) := i_data(7 downto 0);
             elsif i_write_enable_high = '1' then

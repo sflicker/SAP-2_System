@@ -22,23 +22,25 @@ entity proc_top is
           out_port_3 : out STD_LOGIC_VECTOR(7 downto 0);
           out_port_4 : out STD_LOGIC_VECTOR(7 downto 0);
           --data_out : out STD_LOGIC_VECTOR(7 downto 0);
-          running : out STD_LOGIC;
+         -- o_running : out STD_LOGIC;
         --   s7_anodes_out : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
         --   s7_cathodes_out : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
      --     phase_out : out STD_LOGIC_VECTOR(5 downto 0);
-          clear_out : out STD_LOGIC;
-          step_out : out STD_LOGIC
-
-         o_address : out STD_LOGIC_VECTOR(15 downto 0);         -- 16 bit output address
-         i_data : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
-        o_data: out STD_LOGIC_VECTOR(7 downto 0);
+        --  clear_out : out STD_LOGIC;
+        --  step_out : out STD_LOGIC;
+          o_HLTBar : out STD_LOGIC;
+          o_address : out STD_LOGIC_VECTOR(15 downto 0);         -- 16 bit output address
+          i_data : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
+          o_data: out STD_LOGIC_VECTOR(7 downto 0);
+          o_rd : out STD_LOGIC;                          -- active high signal to read from memory using o_address and i_data 
+          o_wr: out STD_LOGIC;                           -- active high signal to write from memory using o_address and o_data
 
     );
     attribute MARK_DEBUG : string;
-    attribute MARK_DEBUG of S5_clear_start : signal is "true";
-    attribute MARK_DEBUG of S6_step_toggle : signal is "true";
-    attribute MARK_DEBUG of S7_manual_auto_switch : signal is "true";
-    attribute MARK_DEBUG of running : signal is "true";
+    --attribute MARK_DEBUG of S5_clear_start : signal is "true";
+--    attribute MARK_DEBUG of S6_step_toggle : signal is "true";
+--    attribute MARK_DEBUG of S7_manual_auto_switch : signal is "true";
+    attribute MARK_DEBUG of o_running : signal is "true";
 
 end proc_top;
 
@@ -118,6 +120,7 @@ architecture rtl of proc_top is
     signal sp_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal w_pc_write_enable_low : STD_LOGIC;
     signal w_pc_write_enable_high : STD_LOGIC;
+    signal w_ir_we : STD_LOGIC_VECTOR(0 to 1);
 
     attribute MARK_DEBUG of clk_ext_converted_sig : signal is "true";
     attribute MARK_DEBUG of i_clk : signal is "true";
@@ -135,11 +138,13 @@ architecture rtl of proc_top is
     attribute MARK_DEBUG of output_1_sig : signal is "true";
 begin
 
-    clr_sig <= '1' when S5_clear_start = '1' else '0';
+    clr_sig <= i_reset;
+--    clr_sig <= '1' when S5_clear_start = '1' else '0';
     clrbar_sig <= not clr_sig;
-    running <= S7_manual_auto_switch and hltbar_sig;
-    clear_out <= S5_clear_start;
-    step_out <= S6_step_toggle; 
+    o_hltbar <= hltbar_sig;
+--    o_running <= S7_manual_auto_switch and hltbar_sig;
+   -- clear_out <= S5_clear_start;
+ --   step_out <= S6_step_toggle; 
     data_out <= ram_data_out_sig;
 
     w_clkbar <= not i_clk
@@ -148,6 +153,8 @@ begin
 
     -- tie the MAR address output to the address output for the proc
     o_address <= w_mar_addr;
+
+    o_wr <= ram_write_enable_sig;
      
    -- phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage_counter_sig - 1));
     
@@ -197,7 +204,7 @@ begin
     --REDO to separate address and data
     -- also ram abd io ports are moving out of the processor but the 
     -- registers are staying. so this is more the internal data buss.
-    w_bus : entity work.w_bus
+    internal_bus : entity work.internal_bus
         port map(
             i_driver_sel_def => wbus_sel_sig,
             i_driver_sel_io => wbus_sel_io_sig, 
@@ -225,9 +232,10 @@ begin
             o_pc_we_low => w_pc_write_enable_low,
             o_pc_we_high => w_pc_write_enable_high
             o_mdr_tm_we => write_enable_mdr_tm_sig,
-            o_ir_opcode_we => write_enable_ir_opcode_sig,
-            o_ir_operand_we_low => write_enable_low_sig,
-            o_ir_operand_we_high => write_enable_high_sig,
+            o_ir_we => w_ir_we,
+            -- o_ir_opcode_we => write_enable_ir_opcode_sig,
+            -- o_ir_operand_we_low => write_enable_low_sig,
+            -- o_ir_operand_we_high => write_enable_high_sig,
             o_out_port_3_we => out_port_3_write_enable_sig,
             o_out_port_4_we => out_port_4_write_enable_sig,
         );
@@ -284,26 +292,38 @@ begin
         o_data => mdr_tm_data_out_sig
     );              
 
-    IR : entity work.data_register
-        generic map(8)
-        port map(
+
+    IR : entity work.instruction_register is
+        port_map(
             i_clk => i_clk,
             i_clr => ir_clear_sig,
-            i_write_enable => write_enable_ir_opcode_sig,
             i_data => w_bus_data_out_sig(7 downto 0),
-            o_data => IR_opcode_sig        
+            i_sel_we => w_ir_we,
+            o_opcode => IR_opcode_sig,
+            o_operand_low => operand_low_out_sig,
+            o_operand_high => operand_high_out_sig
         );
 
-    IR_Operand : entity work.IR_operand_latch
-            port map(
-                clk => i_clk,
-                clr => ir_clear_sig,
-                ir_operand_in => w_bus_data_out_sig(7 downto 0),
-                write_enable_low => write_enable_low_sig,
-                write_enable_high => write_enable_high_sig,
-                operand_low_out => operand_low_out_sig,
-                operand_high_out => operand_high_out_sig
-            );
+    -- IR : entity work.data_register
+    --     generic map(8)
+    --     port map(
+    --         i_clk => i_clk,
+    --         i_clr => ir_clear_sig,
+    --         i_write_enable => write_enable_ir_opcode_sig,
+    --         i_data => w_bus_data_out_sig(7 downto 0),
+    --         o_data => IR_opcode_sig        
+    --     );
+
+    -- IR_Operand : entity work.IR_operand_latch
+    --         port map(
+    --             clk => i_clk,
+    --             clr => ir_clear_sig,
+    --             ir_operand_in => w_bus_data_out_sig(7 downto 0),
+    --             write_enable_low => write_enable_low_sig,
+    --             write_enable_high => write_enable_high_sig,
+    --             operand_low_out => operand_low_out_sig,
+    --             operand_high_out => operand_high_out_sig
+    --         );
 
     SP : entity work.stack_pointer
             port map(
@@ -375,86 +395,86 @@ begin
     acc : entity work.data_register 
         Generic Map(8)
         Port Map (
-            clk => i_clk,
-            clr => clr_sig,
-            write_enable => write_enable_acc_sig,
-            data_in => w_bus_data_out_sig(7 downto 0),
-            data_out => acc_data_sig
+            i_clk => i_clk,
+            i_clr => clr_sig,
+            i_write_enable => write_enable_acc_sig,
+            i_data => w_bus_data_out_sig(7 downto 0),
+            o_data => acc_data_sig
         ); 
 
     B : entity work.data_register 
     Generic Map(8)
     Port Map (
-        clk => i_clk,
-        clr => clr_sig,
-        write_enable => write_enable_B_sig,
-        data_in => w_bus_data_out_sig(7 downto 0),
-        data_out => b_data_sig
+        i_clk => i_clk,
+        i_clr => clr_sig,
+        i_write_enable => write_enable_B_sig,
+        i_data => w_bus_data_out_sig(7 downto 0),
+        o_data => b_data_sig
     );
 
 
     C : entity work.data_register 
     Generic Map(8)
     Port Map (
-        clk => i_clk,
-        clr => clr_sig,
-        write_enable => write_enable_C_sig,
-        data_in => w_bus_data_out_sig(7 downto 0),
-        data_out => c_data_sig
+        i_clk => i_clk,
+        i_clr => clr_sig,
+        i_write_enable => write_enable_C_sig,
+        i_data => w_bus_data_out_sig(7 downto 0),
+        o_data => c_data_sig
     );
 
 
     TMP : entity work.data_register 
     Generic Map(8)
     Port Map (
-        clk => i_clk,
-        clr => clr_sig,
-        write_enable => write_enable_tmp_sig,
-        data_in => w_bus_data_out_sig(7 downto 0),
-        data_out => tmp_data_sig
+        i_clk => i_clk,
+        i_clr => clr_sig,
+        i_write_enable => write_enable_tmp_sig,
+        i_data => w_bus_data_out_sig(7 downto 0),
+        o_data => tmp_data_sig
     );
         
     ALU : entity work.ALU
         port map (
-            clr => clr_sig,
-            op => alu_op_sig,
-            input_1 => acc_data_sig,
-            input_2 => tmp_data_sig,
-            alu_out => alu_data_sig,
-            update_status_flags => update_status_flags_sig,
-            minus_flag => w_minus_flag,
-            equal_flag => w_equal_flag
+            i_clr => clr_sig,
+            i_op => alu_op_sig,
+            i_input_1 => acc_data_sig,
+            i_input_2 => tmp_data_sig,
+            o_out => alu_data_sig,
+            i_update_status_flags => update_status_flags_sig,
+            o_minus_flag => w_minus_flag,
+            o_equal_flag => w_equal_flag
             );
 
     OUTPUT_PORT_3 : entity work.data_register
     Generic Map(8)
     port map (
-        clk => i_clk,
-        clr => clr_sig,
-        write_enable => out_port_3_write_enable_sig,
-        data_in => w_bus_data_out_sig(7 downto 0),
-        data_out => output_1_sig
+        i_clk => i_clk,
+        i_clr => clr_sig,
+        o_write_enable => out_port_3_write_enable_sig,
+        i_data => w_bus_data_out_sig(7 downto 0),
+        o_data => output_1_sig
     );
 
     OUTPUT_PORT_4 : entity work.data_register
     Generic Map(8)
     port map (
-        clk => i_clk,
-        clr => clr_sig,
-        write_enable => out_port_4_write_enable_sig,
-        data_in => w_bus_data_out_sig(7 downto 0),
-        data_out => output_2_sig
+        i_clk => i_clk,
+        i_clr => clr_sig,
+        i_write_enable => out_port_4_write_enable_sig,
+        i_data => w_bus_data_out_sig(7 downto 0),
+        o_data => output_2_sig
     );
 
     IO : entity work.IO_controller
         Port map(
-            clk => w_clkbar,
-            rst => clr_sig,
-            opcode => IR_opcode_sig,
-            portnum => IR_operand_sig(2 downto 0),
-            bus_selector => wbus_sel_io_sig,
-            bus_we_select => wbus_output_we_io_sig,
-            active => io_active_sig
+            i_clk => w_clkbar,
+            i_rst => clr_sig,
+            i_opcode => IR_opcode_sig,
+            i_portnum => IR_operand_sig(2 downto 0),
+            o_bus_selector => wbus_sel_io_sig,
+            o_bus_we_select => wbus_output_we_io_sig,
+            o_active => io_active_sig
         );
 
     REGISTER_LOG : process(i_clk)

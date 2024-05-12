@@ -36,4 +36,4 @@ begin
     r_auto_w_h <= i_clk and i_manual_auto_switch and i_clrbar;
     
     
-end rtl behavioral;
+end rtl;
