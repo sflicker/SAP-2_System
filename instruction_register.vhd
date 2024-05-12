@@ -8,7 +8,7 @@ entity instruction_register is
         i_clk : in STD_LOGIC;
         i_clr : in STD_LOGIC;
         i_data : in STD_LOGIC_VECTOR(7 downto 0);           -- input data
-        i_sel_we : in STD_LOGIC;                         -- write enable selector
+        i_sel_we : in STD_LOGIC_VECTOR(1 downto 0);                         -- write enable selector
         o_opcode : out STD_LOGIC_VECTOR(7 downto 0);        -- outputs
         o_operand_low : out STD_LOGIC_VECTOR(7 downto 0);
         o_operand_high : out STD_LOGIC_VECTOR(7 downto 0);
@@ -18,15 +18,15 @@ end instruction_register;
 architecture rtl of instruction_register is
     
 begin
-    process(clk, clr)
+    process(i_clk, i_clr)
     begin
         -- this should probably be cleared at the beginning
         -- of every fetch cycle
-        if clr = '1' then
+        if i_clr = '1' then
             o_opcode <= "00000000";
             o_operand_low <= "00000000";
             o_operand_high <= "00000000";
-        elsif clk = '1' then
+        elsif rising_edge(i_clk) then
             if i_sel_we = "00" then 
                 -- all write enables off
             elsif i_sel_we = "01" then

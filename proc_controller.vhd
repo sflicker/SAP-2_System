@@ -113,17 +113,17 @@ entity proc_controller is
     o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
     o_alu_op : out STD_LOGIC_VECTOR(3 downto 0);
     o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 13);
-    pc_increment : out STD_LOGIC;
-    mdr_fm_write_enable : out STD_LOGIC;
-    ram_write_enable : out STD_LOGIC;
-    ir_clear : out STD_LOGIC;
-    update_status_flags : out STD_LOGIC;
-    controller_wait : out STD_LOGIC;
-    stack_pointer_inc : out STD_LOGIC;
-    stack_pointer_dec : out STD_LOGIC;
+    o_pc_inc : out STD_LOGIC;
+    o_mdr_fm_we : out STD_LOGIC;
+    o_ram_we : out STD_LOGIC;
+    o_ir_clr : out STD_LOGIC;
+    o_update_status_flags : out STD_LOGIC;
+    o_controller_wait : out STD_LOGIC;
+    o_sp_inc : out STD_LOGIC;
+    o_sp_dec : out STD_LOGIC;
     
-    HLTBar : out STD_LOGIC;
-    stage_out : out integer
+    o_HLTBar : out STD_LOGIC;
+    o_stage : out integer
     );
 end proc_controller;
 
@@ -180,8 +180,8 @@ architecture rtl of proc_controller is
         Report "Stage: " & to_string(stage_var) 
             & ", o_wbus_sel: " & to_string(control_word(0 to 3))
             & ", o_alu_op: " & to_string(control_word(4 to 7))
-            & ", pc_increment: " & to_string(control_word(8))
-            & ", ir_clear: " & to_string(control_word(9))
+            & ", o_pc_inc: " & to_string(control_word(8))
+            & ", o_ir_clr: " & to_string(control_word(9))
             & ", acc_write_enable: " & to_string(control_word(10))
             & ", b_write_enable: " & to_string(control_word(11))
             & ", c_write_enable: " & to_string(control_word(12))
@@ -196,22 +196,22 @@ architecture rtl of proc_controller is
             & ", out_2_write_enable: " & to_string(control_word(21))
             & ", pc_low_write_enable: " & to_string(control_word(22))
             & ", pc_high_write_enable: " & to_string(control_word(23))
-            & ", mdr_fm_write_enable: " & to_string(control_word(24))
-            & ", ram_write_enable: " & to_string(control_word(25))
-            & ", update_status_flags: " & to_string(control_word(26))
+            & ", o_mdr_fm_we: " & to_string(control_word(24))
+            & ", o_ram_we: " & to_string(control_word(25))
+            & ", o_update_status_flags: " & to_string(control_word(26))
             & ", not_m_next: " & to_string(control_word(27))
             & ", not_z_next: " & to_string(control_word(28))
             & ", not_nz_next: " & to_string(control_word(29))
-            & ", controller_wait: " & to_string(control_word(30))
+            & ", o_controller_wait: " & to_string(control_word(30))
             & ", sp_inc: " & to_string(control_word(31))
             & ", sp_dec: " & to_string(control_word(32));
 
     end procedure;
 
 begin
-    HLTBAR <= '0' when opcode = x"76" else
+    o_HLTBar <= '0' when opcode = x"76" else
         '1';
-    stage_out <= stage_sig;
+    o_stage <= stage_sig;
 
     run_mode_process:
         process(i_clk, i_clrbar, i_opcode)
@@ -257,17 +257,17 @@ begin
 
                     o_wbus_sel <= control_word(0 to 3);
                     o_alu_op <= control_word(4 to 7);
-                    pc_increment <= control_word(8);
-                    ir_clear <= control_word(9);
+                    o_pc_inc <= control_word(8);
+                    o_ir_clr <= control_word(9);
                     o_wbus_control_word <= control_word(10 to 23);
-                    mdr_fm_write_enable <= control_word(24);
-                    ram_write_enable <= control_word(25);
+                    o_mdr_fm_we <= control_word(24);
+                    o_ram_we <= control_word(25);
 
-                    update_status_flags <= control_word(26);
+                    o_update_status_flags <= control_word(26);
 
-                    controller_wait <= control_word(30);
-                    stack_pointer_inc <= control_word(31);
-                    stack_pointer_dec <= control_word(32);
+                    o_controller_wait <= control_word(30);
+                    o_sp_inc <= control_word(31);
+                    o_sp_dec <= control_word(32);
 --                    stage_counter <= stage;
         
                     if stage_var >= 30 then     -- all op controls should end in a NOP so should never be true.

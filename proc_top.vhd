@@ -351,24 +351,25 @@ begin
 
     proc_controller : entity work.proc_controller
         port map(
-            clk => w_clkbar,
-            clrbar => clrbar_sig,
-            opcode => IR_opcode_sig,
-            minus_flag => w_minus_flag,
-            equal_flag => w_equal_flag,
-            wbus_sel => wbus_sel_sig,
-            alu_op => alu_op_sig,
-            wbus_output_connected_components_write_enable => wbus_output_we_default_sig,
-            pc_increment => pc_increment_sig,
-            mdr_fm_write_enable => write_enable_mdr_fm_sig,
-            ram_write_enable => ram_write_enable_sig,
-            ir_clear => ir_clear_sig,
-            update_status_flags => update_status_flags_sig,
-            controller_wait => controller_wait_sig,
-            stack_pointer_inc => sp_increment_sig,
-            stack_pointer_dec => sp_decrement_sig,
-            hltbar => hltbar_sig,
-            stage_out => stage_counter_sig
+            i_clk => w_clkbar,
+            i_clrbar => clrbar_sig,
+            i_opcode => IR_opcode_sig,
+            i_minus_flag => w_minus_flag,
+            i_equal_flag => w_equal_flag,
+
+            o_wbus_sel => wbus_sel_sig,
+            o_alu_op => alu_op_sig,
+            o_wbus_control_word => wbus_output_we_default_sig,
+            o_pc_inc => pc_increment_sig,
+            o_mdr_fm_we => write_enable_mdr_fm_sig,
+            o_ram_we => ram_write_enable_sig,
+            o_ir_clr => ir_clear_sig,
+            o_update_status_flags => update_status_flags_sig,
+            o_controller_wait => controller_wait_sig,
+            o_sp_inc => sp_increment_sig,
+            o_sp_dec => sp_decrement_sig,
+            o_HLTBar => hltbar_sig,
+            o_stage => stage_counter_sig
         );
         
     acc : entity work.data_register 
