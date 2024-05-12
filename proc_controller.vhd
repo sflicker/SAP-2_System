@@ -41,22 +41,24 @@ use std.textio.all;
 --  BIT E       MAR Write Enable
 --  BIT F       PC Write Enable
 --  BIT 10      MDR-TM Write Enable
---  BIT 11      IR Write Enable
---  BIT 12      IR Operand Low Write Enable
---  BIT 14      IR Operand High Write Enable
---  BIT 15      OUT Port 1 Write Enable
---  BIT 16      OUT Port 2 Write Enable
---  BIT 17      PC LOW WE
---  BIT 18      PC HIGH WE
---  BIT 19      MDR-FM WE                       -- WE for components not connected to 
---  BIT 1A      RAM WE
---  BIT 1B      Update Status Flags
---  BIT 1C      NOT M NEXT
---  BIT 1D      NOT Z Next
---  BIT 1E      NOT NZ next
---  BIT 1F      WAIT        -- use this if an another controller is running
---  BIT 20      SP INC
---  BIT 21      SP DEC
+--  BITS 11-12  IR component WE
+                -- 00   nothing selected
+                -- 01   opcode WE selected
+                -- 10   operand low WE selected
+                -- 11   operand high WE selected
+--  BIT 13      OUT Port 1 Write Enable
+--  BIT 14      OUT Port 2 Write Enable
+--  BIT 15      PC LOW WE
+--  BIT 16      PC HIGH WE
+--  BIT 17      MDR-FM WE                       -- WE for components not connected to 
+--  BIT 18      RAM WE
+--  BIT 19      Update Status Flags
+--  BIT 1A      NOT M NEXT
+--  BIT 1B      NOT Z Next
+--  BIT 1C      NOT NZ next
+--  BIT 1D      WAIT        -- use this if an another controller is running
+--  BIT 1E      SP INC
+--  BIT 1F      SP DEC
 
 -- SAP-2 Opcodes
 -- ADD B        80      ; Accum <= Accum + B ; includes flag updates
@@ -112,7 +114,7 @@ entity proc_controller is
     -- outputs
     o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
     o_alu_op : out STD_LOGIC_VECTOR(3 downto 0);
-    o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 13);
+    o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 12);
     o_pc_inc : out STD_LOGIC;
     o_mdr_fm_we : out STD_LOGIC;
     o_ram_we : out STD_LOGIC;
@@ -131,7 +133,7 @@ architecture rtl of proc_controller is
     signal stage_sig : integer := 1;
 
     signal control_word_index_signal : std_logic_vector(9 downto 0);
-    signal control_word_signal : std_logic_vector(0 to 32);
+    signal control_word_signal : std_logic_vector(0 to 31);
 
 --    phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage_counter_sig - 1));
 
@@ -139,7 +141,7 @@ architecture rtl of proc_controller is
 
 
     type t_address_rom is array(0 to 255) of std_logic_vector(9 downto 0);
-    type t_control_rom is array(0 to 1023) of STD_LOGIC_VECTOR(0 to 32);
+    type t_control_rom is array(0 to 1023) of STD_LOGIC_VECTOR(0 to 31);
 
     impure function init_address_rom return t_address_rom is
         file text_file : text open read_mode is "instruction_index.txt";
@@ -169,13 +171,13 @@ architecture rtl of proc_controller is
 
     constant ADDRESS_ROM_CONTENTS : t_address_rom := init_address_rom;
 
-    constant NOP : STD_LOGIC_VECTOR(0 to 32) := "000000000000000000000000000000000";
+    constant NOP : STD_LOGIC_VECTOR(0 to 31) := "00000000000000000000000000000000";
 
     constant CONTROL_ROM : t_control_rom := init_control_rom;
 
     procedure output_control_word(
         variable stage_var : integer := 1;
-        variable control_word : std_logic_vector(0 to 32)) is
+        variable control_word : std_logic_vector(0 to 31)) is
     begin
         Report "Stage: " & to_string(stage_var) 
             & ", o_wbus_sel: " & to_string(control_word(0 to 3))
@@ -217,7 +219,7 @@ begin
         process(i_clk, i_clrbar, i_opcode)
             variable stage_var : integer := 1;
             variable control_word_index : std_logic_vector(9 downto 0);
-            variable control_word : std_logic_vector(0 to 32);
+            variable control_word : std_logic_vector(0 to 31);
         begin
 
             if i_clrbar = '0' then
@@ -241,9 +243,9 @@ begin
 
                 -- exit OP control program if NOP reached and reset stage to 1.
                 if control_word = NOP or        -- if the control word is NOP then abort the op and go to next fext
-                    (control_word(27) = '1' and i_minus_flag = '0') or    -- also abort op for conditional jumps
-                    (control_word(28) = '1' and i_equal_flag = '0') or
-                    (control_word(29) = '1' and i_equal_flag = '1') then
+                    (control_word(26) = '1' and i_minus_flag = '0') or    -- also abort op for conditional jumps
+                    (control_word(27) = '1' and i_equal_flag = '0') or
+                    (control_word(28) = '1' and i_equal_flag = '1') then
                         Report "NOP detected moving to next instruction";
                         stage_var := 1;
                         stage_sig <= stage_var;
@@ -259,15 +261,15 @@ begin
                     o_alu_op <= control_word(4 to 7);
                     o_pc_inc <= control_word(8);
                     o_ir_clr <= control_word(9);
-                    o_wbus_control_word <= control_word(10 to 23);
-                    o_mdr_fm_we <= control_word(24);
-                    o_ram_we <= control_word(25);
+                    o_wbus_control_word <= control_word(10 to 22);
+                    o_mdr_fm_we <= control_word(23);
+                    o_ram_we <= control_word(24);
 
-                    o_update_status_flags <= control_word(26);
+                    o_update_status_flags <= control_word(25);
 
-                    o_controller_wait <= control_word(30);
-                    o_sp_inc <= control_word(31);
-                    o_sp_dec <= control_word(32);
+                    o_controller_wait <= control_word(29);
+                    o_sp_inc <= control_word(30);
+                    o_sp_dec <= control_word(31);
 --                    stage_counter <= stage;
         
                     if stage_var >= 30 then     -- all op controls should end in a NOP so should never be true.

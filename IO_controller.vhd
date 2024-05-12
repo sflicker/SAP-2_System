@@ -9,7 +9,7 @@ entity IO_controller is
         i_opcode : IN STD_LOGIC_VECTOR(7 downto 0);
         i_portnum : IN STD_LOGIC_VECTOR(2 downto 0);      -- portnum (0 none, 1 input 1, 2 input 2, 3 output 1, 4 output 2)
         o_bus_selector : OUT STD_LOGIC_VECTOR(3 downto 0);
-        o_bus_control_word : OUT STD_LOGIC_VECTOR(0 to 13);
+        o_bus_control_word : OUT STD_LOGIC_VECTOR(0 to 12);
         o_active : OUT STD_LOGIC
         
     );
@@ -59,21 +59,21 @@ begin
                     if i_portnum = "001" then
                         active <= '1';
                         o_bus_selector <= "1001";
-                        o_bus_control_word <= "10000000000000";
+                        o_bus_control_word <= "1000000000000";
                     elsif portnum = "010" then
                         active <= '1';
                         o_bus_selector <= "1010";
-                        o_bus_control_word <= "10000000000000";
+                        o_bus_control_word <= "1000000000000";
                     end if;
                 elsif opcode = OUT_BYTE_OPCODE then
                     if portnum = "011" then
                         active <= '1';
                         o_bus_selector <= "0101";
-                        o_bus_control_word <= "00000000001000";
+                        o_bus_control_word <= "0000000001000";
                     elsif portnum = "100" then
                         active <= '1';
                         o_bus_selector <= "0101";
-                        o_bus_control_word <= "00000000000100";
+                        o_bus_control_word <= "0000000000100";
                     end if;
                 end if;
                 r_next_state <= s_COOL;
