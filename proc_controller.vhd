@@ -151,6 +151,7 @@ architecture rtl of proc_controller is
         variable text_line : line;
         variable rom_content : t_address_rom;
     begin
+        Report "Loading Instruction Index";
         for i in 0 to 255 loop 
             readline(text_file, text_line);
             bread(text_line, rom_content(i));
@@ -164,6 +165,7 @@ architecture rtl of proc_controller is
         variable text_line : line;
         variable rom_content : t_control_rom;
     begin
+        Report "Loading Control Rom";
         for i in 0 to 1023 loop 
             readline(text_file, text_line);
             bread(text_line, rom_content(i));

@@ -13,7 +13,7 @@ entity system_top is
         S5_clear_start : in STD_LOGIC;       -- start/clear (reset)  -- 
         S6_step_toggle : in STD_LOGIC;       -- single step -- 1 for a single step
         S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
-        memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
+     --   memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
         i_rx_serial : in STD_LOGIC;    -- input to receive serial.
         o_tx_serial : out STD_LOGIC;    -- output to send serial.
         o_seven_segment_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
