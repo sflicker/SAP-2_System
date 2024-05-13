@@ -15,7 +15,7 @@ entity system_top is
         S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
         memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
         i_rx_serial : in STD_LOGIC;    -- input to receive serial.
-        i_tx_serial : in STD_LOGIC;    -- output to send serial.
+        o_tx_serial : out STD_LOGIC;    -- output to send serial.
         o_seven_segment_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
         o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0)     -- maps to seven segment display
 
@@ -54,7 +54,7 @@ begin
         generic map(g_DIV_FACTOR => 100000)
         port map(
             i_clk => i_clk,
-            i_reset => i_reset,
+            i_reset => r_reset,
             o_clk => w_clk_display_refresh_1kHZ
         );
 
@@ -62,7 +62,7 @@ begin
         generic map(g_DIV_FACTOR => 100)
         port map(
             i_clk => i_clk,
-            i_reset => i_reset,
+            i_reset => r_reset,
             o_clk => w_system_clock_1MHZ
         );  
 
@@ -137,23 +137,23 @@ begin
             o_wrt_mem_data => w_mem_data_from_loader,
             o_wrt_mem_we => w_mem_we_from_loader
         );
-
+    
 
 --    GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
 --    generate  
         display_controller : entity work.display_controller
         port map(
-            clk => w_clk_display_refresh_1kHZ,
-            rst => clr_sig,
-            data_in => w_display_data,
-            anodes_out => o_seven_segment_anodes,
-            cathodes_out => o_seven_segment_cathodes
+            i_clk => w_clk_display_refresh_1kHZ,
+            i_rst => r_reset,
+            i_data => w_display_data,
+            o_anodes => o_seven_segment_anodes,
+            o_cathodes => o_seven_segment_cathodes
         );
   --  end generate;          
         
     UART_RX_INST: entity work.UART_RX
     port map(
-        i_clk => i_clk,
+        i_clk => w_system_clock_1MHZ,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => w_rx_byte
@@ -161,36 +161,20 @@ begin
 
     UART_TX_INST : entity work.UART_TX
     port map(
-        i_clk => i_clk,
+        i_clk => w_system_clock_1MHZ,
         i_tx_dv => w_rx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,
-        o_tx_serial => w_tx_serial,
+        o_tx_serial => o_tx_serial,
         o_tx_done => w_tx_done
     );
 
-    loader : entity work.memory_loader
-    port map (
-        i_clk => i_clk,
-        i_reset => r_reset,
-        i_prog_run_mode => '0',
-        i_rx_data => w_rx_byte,
-        i_rx_data_dv => w_rx_rv,
-        i_tx_response_active => w_tx_active,
-        i_tx_response_done => w_tx_done,
-        o_tx_response_data => w_response_data,
-        o_tx_response_dv => w_response_dv,
-        o_wrt_mem_addr => w_wrt_mem_addr,
-        o_wrt_mem_data => w_wrt_mem_data,
-        o_wrt_mem_we => w_wrt_mem_we
-    );
 
 
 
-
-    startup : process(i_clk, i_reset)
+    startup : process(w_system_clock_1MHZ, i_reset)
     begin
-        if rising_edge(i_clk) then
+        if rising_edge(w_system_clock_1MHZ) then
             if i_reset = '1' then
                 r_reset <= '1';
             else 
