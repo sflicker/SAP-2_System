@@ -23,6 +23,7 @@ entity system_top is
 end system_top;
 
 architecture rtl of system_top is
+    signal r_system_clock_100mhz : STD_LOGIC;
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_system_clock_1MHZ : STD_LOGIC;
     signal w_gated_cpu_clock_1MHZ : STD_LOGIC;
@@ -49,6 +50,9 @@ architecture rtl of system_top is
     signal w_tx_serial : STD_LOGIC;
 
 begin
+
+    r_system_clock_100mhz <= i_clk;
+
 
     display_clock_divider_1KHZ : entity work.clock_divider
         generic map(g_DIV_FACTOR => 100000)
@@ -153,7 +157,8 @@ begin
         
     UART_RX_INST: entity work.UART_RX
     port map(
-        i_clk => w_system_clock_1MHZ,
+--        i_clk => w_system_clock_1MHZ,
+        i_clk => r_system_clock_100mhz,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => w_rx_byte
@@ -161,7 +166,8 @@ begin
 
     UART_TX_INST : entity work.UART_TX
     port map(
-        i_clk => w_system_clock_1MHZ,
+--        i_clk => w_system_clock_1MHZ,
+        i_clk => r_system_clock_100mhz,
         i_tx_dv => w_rx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,

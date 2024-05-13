@@ -48,7 +48,7 @@ ghdl -a --std=08 -fsynopsys -v proc_top.vhd
 ghdl -a --std=08 -fsynopsys -v system_top.vhd
 ghdl -a --std=08 -fsynopsys -v system_top_filebased_tb.vhd
 ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb --stop-time=1000ns --vcd=system_top_filebased_tb.vcd
+ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb --stop-time=10ms --vcd=system_top_filebased_tb.vcd
 #ghdl -a --std=08 -fsynopsys -v proc_top_tb.vhd
 #
 
