@@ -51,7 +51,7 @@ architecture rtl of proc_top is
     signal clk_ext_converted_sig : STD_LOGIC;
     signal w_clkbar : std_logic;
     signal clk_disp_refresh_1KHZ_sig : std_logic;
-    signal hltbar_sig : std_logic := '1';
+    signal w_hltbar : std_logic := '1';
     signal clr_sig : STD_LOGIC;
     signal clrbar_sig : STD_LOGIC;
     signal wbus_sel_sig : STD_LOGIC_VECTOR(3 downto 0);
@@ -126,7 +126,7 @@ architecture rtl of proc_top is
     --attribute MARK_DEBUG of i_clk : signal is "true";
     attribute MARK_DEBUG of w_clkbar : signal is "true";
     
-    attribute MARK_DEBUG of hltbar_sig : signal is "true";
+    attribute MARK_DEBUG of w_hltbar : signal is "true";
     attribute MARK_DEBUG of clrbar_sig : signal is "true";
     attribute MARK_DEBUG of clr_sig : signal is "true";
     attribute MARK_DEBUG of alu_op_sig : signal is "true";
@@ -141,7 +141,7 @@ begin
     clr_sig <= i_reset;
 --    clr_sig <= '1' when S5_clear_start = '1' else '0';
     clrbar_sig <= not clr_sig;
-    o_hltbar <= hltbar_sig;
+    o_hltbar <= w_hltbar;
 --    o_running <= S7_manual_auto_switch and hltbar_sig;
    -- clear_out <= S5_clear_start;
  --   step_out <= S6_step_toggle; 
@@ -388,7 +388,7 @@ begin
             o_controller_wait => controller_wait_sig,
             o_sp_inc => sp_increment_sig,
             o_sp_dec => sp_decrement_sig,
-            o_HLTBar => hltbar_sig,
+            o_HLTBar => w_hltbar,
             o_stage => stage_counter_sig
         );
         

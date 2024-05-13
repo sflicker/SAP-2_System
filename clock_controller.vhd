@@ -11,8 +11,7 @@ entity clock_controller is
         i_manual_auto_switch : IN STD_LOGIC;        -- manual/auto mode. 0 manual, 1 auto
         i_hltbar : in STD_LOGIC;      -- 
         i_clrbar : in STD_LOGIC;
-        o_clk : OUT STD_LOGIC;
-        o_clkbar : OUT STD_LOGIC
+        o_clk : OUT STD_LOGIC
     );
 end clock_controller;
 
@@ -29,11 +28,10 @@ begin
     --         pulse_out => clock_pulse
     --     );
     
-    o_clk <= r_manual_or_auto_w_h and i_hltbar and i_prog_run_switch;
-    o_clkbar <= not o_clk;
+    o_clk <= r_manual_or_auto_w_h and i_hltbar and i_clrbar and i_prog_run_switch;
     r_manual_or_auto_w_h <= r_auto_w_h or r_manual_w_h;
     r_manual_w_h <= not i_manual_auto_switch and i_step_toggle;
-    r_auto_w_h <= i_clk and i_manual_auto_switch and i_clrbar;
+    r_auto_w_h <= i_clk and i_manual_auto_switch ;
     
     
 end rtl;
