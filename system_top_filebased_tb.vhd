@@ -40,6 +40,7 @@ architecture test of system_top_filebased_tb is
     signal w_tb_tx_done : std_logic;
     signal w_to_tb_rx_dv : std_logic;
     signal w_to_tb_rx_byte : std_logic_vector(7 downto 0);
+    signal w_clk_1MHZ : std_logic;
 
     procedure wait_cycles(signal clk : in std_logic; cycles : in natural) is
     begin
@@ -140,6 +141,15 @@ begin
         o_clk => w_clk_100mhz
     );
     
+    processor_clock_divider_1MHZ : entity work.clock_divider
+        generic map(g_DIV_FACTOR => 100)
+        port map(
+            i_clk => w_clk_100mhz,
+            i_reset => r_reset,
+            o_clk => w_clk_1MHZ
+        );  
+
+
     system_top : entity work.system_top
     port map (
         i_clk => w_clk_100mhz,
@@ -158,10 +168,10 @@ begin
     tb_uart_tx : entity work.UART_TX
     generic map (
         ID => "TB-UART-TX",
-        g_CLKS_PER_BIT => 868
+        g_CLKS_PER_BIT => 9
     )
     port map(
-        i_clk => w_clk_100mhz,
+        i_clk => w_clk_1MHZ,
         i_tx_dv => r_tb_tx_dv,
         i_tx_byte => r_tb_tx_byte,
         o_tx_active => w_tb_tx_active,
@@ -172,10 +182,10 @@ begin
     tb_uart_rx : entity work.UART_RX
     generic map (
         ID => "TB-UART-RX",
-        g_CLKS_PER_BIT => 868
+        g_CLKS_PER_BIT => 9
     )
     port map (
-        i_clk => w_clk_100mhz,
+        i_clk => w_clk_1MHZ,
         i_rx_serial => w_tb_rx_from_system_top_tx,
         o_rx_dv => w_to_tb_rx_dv,
         o_rx_byte => w_to_tb_rx_byte
@@ -186,11 +196,13 @@ begin
     begin
         Report "Starting System Top - Memory Loader Test";
         load_program_bytes(g_FILE_NAME, program_size, program_bytes);
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
+
+        Report "Program Size: " & to_string(program_size);
 
 --        r_prog_run_switch <= '0';
 --        r_manual_auto_switch <= '0';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         Report "Sending Load Command";
         send_bytes_to_loader(w_clk_100mhz, c_load_str'length, c_load_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
@@ -198,6 +210,7 @@ begin
 
         total_size <= program_size + 4;
         wait for 0 ns;
+        Report "Total Size: " & to_string(total_size);
         program_size_bytes(0) <= std_logic_vector(total_size(7 downto 0));
         program_size_bytes(1) <= std_logic_vector(total_size(15 downto 8));
         wait for 0 ns;
@@ -235,22 +248,22 @@ begin
         Report "Resetting System";
 
         r_prog_run_switch <= '1' ;
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         r_reset <= '1';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         r_reset <= '0';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         r_clear_start <= '1';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         r_clear_start <= '0';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         r_manual_auto_switch <= '1';
-        wait until rising_edge(w_clk_100mhz);
+        wait until rising_edge(w_clk_1MHZ);
 
         wait;
 

@@ -39,9 +39,11 @@ architecture rtl of memory_loader is
     signal r_checksum : unsigned(7 downto 0) := (others => '0');
     signal r_state_pos : integer;
     signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0);
+    signal r_rx_data : STD_LOGIC_VECTOR(7 downto 0);
 begin
 
     r_state_pos <= t_state'POS(r_state);
+    r_rx_data <= i_rx_data when i_rx_data_dv;
 
     p_memory_loader : process(i_clk, i_reset)
         variable v_start_addr : std_logic_vector(15 downto 0) := (others => '0');
@@ -173,6 +175,7 @@ begin
                         o_wrt_mem_addr <= r_addr;
                         o_wrt_mem_data <= i_rx_data;
                         o_wrt_mem_we <= '1';
+                        r_index <= 0;
                     else 
                         r_state <= s_rx_data;
                     end if;
@@ -182,18 +185,18 @@ begin
                     -- and do the counter increments.
                     -- may need to hold for several clock cycles but assuming not    
                     
-                    if r_index = 1 then
+                    if r_index = 2 then
                         o_wrt_mem_we <= '0';
                         r_state <= s_verify_data;
                         r_index <= 0;
                     else 
                         r_index <= r_index + 1;
-                        r_state <= s_rx_data;
+                        r_state <= s_wrt_data;
                     end if;
 
                 when s_verify_data =>
                     r_data_verify <= i_ram_data;
-                    if r_index = 1 then
+                    if r_index = 2 then
                         if r_data_verify = i_rx_data then
                             Report "Correct Byte ReadBack from Ram - " & to_string(r_data_verify);
                         else 
@@ -204,7 +207,7 @@ begin
 
                         r_index <= 0;
                         
-                        if r_counter = unsigned(r_rx_total) - 1 then
+                        if r_counter = unsigned(r_rx_total) then
                             r_state <= s_tx_checksum;
                         else
                             r_counter <= r_counter + 1;

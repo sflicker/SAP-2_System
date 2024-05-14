@@ -127,7 +127,7 @@ begin
 
     mem_loader : entity work.memory_loader
         port map(
-            i_clk => r_system_clock_100mhz,
+            i_clk => w_system_clock_1MHZ,
             i_reset => i_reset, 
             i_prog_run_mode => S2_prog_run_switch,
             i_rx_data => w_rx_byte,
@@ -158,11 +158,11 @@ begin
     UART_RX_INST: entity work.UART_RX
     generic map (
         ID => "ST-UART-RX",
-        g_CLKS_PER_BIT => 868
+        g_CLKS_PER_BIT => 9
     )
     port map(
 --        i_clk => w_system_clock_1MHZ,
-        i_clk => r_system_clock_100mhz,
+        i_clk => w_system_clock_1MHZ,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => w_rx_byte
@@ -171,11 +171,11 @@ begin
     UART_TX_INST : entity work.UART_TX
     generic map (
         ID => "ST-UART-TX",
-        g_CLKS_PER_BIT => 868
+        g_CLKS_PER_BIT => 9
     )
     port map(
 --        i_clk => w_system_clock_1MHZ,
-        i_clk => r_system_clock_100mhz,
+        i_clk => w_system_clock_1MHZ,
         i_tx_dv => w_rx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,
