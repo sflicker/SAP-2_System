@@ -46,9 +46,10 @@ begin
     begin
         if i_reset = '1' then
             r_state <= s_init;
-        elsif rising_edge(i_clk) then
+        elsif rising_edge(i_clk) and i_prog_run_mode = '0' then
             case r_state is 
                 when s_init => 
+                    Report "Memory Loader - s_init -> s_idle";
                     r_index <= 0;
                     r_counter <= (others => '0');
                     v_start_addr := (others => '0');
@@ -65,7 +66,9 @@ begin
                         if i_rx_data = c_load_str(r_index) then
                             r_index <= r_index + 1;
                             r_state <= s_rx_start;
+                            Report "Memory Loader - s_idle -> s_rx_start";
                         else 
+                            Report "Memory Loader - Incorrect byte received resetting index and remaining in Idle state";
                             r_state <= s_idle;
                             r_index <= 0;
                         end if;
@@ -78,6 +81,7 @@ begin
                             if r_index = c_load_str'length-1 then
                                 r_index <= 0;
                                 r_state <= s_tx_start_resp;
+                                Report "Memory Loader - s_rx_start -> s_tx_start_resp";
                             else
                                 r_index <= r_index + 1;
                                 r_state <= s_rx_start;
@@ -93,6 +97,7 @@ begin
                         if r_index = c_ready_str'length-1 then
                             r_index <= 0;
                             r_state <= s_rx_total;
+                            Report "Memory Loader - s_tx_start_resp -> s_rx_total";
                         else
                             r_index <= r_index + 1;
                             r_state <= s_tx_start_resp;

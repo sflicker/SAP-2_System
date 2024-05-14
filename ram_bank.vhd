@@ -23,7 +23,7 @@ architecture rtl of ram_bank is
     attribute ram_style of r_RAM : signal is "block";
 begin
 
-    process(i_clk, i_addr, i_we, i_data)
+    process(i_clk)
         variable v_data : STD_LOGIC_VECTOR(7 downto 0);
     begin
         if rising_edge(i_clk) then

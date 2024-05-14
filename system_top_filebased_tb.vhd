@@ -10,14 +10,14 @@ entity system_top_filebased_tb is
 end system_top_filebased_tb;
 
 architecture test of system_top_filebased_tb is
-    signal w_clk : std_logic;
+    signal w_clk_100mhz : std_logic;
     signal r_reset : std_logic := '0';
     signal r_prog_run_switch : std_logic := '0';
     signal r_read_write_switch : STD_LOGIC := '0';
     signal r_clear_start : std_logic := '0';
     signal r_step_toggle : std_logic := '0';
     signal r_manual_auto_switch : std_logic := '0';
-    signal w_tb_tx_to_system_top_rx : std_logic := '0';
+    signal w_tb_tx_to_system_top_rx : std_logic := '1';
     signal w_tb_rx_from_system_top_tx : std_logic;
     signal w_seven_segment_anodes : STD_LOGIC_VECTOR(3 downto 0);
     signal w_seven_segment_cathodes : STD_LOGIC_VECTOR(6 downto 0);
@@ -137,12 +137,12 @@ begin
     clock : entity work.clock
     generic map(g_CLK_PERIOD => 10 ns)
     port map(
-        o_clk => w_clk
+        o_clk => w_clk_100mhz
     );
     
     system_top : entity work.system_top
     port map (
-        i_clk => w_clk,
+        i_clk => w_clk_100mhz,
         i_reset => r_reset,
         s2_prog_run_switch => r_prog_run_switch,
         S4_read_write_switch => r_read_write_switch,
@@ -157,10 +157,11 @@ begin
 
     tb_uart_tx : entity work.UART_TX
     generic map (
-        ID => "TB-UART-TX"
+        ID => "TB-UART-TX",
+        g_CLKS_PER_BIT => 868
     )
     port map(
-        i_clk => w_clk,
+        i_clk => w_clk_100mhz,
         i_tx_dv => r_tb_tx_dv,
         i_tx_byte => r_tb_tx_byte,
         o_tx_active => w_tb_tx_active,
@@ -170,10 +171,11 @@ begin
 
     tb_uart_rx : entity work.UART_RX
     generic map (
-        ID => "TB-UART-RX"
+        ID => "TB-UART-RX",
+        g_CLKS_PER_BIT => 868
     )
     port map (
-        i_clk => w_clk,
+        i_clk => w_clk_100mhz,
         i_rx_serial => w_tb_rx_from_system_top_tx,
         o_rx_dv => w_to_tb_rx_dv,
         o_rx_byte => w_to_tb_rx_byte
@@ -184,11 +186,15 @@ begin
     begin
         Report "Starting System Top - Memory Loader Test";
         load_program_bytes(g_FILE_NAME, program_size, program_bytes);
-        wait until rising_edge(w_clk);
+        wait until rising_edge(w_clk_100mhz);
+
+--        r_prog_run_switch <= '0';
+--        r_manual_auto_switch <= '0';
+        wait until rising_edge(w_clk_100mhz);
 
         Report "Sending Load Command";
-        send_bytes_to_loader(w_clk, c_load_str'length, c_load_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
-        receive_and_validate_bytes(w_clk, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
+        send_bytes_to_loader(w_clk_100mhz, c_load_str'length, c_load_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
 
         total_size <= program_size + 4;
         wait for 0 ns;
@@ -201,18 +207,18 @@ begin
 
         wait for 0 ns;
         -- send total size as byte array to loader
-        send_bytes_to_loader(w_clk, 2, program_size_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        send_bytes_to_loader(w_clk_100mhz, 2, program_size_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(2, program_size_bytes, r_checksum);
 
         wait for 0 ns;
         -- send address to as byte array to loader
-        send_bytes_to_loader(w_clk, 2, program_addr, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        send_bytes_to_loader(w_clk_100mhz, 2, program_addr, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(2, program_addr, r_checksum);
 
         wait for 0 ns;
 
         -- send program as byte array to loader
-        send_bytes_to_loader(w_clk, to_integer(program_size), program_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        send_bytes_to_loader(w_clk_100mhz, to_integer(program_size), program_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(to_integer(program_size), program_bytes, r_checksum);
         -- receive checksum
         wait for 0 ns;
@@ -220,9 +226,34 @@ begin
 
         r_checksum_bytes(0) <= std_logic_vector(r_checksum);
         wait for 0 ns;
-        receive_and_validate_bytes(w_clk, r_checksum_bytes'length, r_checksum_bytes, w_to_tb_rx_byte, w_to_tb_rx_dv);
+        receive_and_validate_bytes(w_clk_100mhz, r_checksum_bytes'length, r_checksum_bytes, w_to_tb_rx_byte, w_to_tb_rx_dv);
+
+        wait for 100 ns;
+
+        Report "Finished Loading Test Program into Memory";
+
+        Report "Resetting System";
+
+        r_prog_run_switch <= '1' ;
+        wait until rising_edge(w_clk_100mhz);
+
+        r_reset <= '1';
+        wait until rising_edge(w_clk_100mhz);
+
+        r_reset <= '0';
+        wait until rising_edge(w_clk_100mhz);
+
+        r_clear_start <= '1';
+        wait until rising_edge(w_clk_100mhz);
+
+        r_clear_start <= '0';
+        wait until rising_edge(w_clk_100mhz);
+
+        r_manual_auto_switch <= '1';
+        wait until rising_edge(w_clk_100mhz);
 
         wait;
+
 
 
     end process;

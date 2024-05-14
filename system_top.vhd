@@ -27,7 +27,6 @@ architecture rtl of system_top is
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_system_clock_1MHZ : STD_LOGIC;
     signal w_gated_cpu_clock_1MHZ : STD_LOGIC;
-    signal r_reset : STD_LOGIC := '1';
     signal w_display_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_input_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_hltbar : STD_LOGIC;
@@ -58,7 +57,7 @@ begin
         generic map(g_DIV_FACTOR => 100000)
         port map(
             i_clk => i_clk,
-            i_reset => r_reset,
+            i_reset => i_reset,
             o_clk => w_clk_display_refresh_1kHZ
         );
 
@@ -66,7 +65,7 @@ begin
         generic map(g_DIV_FACTOR => 100)
         port map(
             i_clk => i_clk,
-            i_reset => r_reset,
+            i_reset => i_reset,
             o_clk => w_system_clock_1MHZ
         );  
 
@@ -77,14 +76,14 @@ begin
             i_step_toggle => S6_step_toggle,
             i_manual_auto_switch => S7_manual_auto_switch,
             i_hltbar => w_hltbar,
-            i_clrbar => not r_reset,
+            i_clrbar => not i_reset,
             o_clk => w_gated_cpu_clock_1MHZ
         );
 
         soft_core : entity work.proc_top
         port map (
             i_clk => w_gated_cpu_clock_1MHZ,
-            i_reset => r_reset,
+            i_reset => i_reset,
             i_data => w_ram_data_out,
             o_data => w_mdr_tm_data, 
             o_address => w_mar_addr,
@@ -128,8 +127,8 @@ begin
 
     mem_loader : entity work.memory_loader
         port map(
-            i_clk => w_system_clock_1MHZ,
-            i_reset => r_reset, 
+            i_clk => r_system_clock_100mhz,
+            i_reset => i_reset, 
             i_prog_run_mode => S2_prog_run_switch,
             i_rx_data => w_rx_byte,
             i_rx_data_dv => w_rx_rv,
@@ -148,7 +147,7 @@ begin
         display_controller : entity work.display_controller
         port map(
             i_clk => w_clk_display_refresh_1kHZ,
-            i_rst => r_reset,
+            i_rst => i_reset,
             i_data => w_display_data,
             o_anodes => o_seven_segment_anodes,
             o_cathodes => o_seven_segment_cathodes
@@ -156,6 +155,10 @@ begin
   --  end generate;          
         
     UART_RX_INST: entity work.UART_RX
+    generic map (
+        ID => "ST-UART-RX",
+        g_CLKS_PER_BIT => 868
+    )
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => r_system_clock_100mhz,
@@ -165,6 +168,10 @@ begin
     );
 
     UART_TX_INST : entity work.UART_TX
+    generic map (
+        ID => "ST-UART-TX",
+        g_CLKS_PER_BIT => 868
+    )
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => r_system_clock_100mhz,
@@ -174,20 +181,6 @@ begin
         o_tx_serial => o_tx_serial,
         o_tx_done => w_tx_done
     );
-
-
-
-
-    startup : process(w_system_clock_1MHZ, i_reset)
-    begin
-        if rising_edge(w_system_clock_1MHZ) then
-            if i_reset = '1' then
-                r_reset <= '1';
-            else 
-                r_reset <= '0';
-            end if;
-        end if;
-    end process;
 
 
 end rtl;
