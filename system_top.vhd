@@ -134,6 +134,7 @@ begin
             i_rx_data_dv => w_rx_rv,
             i_tx_response_active =>w_tx_active,
             i_tx_response_done =>w_tx_done,
+            i_ram_data => w_ram_data_out,
             o_tx_response_data =>w_tx_byte,
             o_tx_response_dv => w_rx_dv,
             o_wrt_mem_addr => w_mem_addr_from_loader,

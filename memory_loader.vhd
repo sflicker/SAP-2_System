@@ -11,6 +11,7 @@ entity memory_loader is
         i_rx_data_dv : in STD_LOGIC;                        -- byte of data is available to receive.
         i_tx_response_active : in STD_LOGIC;                -- response transmitter is active
         i_tx_response_done : in STD_LOGIC; 
+        i_ram_data : in STD_LOGIC_VECTOR(7 downto 0);
         o_tx_response_data : out STD_LOGIC_VECTOR(7 downto 0);   -- response byte to transmit
         o_tx_response_dv : out STD_LOGIC;                   -- response byte is ready to transmit
         o_wrt_mem_addr : out STD_LOGIC_VECTOR(15 downto 0); -- address of mem to write
@@ -22,7 +23,7 @@ end memory_loader;
 architecture rtl of memory_loader is
     type t_byte_array is array (natural range <>) of std_logic_vector(7 downto 0);
     type t_state is (s_init, s_idle, s_rx_start, s_tx_start_resp, s_rx_total,
-        s_rx_start_addr, s_rx_data, s_wrt_data, s_tx_checksum, s_tx_checksum_finish, s_cleanup);
+        s_rx_start_addr, s_rx_data, s_wrt_data, s_verify_data, s_tx_checksum, s_tx_checksum_finish, s_cleanup);
     
     constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"4D");
     constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");
@@ -37,6 +38,7 @@ architecture rtl of memory_loader is
     signal r_index : integer := 0;
     signal r_checksum : unsigned(7 downto 0) := (others => '0');
     signal r_state_pos : integer;
+    signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0);
 begin
 
     r_state_pos <= t_state'POS(r_state);
@@ -61,6 +63,9 @@ begin
                     r_state <= s_idle;
                     o_tx_response_data <= (others => '0');
                     o_tx_response_dv <= '0';
+                    o_wrt_mem_addr <= (others => '0');
+                    o_wrt_mem_data <= (others => '0');
+                    o_wrt_mem_we <= '0';
                 when s_idle =>
                     if i_rx_data_dv = '1' then     -- only receive if data valid 
                         if i_rx_data = c_load_str(r_index) then
@@ -176,13 +181,40 @@ begin
                     -- this is really a to give mem write at least one clock
                     -- and do the counter increments.
                     -- may need to hold for several clock cycles but assuming not    
-                    o_wrt_mem_we <= '0';
-                    if r_counter = unsigned(r_rx_total) - 1 then
-                        r_state <= s_tx_checksum;
-                    else
-                        r_counter <= r_counter + 1;
-                        r_addr <= std_logic_vector(unsigned(r_addr) + 1);
+                    
+                    if r_index = 1 then
+                        o_wrt_mem_we <= '0';
+                        r_state <= s_verify_data;
+                        r_index <= 0;
+                    else 
+                        r_index <= r_index + 1;
                         r_state <= s_rx_data;
+                    end if;
+
+                when s_verify_data =>
+                    r_data_verify <= i_ram_data;
+                    if r_index = 1 then
+                        if r_data_verify = i_rx_data then
+                            Report "Correct Byte ReadBack from Ram - " & to_string(r_data_verify);
+                        else 
+                            Report "Incorrect Byte ReadBack from Ram - " 
+                            & to_string(r_data_verify) & ", should be " & to_string(i_rx_data) ;
+                            -- TODO NEED SOME ERROR HANDLING HERE
+                        end if;
+
+                        r_index <= 0;
+                        
+                        if r_counter = unsigned(r_rx_total) - 1 then
+                            r_state <= s_tx_checksum;
+                        else
+                            r_counter <= r_counter + 1;
+                            r_addr <= std_logic_vector(unsigned(r_addr) + 1);
+                            r_state <= s_rx_data;
+                        end if;
+    
+                    else
+                        r_index <= r_index + 1;
+                        r_state <= s_verify_data;
                     end if;
 
                 when s_tx_checksum =>
