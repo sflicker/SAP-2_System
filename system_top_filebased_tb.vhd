@@ -5,7 +5,7 @@ use std.textio.all;
 
 entity system_top_filebased_tb is
     Generic (
-        g_FILE_NAME : String := "asm_test_files/test_program_1.asm"
+        file_name : String := "asm_test_files/test_program_1.asm"
     );
 end system_top_filebased_tb;
 
@@ -49,11 +49,11 @@ architecture test of system_top_filebased_tb is
         end loop;
     end procedure wait_cycles;
 
-    procedure load_program_bytes(constant file_name : String;
+    procedure load_program_bytes(constant c_file_name : String;
             signal data_size : out unsigned(15 downto 0);
             signal data_bytes : out t_byte_array
         ) is
-        File f : TEXT OPEN READ_MODE is file_name;
+        File f : TEXT OPEN READ_MODE is c_file_name;
         variable l : LINE;
         variable data_in : std_logic_vector(7 downto 0);
         variable pos : integer := 0;
@@ -195,7 +195,7 @@ begin
     uut: process
     begin
         Report "Starting System Top - Memory Loader Test";
-        load_program_bytes(g_FILE_NAME, program_size, program_bytes);
+        load_program_bytes(file_name, program_size, program_bytes);
         wait for 50 ns;
 
         Report "Program Size: " & to_string(program_size);
