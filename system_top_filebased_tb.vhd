@@ -196,74 +196,73 @@ begin
     begin
         Report "Starting System Top - Memory Loader Test";
         load_program_bytes(g_FILE_NAME, program_size, program_bytes);
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         Report "Program Size: " & to_string(program_size);
 
 --        r_prog_run_switch <= '0';
 --        r_manual_auto_switch <= '0';
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         Report "Sending Load Command";
         send_bytes_to_loader(w_clk_100mhz, c_load_str'length, c_load_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
 
         total_size <= program_size + 4;
-        wait for 0 ns;
+        wait for 50 ns;
         Report "Total Size: " & to_string(total_size);
         program_size_bytes(0) <= std_logic_vector(total_size(7 downto 0));
         program_size_bytes(1) <= std_logic_vector(total_size(15 downto 8));
-        wait for 0 ns;
+        wait for 50 ns;
     
         program_addr(0) <= (others => '0');
-        program_addr(1) <= "00100000";
+        program_addr(1) <= (others => '0');
 
-        wait for 0 ns;
+        wait for 50 ns;
         -- send total size as byte array to loader
         send_bytes_to_loader(w_clk_100mhz, 2, program_size_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(2, program_size_bytes, r_checksum);
 
-        wait for 0 ns;
+        wait for 50 ns;
         -- send address to as byte array to loader
         send_bytes_to_loader(w_clk_100mhz, 2, program_addr, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(2, program_addr, r_checksum);
 
-        wait for 0 ns;
+        wait for 50 ns;
 
         -- send program as byte array to loader
         send_bytes_to_loader(w_clk_100mhz, to_integer(program_size), program_bytes, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
         checksum_bytes(to_integer(program_size), program_bytes, r_checksum);
         -- receive checksum
-        wait for 0 ns;
+        wait for 50 ns;
         Report "Checksum calculated by Test Bench=" & to_string(r_checksum);
 
         r_checksum_bytes(0) <= std_logic_vector(r_checksum);
-        wait for 0 ns;
+        wait for 50 ns;
         receive_and_validate_bytes(w_clk_100mhz, r_checksum_bytes'length, r_checksum_bytes, w_to_tb_rx_byte, w_to_tb_rx_dv);
 
-        wait for 100 ns;
+        wait for 50 ns;
 
         Report "Finished Loading Test Program into Memory";
 
         Report "Resetting System";
 
         r_prog_run_switch <= '1' ;
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         r_reset <= '1';
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         r_reset <= '0';
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         r_clear_start <= '1';
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         r_clear_start <= '0';
-        wait until rising_edge(w_clk_1MHZ);
+        wait for 50 ns;
 
         r_manual_auto_switch <= '1';
-        wait until rising_edge(w_clk_1MHZ);
 
         wait;
 

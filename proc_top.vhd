@@ -62,7 +62,7 @@ architecture rtl of proc_top is
     signal IR_operand_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal IR_opcode_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal ir_clear_sig : STD_LOGIC;
-    signal RAM_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
+--    signal RAM_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal w_bus_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal w_mar_addr: STD_LOGIC_VECTOR(15 downto 0);
     signal ram_addr_in_sig : STD_LOGIC_VECTOR(15 downto 0);
@@ -145,7 +145,7 @@ begin
 --    o_running <= S7_manual_auto_switch and hltbar_sig;
    -- clear_out <= S5_clear_start;
  --   step_out <= S6_step_toggle; 
-    o_data <= ram_data_out_sig;
+    o_data <= mdr_tm_data_out_sig;
 
     w_clkbar <= not i_clk;
 
@@ -273,7 +273,7 @@ begin
             -- write enable for both modes
             i_write_enable => write_enable_mdr_fm_sig,
             -- bus to mem (write) mode ports (write to memory)
-            i_data => ram_data_out_sig,
+            i_data => i_data,
             -- mem to bus (read) mode ports (read from memory)
             o_data => mdr_fm_data_out_sig
         );              

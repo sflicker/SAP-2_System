@@ -114,13 +114,7 @@ begin
                         o_tx_response_data <= c_ready_str(r_index);
                         o_tx_response_dv <= '1';
                         r_state <= s_tx_start_resp;
-                        -- if r_index = c_ready_str'length-1 then
-                        --     r_index <= 0;
-                        --     r_state <= s_rx_total;
-                        -- else
-                        --     r_index <= r_index + 1;
-                        --     r_state <= s_tx_start_resp;
-                        -- end if;
+
                     else
                         o_tx_response_dv <= '0';
                         r_state <= s_tx_start_resp;
@@ -207,7 +201,7 @@ begin
 
                         r_index <= 0;
                         
-                        if r_counter = unsigned(r_rx_total) then
+                        if r_counter = unsigned(r_rx_total) -1 then
                             r_state <= s_tx_checksum;
                         else
                             r_counter <= r_counter + 1;
@@ -221,22 +215,40 @@ begin
                     end if;
 
                 when s_tx_checksum =>
-                    if i_tx_response_active = '0' then
+                    if i_tx_response_done = '1' then
+                        r_state <= s_cleanup;
+                    elsif i_tx_response_active = '0' then
                         Report "Sending Checksum - " & to_string(r_checksum);
                         o_tx_response_data <= std_logic_vector(r_checksum);
                         o_tx_response_dv <= '1';
-                        r_state <= s_tx_checksum_finish;
-                    else
+                        r_state <= s_tx_checksum;
+                    else 
+                        o_tx_response_dv <= '0';
                         r_state <= s_tx_checksum;
                     end if;
 
+
+
+
+                    -- if i_tx_response_active = '0' then
+                    --     Report "Sending Checksum - " & to_string(r_checksum);
+                    --     o_tx_response_data <= std_logic_vector(r_checksum);
+                    --     o_tx_response_dv <= '1';
+                    --     r_state <= s_tx_checksum_finish;
+                    -- else
+                    --     o_tx_response_dv <= '0';
+                    --     r_state <= s_tx_checksum;
+                    -- end if;
+
                 when s_tx_checksum_finish =>
-                    if i_tx_response_active = '0' then
-                        o_tx_response_dv <= '0';
-                        r_state <= s_cleanup;
-                    else 
-                        r_state <= s_tx_checksum_finish;
-                    end if;
+                      o_tx_response_dv <= '0';
+                      r_state <= s_cleanup;
+                --     if i_tx_response_active = '0' then
+                --         o_tx_response_dv <= '0';
+                --         r_state <= s_cleanup;
+                --     else 
+                --         r_state <= s_tx_checksum_finish;
+                --     end if;
 
                 when s_cleanup =>
                     o_tx_response_data <= (others => '0');
