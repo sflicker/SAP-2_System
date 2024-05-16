@@ -13,7 +13,7 @@ architecture test of system_top_filebased_tb is
     signal w_clk_100mhz : std_logic;
     signal r_reset : std_logic := '0';
     signal r_prog_run_switch : std_logic := '0';
-    signal r_read_write_switch : STD_LOGIC := '0';
+--    signal r_read_write_switch : STD_LOGIC := '0';
     signal r_clear_start : std_logic := '0';
     signal r_step_toggle : std_logic := '0';
     signal r_manual_auto_switch : std_logic := '0';
@@ -155,8 +155,8 @@ begin
         i_clk => w_clk_100mhz,
         i_reset => r_reset,
         s2_prog_run_switch => r_prog_run_switch,
-        S4_read_write_switch => r_read_write_switch,
-        S5_clear_start => r_clear_start,
+--        S4_read_write_switch => r_read_write_switch,
+--        S5_clear_start => r_clear_start,
         S6_step_toggle => r_step_toggle,
         S7_manual_auto_switch => r_manual_auto_switch,
         i_rx_serial => w_tb_tx_to_system_top_rx,
@@ -256,11 +256,11 @@ begin
         r_reset <= '0';
         wait for 50 ns;
 
-        r_clear_start <= '1';
-        wait for 50 ns;
+--        r_clear_start <= '1';
+--        wait for 50 ns;
 
-        r_clear_start <= '0';
-        wait for 50 ns;
+--        r_clear_start <= '0';
+--        wait for 50 ns;
 
         r_manual_auto_switch <= '1';
 

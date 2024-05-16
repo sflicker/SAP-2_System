@@ -16,7 +16,8 @@ entity memory_loader is
         o_tx_response_dv : out STD_LOGIC;                   -- response byte is ready to transmit
         o_wrt_mem_addr : out STD_LOGIC_VECTOR(15 downto 0); -- address of mem to write
         o_wrt_mem_data : out STD_LOGIC_VECTOR(7 downto 0);  -- byte of data to write to mem
-        o_wrt_mem_we : out STD_LOGIC                        -- ram we enable. must be high for one clock cycle to write a byte.
+        o_wrt_mem_we : out STD_LOGIC;
+        o_loading : out STD_LOGIC                        -- ram we enable. must be high for one clock cycle to write a byte.
     );
 end memory_loader;
 
@@ -40,8 +41,10 @@ architecture rtl of memory_loader is
     signal r_state_pos : integer;
     signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0);
     signal r_rx_data : STD_LOGIC_VECTOR(7 downto 0);
+    signal r_loading : STD_LOGIC;
 begin
 
+    o_loading <= r_loading and not i_prog_run_mode;
     r_state_pos <= t_state'POS(r_state);
     r_rx_data <= i_rx_data when i_rx_data_dv;
 
@@ -68,11 +71,14 @@ begin
                     o_wrt_mem_addr <= (others => '0');
                     o_wrt_mem_data <= (others => '0');
                     o_wrt_mem_we <= '0';
+                    r_loading <= '0';
                 when s_idle =>
+                    r_loading <= '0';
                     if i_rx_data_dv = '1' then     -- only receive if data valid 
                         if i_rx_data = c_load_str(r_index) then
                             r_index <= r_index + 1;
                             r_state <= s_rx_start;
+                            r_loading <= '1';
                             Report "Memory Loader - s_idle -> s_rx_start";
                         else 
                             Report "Memory Loader - Incorrect byte received resetting index and remaining in Idle state";
@@ -254,6 +260,7 @@ begin
                     o_tx_response_data <= (others => '0');
                     o_tx_response_dv <= '0';
                     r_state <= s_init;
+                    r_loading <= '0';
             end case;
         end if;
     end process;

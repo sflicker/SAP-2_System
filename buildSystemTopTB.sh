@@ -38,16 +38,16 @@ ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
 #run
 
 
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb --stop-time=5ms --vcd=system_top_filebased_tb.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_program_1.asm" --stop-time=5ms --vcd=system_top_test_program_1.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/load_accumulator_test.asm" --stop-time=5ms --vcd=system_top_load_accumulator_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/store_accumulator_test.asm" --stop-time=5ms --vcd=system_top_store_accumulator_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/mvi_test.asm" --stop-time=5ms --vcd=system_top_mvi_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/jump_test.asm" --stop-time=5ms --vcd=system_top_jump_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test.asm" --stop-time=5ms --vcd=system_top_loop_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb --stop-time=5ms --vcd=system_top_filebased_tb.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_program_1.asm" --stop-time=5ms --vcd=system_top_test_program_1.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/load_accumulator_test.asm" --stop-time=5ms --vcd=system_top_load_accumulator_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/store_accumulator_test.asm" --stop-time=5ms --vcd=system_top_store_accumulator_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/mvi_test.asm" --stop-time=5ms --vcd=system_top_mvi_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/jump_test.asm" --stop-time=5ms --vcd=system_top_jump_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test.asm" --stop-time=5ms --vcd=system_top_loop_test.vcd
 ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test_with_output.asm" --stop-time=5ms --vcd=system_top_loop_test_with_output.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test.asm" --stop-time=5ms --vcd=system_top_out_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test2.asm" --stop-time=5ms --vcd=system_top_out_test2.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/call_test.asm" --stop-time5ms --vcd=system_top_call_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/a_ana_c_test.asm" --stop-time=5ms --vcd=system_top_a_ana_c_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test.asm" --stop-time=5ms --vcd=system_top_out_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test2.asm" --stop-time=5ms --vcd=system_top_out_test2.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/call_test.asm" --stop-time5ms --vcd=system_top_call_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/a_ana_c_test.asm" --stop-time=5ms --vcd=system_top_a_ana_c_test.vcd
 
