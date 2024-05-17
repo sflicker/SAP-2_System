@@ -11,7 +11,7 @@ end system_top_filebased_tb;
 
 architecture test of system_top_filebased_tb is
     signal w_clk_100mhz : std_logic;
-    signal r_reset : std_logic := '0';
+    signal r_rst : std_logic := '0';
     signal r_prog_run_switch : std_logic := '0';
 --    signal r_read_write_switch : STD_LOGIC := '0';
     signal r_clear_start : std_logic := '0';
@@ -145,7 +145,7 @@ begin
         generic map(g_DIV_FACTOR => 100)
         port map(
             i_clk => w_clk_100mhz,
-            i_reset => r_reset,
+            i_rst => r_rst,
             o_clk => w_clk_1MHZ
         );  
 
@@ -153,7 +153,7 @@ begin
     system_top : entity work.system_top
     port map (
         i_clk => w_clk_100mhz,
-        i_reset => r_reset,
+        i_rst => r_rst,
         s2_prog_run_switch => r_prog_run_switch,
 --        S4_read_write_switch => r_read_write_switch,
 --        S5_clear_start => r_clear_start,
@@ -250,10 +250,10 @@ begin
         r_prog_run_switch <= '1' ;
         wait for 50 ns;
 
-        r_reset <= '1';
+        r_rst <= '1';
         wait for 50 ns;
 
-        r_reset <= '0';
+        r_rst <= '0';
         wait for 50 ns;
 
 --        r_clear_start <= '1';

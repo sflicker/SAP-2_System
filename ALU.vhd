@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity ALU is
-    Port ( i_clr : in STD_LOGIC;
+    Port ( i_rst : in STD_LOGIC;
            i_op : in STD_LOGIC_VECTOR(3 downto 0);
            i_input_1 : in STD_LOGIC_VECTOR(7 downto 0);
            i_input_2 : in STD_LOGIC_VECTOR(7 downto 0);
@@ -28,10 +28,10 @@ architecture rtl of ALU is
     end procedure;
 begin
 
-    process (i_clr, i_input_1, i_input_2, i_op)
+    process (i_rst, i_input_1, i_input_2, i_op)
         variable result : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
     begin
-        if i_clr = '1' then
+        if i_rst = '1' then
             result := (others => '0');
         elsif i_op = "0001" then -- ADD
             result := std_logic_vector(unsigned(i_input_1) + unsigned(i_input_2));

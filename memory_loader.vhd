@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity memory_loader is
     port(
         i_clk : in STD_LOGIC;                               -- system clock
-        i_reset : in STD_LOGIC;                             -- reset loader
+        i_rst : in STD_LOGIC;                             -- reset loader
         i_prog_run_mode : in STD_LOGIC;                     -- system prog(low)/run(high) selecter. loader is active in prog mode only. 
         i_rx_data : in STD_LOGIC_VECTOR(7 downto 0);        -- receive a byte of data 
         i_rx_data_dv : in STD_LOGIC;                        -- byte of data is available to receive.
@@ -37,7 +37,7 @@ architecture rtl of memory_loader is
     signal r_rx_total : std_logic_vector(15 downto 0);
     signal r_rx_start_addr : std_logic_vector(15 downto 0);
     signal r_index : integer := 0;
-    signal r_checksum : unsigned(7 downto 0) := (others => '0');
+    --signal r_checksum : unsigned(7 downto 0) := (others => '0');
     signal r_state_pos : integer;
     signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0);
     signal r_rx_data : STD_LOGIC_VECTOR(7 downto 0);
@@ -48,10 +48,11 @@ begin
     r_state_pos <= t_state'POS(r_state);
     r_rx_data <= i_rx_data when i_rx_data_dv;
 
-    p_memory_loader : process(i_clk, i_reset)
+    p_memory_loader : process(i_clk, i_rst)
         variable v_start_addr : std_logic_vector(15 downto 0) := (others => '0');
+        variable checksum : std_logic_vector(7 downto 0) := (others => '0');
     begin
-        if i_reset = '1' then
+        if i_rst = '1' then
             r_state <= s_init;
         elsif rising_edge(i_clk) and i_prog_run_mode = '0' then
             case r_state is 
@@ -64,7 +65,7 @@ begin
                     r_data <= (others => '0');
                     r_rx_start_addr <= (others => '0');
                     r_rx_total <= (others => '0');
-                    r_checksum <= (others => '0');
+                    checksum := (others => '0');
                     r_state <= s_idle;
                     o_tx_response_data <= (others => '0');
                     o_tx_response_dv <= '0';
@@ -130,13 +131,13 @@ begin
                     if i_rx_data_dv = '1' then
                         if r_index = 0 then
                             r_rx_total(7 downto 0) <= i_rx_data;
-                            r_checksum <= r_checksum xor unsigned(i_rx_data);
+                            checksum := checksum xor i_rx_data;
                             r_index <= r_index + 1;
                             r_state <= s_rx_total;
                             r_counter <= r_counter + 1;
                         elsif r_index = 1 then
                             r_rx_total(15 downto 8) <= i_rx_data;
-                            r_checksum <= r_checksum xor unsigned(i_rx_data);
+                            checksum := checksum xor i_rx_data;
                             r_index <= 0;
                             r_state <= s_rx_start_addr;
                             r_counter <= r_counter + 1;
@@ -149,7 +150,7 @@ begin
                     if i_rx_data_dv = '1' then
                         if r_index = 0 then
                             v_start_addr(7 downto 0) := i_rx_data;
-                            r_checksum <= r_checksum xor unsigned(i_rx_data);
+                            checksum := checksum xor i_rx_data;
                             r_index <= r_index + 1;
                             r_state <= s_rx_start_addr;
                             r_counter <= r_counter + 1;
@@ -157,7 +158,7 @@ begin
                             v_start_addr(15 downto 8) := i_rx_data;
                             r_rx_start_addr <= v_start_addr;
                             r_addr <= v_start_addr;
-                            r_checksum <= r_checksum xor unsigned(i_rx_data);
+                            checksum := checksum xor i_rx_data;
                             r_index <= 0;
                             r_state <= s_rx_data;
                             r_counter <= r_counter + 1;
@@ -169,7 +170,7 @@ begin
                 when s_rx_data =>
                     if i_rx_data_dv = '1' then
                         r_data <= i_rx_data;
-                        r_checksum <= r_checksum xor unsigned(i_rx_data);
+                        checksum := checksum xor i_rx_data;
                     --    r_counter <= r_counter + 1;
                         r_state <= s_wrt_data;
                         o_wrt_mem_addr <= r_addr;
@@ -224,8 +225,8 @@ begin
                     if i_tx_response_done = '1' then
                         r_state <= s_cleanup;
                     elsif i_tx_response_active = '0' then
-                        Report "Sending Checksum - " & to_string(r_checksum);
-                        o_tx_response_data <= std_logic_vector(r_checksum);
+                        Report "Sending Checksum - " & to_string(checksum);
+                        o_tx_response_data <= std_logic_vector(checksum);
                         o_tx_response_dv <= '1';
                         r_state <= s_tx_checksum;
                     else 

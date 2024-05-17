@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity system_top is
     port(
         i_clk : STD_LOGIC;
-        i_reset : STD_LOGIC;
+        i_rst : STD_LOGIC;
 --        S1_addr_in : in STD_LOGIC_VECTOR(15 downto 0);       -- address setting - S1 in ref
         S2_prog_run_switch : in STD_LOGIC;       -- prog / run switch (prog=0, run=1)
 --        S3_data_in : in STD_LOGIC_VECTOR(7 downto 0);       -- data setting      S3 in ref
@@ -67,7 +67,7 @@ begin
         generic map(g_DIV_FACTOR => 100000)
         port map(
             i_clk => i_clk,
-            i_reset => i_reset,
+            i_rst => i_rst,
             o_clk => w_clk_display_refresh_1kHZ
         );
 
@@ -75,7 +75,7 @@ begin
         generic map(g_DIV_FACTOR => 100)
         port map(
             i_clk => i_clk,
-            i_reset => i_reset,
+            i_rst => i_rst,
             o_clk => w_system_clock_1MHZ
         );  
 
@@ -86,7 +86,7 @@ begin
             i_step_toggle => S6_step_toggle,
             i_manual_auto_switch => S7_manual_auto_switch,
             i_hltbar => w_hltbar,
-            i_clrbar => not i_reset,
+            i_clrbar => not i_rst,
             o_clk => w_gated_cpu_clock_1MHZ,
             o_running => w_running,
             o_stepping => w_stepping
@@ -95,7 +95,7 @@ begin
     sap_2_core : entity work.proc_top
         port map (
             i_clk => w_gated_cpu_clock_1MHZ,
-            i_reset => i_reset,
+            i_rst => i_rst,
             i_data => w_ram_data_out,
             o_data => w_mdr_tm_data, 
             o_address => w_mar_addr,
@@ -136,11 +136,10 @@ begin
                 o_write_enable => w_ram_write_enable
         );
 
-
     mem_loader : entity work.memory_loader
         port map(
             i_clk => w_system_clock_1MHZ,
-            i_reset => i_reset, 
+            i_rst => i_rst, 
             i_prog_run_mode => S2_prog_run_switch,
             i_rx_data => w_rx_byte,
             i_rx_data_dv => w_rx_rv,
@@ -161,7 +160,7 @@ begin
         display_controller : entity work.display_controller
         port map(
             i_clk => w_clk_display_refresh_1kHZ,
-            i_rst => i_reset,
+            i_rst => i_rst,
             i_data => w_display_data,
             o_anodes => o_seven_segment_anodes,
             o_cathodes => o_seven_segment_cathodes

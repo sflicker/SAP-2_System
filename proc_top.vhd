@@ -7,7 +7,7 @@ entity proc_top is
         SIMULATION_MODE : boolean := false
     );
     port( i_clk : in STD_LOGIC;
-          i_reset : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
+          i_rst : in STD_LOGIC;  -- map to FPGA clock will be stepped down to 1HZ
                                 -- for simulation TB should generate clk of 1HZ
 --          S1_addr_in : in STD_LOGIC_VECTOR(15 downto 0);       -- address setting - S1 in ref
 --          S2_prog_run_switch : in STD_LOGIC;       -- prog / run switch (prog=0, run=1)
@@ -36,7 +36,7 @@ entity proc_top is
           o_ram_we : out STD_LOGIC                           -- active high signal to write from memory using o_address and o_data
 
     );
-    attribute MARK_DEBUG : string;
+  --  attribute MARK_DEBUG : string;
     --attribute MARK_DEBUG of S5_clear_start : signal is "true";
 --    attribute MARK_DEBUG of S6_step_toggle : signal is "true";
 --    attribute MARK_DEBUG of S7_manual_auto_switch : signal is "true";
@@ -48,9 +48,9 @@ architecture rtl of proc_top is
 
 --    attribute MARK_DEBUG : string;
 
-    signal clk_ext_converted_sig : STD_LOGIC;
+   -- signal clk_ext_converted_sig : STD_LOGIC;
     signal w_clkbar : std_logic;
-    signal clk_disp_refresh_1KHZ_sig : std_logic;
+ --   signal clk_disp_refresh_1KHZ_sig : std_logic;
     signal w_hltbar : std_logic := '1';
     signal clr_sig : STD_LOGIC;
     signal clrbar_sig : STD_LOGIC;
@@ -72,8 +72,8 @@ architecture rtl of proc_top is
     signal tmp_data_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal display_data : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
     signal stage_counter_sig : INTEGER;
-    signal output_1_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal output_2_sig : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_output_3 : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_output_4 : STD_LOGIC_VECTOR(7 downto 0);
     signal w_write_enable_PC : STD_LOGIC;
     signal pc_increment_sig : STD_LOGIC;
     signal write_enable_ir_opcode_sig : STD_LOGIC;
@@ -95,16 +95,16 @@ architecture rtl of proc_top is
     signal pc_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal w_minus_flag : STD_LOGIC;
     signal w_equal_flag : STD_LOGIC;
-    signal alu_buffer_out : STD_LOGIC_VECTOR(7 downto 0);
+ --   signal alu_buffer_out : STD_LOGIC_VECTOR(7 downto 0);
     signal mdr_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal mdr_direction_sig : STD_LOGIC;
     signal write_enable_mdr_sig : STD_LOGIC;
     signal write_enable_alu_out_sig : STD_LOGIC;
-    signal alu_data_out : STD_LOGIC_VECTOR(7 downto 0);
+ --   signal alu_data_out : STD_LOGIC_VECTOR(7 downto 0);
     signal update_status_flags_sig : STD_LOGIC;
-    signal data_out_signal : STD_LOGIC_VECTOR(7 downto 0); 
-    signal input_port_1_data_in_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal input_port_2_data_in_sig : STD_LOGIC_VECTOR(7 downto 0);
+ --   signal data_out_signal : STD_LOGIC_VECTOR(7 downto 0); 
+--    signal input_port_1_data_in_sig : STD_LOGIC_VECTOR(7 downto 0);
+--    signal input_port_2_data_in_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal controller_wait_sig : STD_LOGIC;
     signal io_active_sig : STD_LOGIC;
     signal mdr_fm_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
@@ -113,7 +113,7 @@ architecture rtl of proc_top is
     signal wbus_output_we_io_sig : STD_LOGIC_VECTOR(0 to 12);
     signal write_enable_mdr_fm_sig : STD_LOGIC;
     signal mdr_tm_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal acc_write_enable : STD_LOGIC;
+    signal acc_write_enable : STD_LOGIC := '0';
     signal write_enable_mdr_tm_sig : STD_LOGIC;
     signal sp_increment_sig : STD_LOGIC;
     signal sp_decrement_sig : STD_LOGIC;
@@ -122,25 +122,25 @@ architecture rtl of proc_top is
     signal w_pc_write_enable_high : STD_LOGIC;
     signal w_ir_we : STD_LOGIC_VECTOR(0 to 1);
 
-    attribute MARK_DEBUG of clk_ext_converted_sig : signal is "true";
+--    attribute MARK_DEBUG of clk_ext_converted_sig : signal is "true";
     --attribute MARK_DEBUG of i_clk : signal is "true";
-    attribute MARK_DEBUG of w_clkbar : signal is "true";
+--    attribute MARK_DEBUG of w_clkbar : signal is "true";
     
-    attribute MARK_DEBUG of w_hltbar : signal is "true";
-    attribute MARK_DEBUG of clrbar_sig : signal is "true";
-    attribute MARK_DEBUG of clr_sig : signal is "true";
-    attribute MARK_DEBUG of alu_op_sig : signal is "true";
-    attribute MARK_DEBUG of w_mar_addr : signal is "true";
-    attribute MARK_DEBUG of IR_opcode_sig : signal is "true";
-    attribute MARK_DEBUG of IR_operand_sig : signal is "true";
-    attribute MARK_DEBUG of acc_data_sig : signal is "true";
-    attribute MARK_DEBUG of b_data_sig : signal is "true";
-    attribute MARK_DEBUG of output_1_sig : signal is "true";
+--    attribute MARK_DEBUG of w_hltbar : signal is "true";
+--    attribute MARK_DEBUG of clrbar_sig : signal is "true";
+--    attribute MARK_DEBUG of clr_sig : signal is "true";
+ --   attribute MARK_DEBUG of alu_op_sig : signal is "true";
+--    attribute MARK_DEBUG of w_mar_addr : signal is "true";
+--    attribute MARK_DEBUG of IR_opcode_sig : signal is "true";
+--    attribute MARK_DEBUG of IR_operand_sig : signal is "true";
+--    attribute MARK_DEBUG of acc_data_sig : signal is "true";
+--    attribute MARK_DEBUG of b_data_sig : signal is "true";
+--    attribute MARK_DEBUG of output_1_sig : signal is "true";
 begin
 
-    clr_sig <= i_reset;
+ --   clr_sig <= i_reset;
 --    clr_sig <= '1' when S5_clear_start = '1' else '0';
-    clrbar_sig <= not clr_sig;
+    clrbar_sig <= not i_rst;
     o_hltbar <= w_hltbar;
 --    o_running <= S7_manual_auto_switch and hltbar_sig;
    -- clear_out <= S5_clear_start;
@@ -156,9 +156,10 @@ begin
 
     o_ram_we <= ram_write_enable_sig;
      
-   o_port_3 <= output_1_sig;
-   o_port_4 <= output_2_sig;
-     
+   o_port_3 <= w_output_3;
+   o_port_4 <= w_output_4;
+--   input_port_1_data_in_sig <= i_port_1;
+--   input_port_2_data_in_sig <= i_port_2;  
      
    -- phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage_counter_sig - 1));
     
@@ -224,8 +225,8 @@ begin
             i_b_data => b_data_sig,
             i_c_data => c_data_sig, 
             i_tmp_data => tmp_data_sig,
-            i_input_port_1_data => input_port_1_data_in_sig,
-            i_input_port_2_data => input_port_2_data_in_sig,
+            i_input_port_1_data => i_port_1,
+            i_input_port_2_data => i_port_2,
             o_bus_data => w_bus_data_out_sig,
             o_acc_we => write_enable_acc_sig,
             o_b_we => write_enable_B_sig,
@@ -248,7 +249,7 @@ begin
         Generic Map(16)
         port map(
             i_clk => w_clkbar,
-            i_reset => i_reset,
+            i_reset => i_rst,
             i_write_enable_full => w_write_enable_PC,
             i_write_enable_low => w_pc_write_enable_low,
             i_write_enable_high => w_pc_write_enable_high,
@@ -262,7 +263,7 @@ begin
         Generic Map(16)
         port map(
             i_clk => i_clk,
-            i_rst => clr_sig,
+            i_rst => i_rst,
             i_write_enable => w_write_enable_mar,
             i_data => w_bus_data_out_sig,
             o_data => w_mar_addr
@@ -273,7 +274,7 @@ begin
         Generic Map(8)
         port map(
             i_clk => i_clk,
-            i_rst => clr_sig,
+            i_rst => i_rst,
             -- write enable for both modes
             i_write_enable => write_enable_mdr_fm_sig,
             -- bus to mem (write) mode ports (write to memory)
@@ -287,7 +288,7 @@ begin
     Generic Map(8)
     port map(
         i_clk => i_clk,
-        i_rst => clr_sig,
+        i_rst => i_rst,
         -- write enable for both modes
         i_write_enable => write_enable_mdr_tm_sig,
         -- bus to mem (write) mode ports (write to memory)
@@ -440,7 +441,7 @@ begin
         
     ALU : entity work.ALU
         port map (
-            i_clr => clr_sig,
+            i_rst => clr_sig,
             i_op => alu_op_sig,
             i_input_1 => acc_data_sig,
             i_input_2 => tmp_data_sig,
@@ -457,7 +458,7 @@ begin
         i_rst => clr_sig,
         i_write_enable => out_port_3_write_enable_sig,
         i_data => w_bus_data_out_sig(7 downto 0),
-        o_data => output_1_sig
+        o_data => w_output_3
     );
 
     OUTPUT_PORT_4 : entity work.data_register
@@ -467,13 +468,13 @@ begin
         i_rst => clr_sig,
         i_write_enable => out_port_4_write_enable_sig,
         i_data => w_bus_data_out_sig(7 downto 0),
-        o_data => output_2_sig
+        o_data => w_output_4
     );
 
     IO : entity work.IO_controller
         Port map(
             i_clk => w_clkbar,
-            i_rst => clr_sig,
+            i_rst => i_rst,
             i_opcode => IR_opcode_sig,
             i_portnum => IR_operand_sig(2 downto 0),
             o_bus_src_sel => wbus_sel_io_sig,

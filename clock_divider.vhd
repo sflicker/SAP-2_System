@@ -9,7 +9,7 @@ entity clock_divider is
     );
     port (
         i_clk : in STD_LOGIC;
-        i_reset : in STD_LOGIC;
+        i_rst : in STD_LOGIC;
         o_clk : out STD_LOGIC
     );
 end clock_divider;
@@ -28,9 +28,9 @@ architecture rtl of clock_divider is
 
     signal r_div_clk : std_logic := '0';
 begin
-    process(i_clk, i_reset)
+    process(i_clk, i_rst)
     begin
-        if i_reset = '1' then
+        if i_rst = '1' then
             r_counter <= (others => '0');
             r_div_clk <= '0';
         elsif rising_edge(i_clk) then
