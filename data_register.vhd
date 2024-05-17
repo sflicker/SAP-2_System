@@ -17,7 +17,7 @@ end data_register;
 architecture rtl of data_register is
 
 begin
-    process(i_clk)
+    process(i_clk, i_rst)
     variable internal_data : STD_LOGIC_VECTOR(g_WIDTH-1 downto 0) 
         := (others => '0');
     begin

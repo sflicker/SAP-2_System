@@ -45,7 +45,7 @@ begin
     r_src_sel <= i_src_sel_io when i_io_controller_active = '1' else i_src_sel_def;
     r_dest_sel <= i_dest_sel_io when i_io_controller_active = '1' else i_dest_sel_def;    
 
-    process(r_src_sel)
+    process(r_src_sel, i_pc_data, i_ir_operand_full, i_mdr_fm_data, i_acc_data, i_b_data, i_c_data, i_tmp_data, i_input_port_1_data, i_input_port_2_data, i_sp_data)
     begin
         case r_src_sel is
             when "0000" => o_bus_data <= (others => '0');  -- zero

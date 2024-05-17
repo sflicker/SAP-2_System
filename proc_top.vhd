@@ -17,10 +17,10 @@ entity proc_top is
 --          S6_step_toggle : in STD_LOGIC;       -- single step -- 1 for a single step
 --          S7_manual_auto_switch : in STD_LOGIC;       -- manual/auto mode - 0 for manual, 1 for auto. 
 --          memory_access_clk : in STD_LOGIC;  -- toogle memory write. if in program, write and manual mode. this is the ram clock for prog mode. execution mode should use the system clock.
-          in_port_1 : in STD_LOGIC_VECTOR(7 downto 0);
-          in_port_2 : in STD_LOGIC_VECTOR(7 downto 0);
-          out_port_3 : out STD_LOGIC_VECTOR(7 downto 0);
-          out_port_4 : out STD_LOGIC_VECTOR(7 downto 0);
+          i_port_1 : in STD_LOGIC_VECTOR(7 downto 0);
+          i_port_2 : in STD_LOGIC_VECTOR(7 downto 0);
+          o_port_3 : out STD_LOGIC_VECTOR(7 downto 0);
+          o_port_4 : out STD_LOGIC_VECTOR(7 downto 0);
           --data_out : out STD_LOGIC_VECTOR(7 downto 0);
          -- o_running : out STD_LOGIC;
         --   s7_anodes_out : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
@@ -155,6 +155,10 @@ begin
     o_address <= w_mar_addr;
 
     o_ram_we <= ram_write_enable_sig;
+     
+   o_port_3 <= output_1_sig;
+   o_port_4 <= output_2_sig;
+     
      
    -- phase_out <= std_logic_vector(shift_left(unsigned'("000001"), stage_counter_sig - 1));
     

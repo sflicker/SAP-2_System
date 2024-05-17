@@ -60,6 +60,9 @@ begin
     o_stepping <= w_stepping;
     o_loading <= w_loading;
 
+    --TODO need to connect this to something like USB input
+    w_input_data <= (others => '0');
+
     display_clock_divider_1KHZ : entity work.clock_divider
         generic map(g_DIV_FACTOR => 100000)
         port map(
@@ -97,10 +100,10 @@ begin
             o_data => w_mdr_tm_data, 
             o_address => w_mar_addr,
             o_ram_we => w_ram_write_enable_from_proc,
-            in_port_1 => w_input_data(7 downto 0),
-            in_port_2 => w_input_data(15 downto 8),
-            out_port_3 => w_display_data(7 downto 0),
-            out_port_4 => w_display_data(15 downto 8),
+            i_port_1 => w_input_data(7 downto 0),
+            i_port_2 => w_input_data(15 downto 8),
+            o_port_3 => w_display_data(7 downto 0),
+            o_port_4 => w_display_data(15 downto 8),
             o_hltbar => w_hltbar
         );
     
@@ -142,7 +145,7 @@ begin
             i_rx_data => w_rx_byte,
             i_rx_data_dv => w_rx_rv,
             i_tx_response_active =>w_tx_active,
-            i_tx_response_done =>w_tx_done,
+            i_tx_response_done => w_tx_done,
             i_ram_data => w_ram_data_out,
             o_tx_response_data =>w_tx_byte,
             o_tx_response_dv => w_rx_dv,

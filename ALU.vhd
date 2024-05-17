@@ -17,8 +17,8 @@ end ALU;
 architecture rtl of ALU is
     procedure update_flags(
         variable result : STD_LOGIC_VECTOR(7 downto 0);
-        signal minus_flag_sig : inout STD_LOGIC;
-        signal equal_flag_sig : inout STD_LOGIC;
+        signal minus_flag_sig : out STD_LOGIC;
+        signal equal_flag_sig : out STD_LOGIC;
         signal update_status_flags_sig : STD_LOGIC) is
     begin
         if update_status_flags_sig = '1' then
