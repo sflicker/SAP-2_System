@@ -17,7 +17,6 @@ entity proc_top is
           o_address : out STD_LOGIC_VECTOR(15 downto 0);         -- 16 bit output address
           i_data : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit bidirectional data
           o_data: out STD_LOGIC_VECTOR(7 downto 0);
-          o_rd : out STD_LOGIC;                          -- active high signal to read from memory using o_address and i_data 
           o_ram_we : out STD_LOGIC                           -- active high signal to write from memory using o_address and o_data
 
     );
@@ -58,23 +57,18 @@ architecture rtl of proc_top is
     signal w_pc_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_minus_flag : STD_LOGIC;
     signal w_equal_flag : STD_LOGIC;
-    signal mdr_direction_sig : STD_LOGIC;
-    signal write_enable_mdr_sig : STD_LOGIC;
-    signal write_enable_alu_out_sig : STD_LOGIC;
-    signal update_status_flags_sig : STD_LOGIC;
-    signal controller_wait_sig : STD_LOGIC;
-    signal io_active_sig : STD_LOGIC;
-    signal mdr_fm_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal wbus_output_connected_components_write_enable_sig : STD_LOGIC_VECTOR(0 to 11);
-    signal wbus_output_we_default_sig : STD_LOGIC_VECTOR(0 to 12);
-    signal wbus_output_we_io_sig : STD_LOGIC_VECTOR(0 to 12);
-    signal write_enable_mdr_fm_sig : STD_LOGIC;
-    signal mdr_tm_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal acc_write_enable : STD_LOGIC := '0';
-    signal write_enable_mdr_tm_sig : STD_LOGIC;
-    signal sp_increment_sig : STD_LOGIC;
-    signal sp_decrement_sig : STD_LOGIC;
-    signal sp_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
+    signal w_update_status_flags : STD_LOGIC;
+    signal w_controller_wait : STD_LOGIC;
+    signal w_io_controller_active : STD_LOGIC;
+    signal w_mdr_fm_data : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_dest_select_def : STD_LOGIC_VECTOR(0 to 12);
+    signal w_wbus_dest_sel_io : STD_LOGIC_VECTOR(0 to 12);
+    signal w_mdr_fm_we : STD_LOGIC;
+    signal w_mdr_tm_data : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_mdr_tm_we : STD_LOGIC;
+    signal w_sp_inc : STD_LOGIC;
+    signal w_sp_dec : STD_LOGIC;
+    signal w_sp_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_pc_write_enable_low : STD_LOGIC;
     signal w_pc_write_enable_high : STD_LOGIC;
     signal w_ir_we : STD_LOGIC_VECTOR(0 to 1);
@@ -84,7 +78,7 @@ architecture rtl of proc_top is
 begin
 
     o_hltbar <= w_hltbar;
-    o_data <= mdr_tm_data_out_sig;
+    o_data <= w_mdr_tm_data;
 
     w_clkbar <= not i_clk;
 
@@ -100,15 +94,15 @@ begin
     port map(
         i_src_sel_def => w_wbus_sel_def,
         i_src_sel_io => w_wbus_sel_io_def, 
-        i_dest_sel_def => wbus_output_we_default_sig,
-        i_dest_sel_io => wbus_output_we_io_sig,
-        i_io_controller_active => io_active_sig,
+        i_dest_sel_def => w_dest_select_def,
+        i_dest_sel_io => w_wbus_dest_sel_io,
+        i_io_controller_active => w_io_controller_active,
         i_pc_data => w_pc_data,
-        i_sp_data => sp_data_out_sig,
+        i_sp_data => w_sp_data,
         i_ir_operand_full => w_operand_high & w_operand_low,
         i_acc_data => w_acc_data,
         i_alu_data => w_alu_data,
-        i_mdr_fm_data => mdr_fm_data_out_sig,
+        i_mdr_fm_data => w_mdr_fm_data,
         i_b_data => w_b_data,
         i_c_data => w_c_data, 
         i_tmp_data => w_tmp_data,
@@ -123,7 +117,7 @@ begin
         o_pc_we_full => w_write_enable_PC,
         o_pc_we_low => w_pc_write_enable_low,
         o_pc_we_high => w_pc_write_enable_high,
-        o_mdr_tm_we => write_enable_mdr_tm_sig,
+        o_mdr_tm_we => w_mdr_tm_we,
         o_ir_we => w_ir_we,
         o_out_port_3_we => w_out_port_3_we,
         o_out_port_4_we => w_out_port_4_we
@@ -160,11 +154,11 @@ begin
             i_clk => i_clk,
             i_rst => i_rst,
             -- write enable for both modes
-            i_write_enable => write_enable_mdr_fm_sig,
+            i_write_enable => w_mdr_fm_we,
             -- bus to mem (write) mode ports (write to memory)
             i_data => i_data,
             -- mem to bus (read) mode ports (read from memory)
-            o_data => mdr_fm_data_out_sig
+            o_data => w_mdr_fm_data
         );              
 
             -- MEMORY DATA_REGISTER - To Ram        
@@ -174,11 +168,11 @@ begin
         i_clk => i_clk,
         i_rst => i_rst,
         -- write enable for both modes
-        i_write_enable => write_enable_mdr_tm_sig,
+        i_write_enable => w_mdr_tm_we,
         -- bus to mem (write) mode ports (write to memory)
         i_data => w_bus_data_out_sig(7 downto 0),
         -- mem to bus (read) mode ports (read from memory)
-        o_data => mdr_tm_data_out_sig
+        o_data => w_mdr_tm_data
     );              
 
 
@@ -197,9 +191,9 @@ begin
             port map(
                 i_clk => i_clk,
                 i_rst => i_rst,
-                i_inc => sp_increment_sig,
-                i_dec => sp_decrement_sig,
-                o_data => sp_data_out_sig
+                i_inc => w_sp_inc,
+                i_dec => w_sp_dec,
+                o_data => w_sp_data
             );
 
     proc_controller : entity work.proc_controller
@@ -212,15 +206,15 @@ begin
 
             o_wbus_sel => w_wbus_sel_def,
             o_alu_op => w_alu_op,
-            o_wbus_control_word => wbus_output_we_default_sig,
+            o_wbus_control_word => w_dest_select_def,
             o_pc_inc => w_pc_increment,
-            o_mdr_fm_we => write_enable_mdr_fm_sig,
+            o_mdr_fm_we => w_mdr_fm_we,
             o_ram_we => w_ram_write_enable,
             o_ir_clr => w_ir_clr,
-            o_update_status_flags => update_status_flags_sig,
-            o_controller_wait => controller_wait_sig,
-            o_sp_inc => sp_increment_sig,
-            o_sp_dec => sp_decrement_sig,
+            o_update_status_flags => w_update_status_flags,
+            o_controller_wait => w_controller_wait,
+            o_sp_inc => w_sp_inc,
+            o_sp_dec => w_sp_dec,
             o_HLTBar => w_hltbar,
             o_stage => w_stage_counter,
             o_first_stage => w_first_stage,
@@ -275,7 +269,7 @@ begin
             i_input_1 => w_acc_data,
             i_input_2 => w_tmp_data,
             o_out => w_alu_data,
-            i_update_status_flags => update_status_flags_sig,
+            i_update_status_flags => w_update_status_flags,
             o_minus_flag => w_minus_flag,
             o_equal_flag => w_equal_flag
             );
@@ -307,8 +301,8 @@ begin
             i_opcode => w_ir_opcode,
             i_portnum => w_operand_low(2 downto 0),
             o_bus_src_sel => w_wbus_sel_io_def,
-            o_bus_dest_sel => wbus_output_we_io_sig,
-            o_active => io_active_sig
+            o_bus_dest_sel => w_wbus_dest_sel_io,
+            o_active => w_io_controller_active
         );
 
     REGISTER_LOG : process(i_clk)
@@ -317,8 +311,8 @@ begin
             Report "Current Simulation Time: " & time'image(now)
                 & ", PC: " & to_hex_string(w_pc_data)
                 & ", MAR: " & to_hex_string(w_mar_addr)
-                & ", MDR-FM: " & to_hex_string(mdr_fm_data_out_sig)
-                & ", MDR-TM: " & to_hex_string(mdr_tm_data_out_sig)
+                & ", MDR-FM: " & to_hex_string(w_mdr_fm_data)
+                & ", MDR-TM: " & to_hex_string(w_mdr_tm_data)
                 & ", OPCODE: " & to_hex_string(w_ir_opcode)
                 & ", ACC: " & to_hex_string(w_acc_data)
                 & ", B: " & to_hex_string(w_b_data)
