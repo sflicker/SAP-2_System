@@ -18,9 +18,10 @@ entity clock_controller is
 end clock_controller;
 
 architecture rtl of clock_controller is
-    signal r_manual_or_auto_w_h : STD_LOGIC;
-    signal r_auto_w_h : STD_LOGIC;
-    signal r_manual_w_h : STD_LOGIC;
+--    signal r_manual_or_auto_w_h : STD_LOGIC;
+--    signal r_auto_w_h : STD_LOGIC;
+--    signal r_manual_w_h : STD_LOGIC;
+    signal r_gate : STD_LOGIC;
 begin
 
     -- single_pulse_generator : entity work.single_pulse_generator
@@ -29,13 +30,20 @@ begin
     --         start => pulse,
     --         pulse_out => clock_pulse
     --     );
+
+    o_clk <= i_clk and r_gate;
+    o_running <= r_gate;
+
+    r_gate <= i_manual_auto_switch and i_prog_run_switch and i_hltbar and i_clrbar;
+
+
     
-    o_running <= i_manual_auto_switch and i_hltbar and i_clrbar and i_prog_run_switch;
-    o_stepping <= r_manual_w_h and i_hltbar and i_clrbar and i_prog_run_switch; 
-    o_clk <= r_manual_or_auto_w_h and i_hltbar and i_clrbar and i_prog_run_switch;
-    r_manual_or_auto_w_h <= r_auto_w_h or r_manual_w_h;
-    r_manual_w_h <= not i_manual_auto_switch and i_step_toggle;
-    r_auto_w_h <= i_clk and i_manual_auto_switch ;
+--    o_running <= i_manual_auto_switch and i_hltbar and i_clrbar and i_prog_run_switch;
+--    o_stepping <= r_manual_w_h and i_hltbar and i_clrbar and i_prog_run_switch; 
+--    o_clk <= r_manual_or_auto_w_h and i_hltbar and i_clrbar and i_prog_run_switch;
+--    r_manual_or_auto_w_h <= r_auto_w_h or r_manual_w_h;
+--    r_manual_w_h <= not i_manual_auto_switch and i_step_toggle;
+--    r_auto_w_h <= i_clk and i_manual_auto_switch ;
     
     
 end rtl;

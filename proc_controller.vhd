@@ -109,7 +109,7 @@ entity proc_controller is
   Port (
     -- inputs
     i_clk : in STD_LOGIC;
-    i_clrbar : in STD_LOGIC;
+    i_rst : in STD_LOGIC;
     i_opcode : in STD_LOGIC_VECTOR(7 downto 0);          -- 8 bit opcodes
     i_minus_flag : in STD_LOGIC;
     i_equal_flag : in STD_LOGIC;
@@ -219,13 +219,13 @@ begin
     o_stage <= stage_sig;
 
     run_mode_process:
-        process(i_clk, i_clrbar, i_opcode)
+        process(i_clk, i_rst, i_opcode)
             variable stage_var : integer := 1;
             variable control_word_index : std_logic_vector(9 downto 0);
             variable control_word : std_logic_vector(0 to 31);
         begin
 
-            if i_clrbar = '0' then
+            if i_rst = '1' then
                 stage_var := 1;
                 stage_sig <= stage_var;
             elsif rising_edge(i_clk) then
