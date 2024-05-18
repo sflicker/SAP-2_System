@@ -75,8 +75,8 @@ set_property PACKAGE_PIN U16 [get_ports o_running]
 set_property IOSTANDARD LVCMOS33 [get_ports o_loading]
 set_property PACKAGE_PIN E19 [get_ports o_loading]
 
-set_property IOSTANDARD LVCMOS33 [get_ports o_stepping]
-set_property PACKAGE_PIN U19 [get_ports o_stepping]
+#set_property IOSTANDARD LVCMOS33 [get_ports o_stepping]
+#set_property PACKAGE_PIN U19 [get_ports o_stepping]
 
 
 #set_property IOSTANDARD LVCMOS33 [get_ports clear_out]
@@ -88,11 +88,11 @@ set_property PACKAGE_PIN U19 [get_ports o_stepping]
 #set_property IOSTANDARD LVCMOS33 [get_ports S2]
 #set_property IOSTANDARD LVCMOS33 [get_ports S4]
 
-set_property IOSTANDARD LVCMOS33 [get_ports S6_step_toggle]
-set_property PACKAGE_PIN T18 [get_ports S6_step_toggle]
+#set_property IOSTANDARD LVCMOS33 [get_ports S6_step_toggle]
+#set_property PACKAGE_PIN T18 [get_ports S6_step_toggle]
 
-set_property IOSTANDARD LVCMOS33 [get_ports i_reset]
-set_property PACKAGE_PIN U18 [get_ports i_reset]
+set_property IOSTANDARD LVCMOS33 [get_ports i_rst]
+set_property PACKAGE_PIN U18 [get_ports i_rst]
 
 set_property IOSTANDARD LVCMOS33 [get_ports S7_manual_auto_switch]
 set_property PACKAGE_PIN V17 [get_ports S7_manual_auto_switch]

@@ -37,34 +37,27 @@ architecture rtl of proc_top is
     signal w_ir_clr : STD_LOGIC;
     signal w_bus_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
     signal w_mar_addr: STD_LOGIC_VECTOR(15 downto 0);
-    signal b_data_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal c_data_sig : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_b_data : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_c_data : STD_LOGIC_VECTOR(7 downto 0);
     signal w_tmp_data : STD_LOGIC_VECTOR(7 downto 0);
-    signal stage_counter_sig : INTEGER;
+    signal w_stage_counter : INTEGER;
     signal w_output_3 : STD_LOGIC_VECTOR(7 downto 0);
     signal w_output_4 : STD_LOGIC_VECTOR(7 downto 0);
     signal w_write_enable_PC : STD_LOGIC;
-    signal pc_increment_sig : STD_LOGIC;
-    signal write_enable_ir_opcode_sig : STD_LOGIC;
-    signal write_enable_low_sig : STD_LOGIC;
-    signal write_enable_high_sig : STD_LOGIC;
-    signal operand_low_out_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal operand_high_out_sig : STD_LOGIC_VECTOR(7 downto 0);
-    signal ram_write_enable_sig : STD_LOGIC;
-    signal selected_ram_write_enable_sig : STD_LOGIC;
-    signal ram_clk_in_sig : STD_LOGIC;
-    signal write_enable_acc_sig : STD_LOGIC;
-    signal w_write_enable_mar : STD_LOGIC;
-    signal write_enable_B_sig: STD_LOGIC;
-    signal write_enable_C_sig : STD_LOGIC;
-    signal write_enable_output_sig : STD_LOGIC;
-    signal write_enable_tmp_sig : STD_LOGIC;
-    signal out_port_3_write_enable_sig : STD_LOGIC;
-    signal out_port_4_write_enable_sig : STD_LOGIC;
-    signal pc_data_out_sig : STD_LOGIC_VECTOR(15 downto 0);
+    signal w_pc_increment : STD_LOGIC;
+    signal w_operand_low : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_operand_high : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_ram_write_enable : STD_LOGIC;
+    signal w_acc_we : STD_LOGIC;
+    signal w_mar_we : STD_LOGIC;
+    signal w_b_we: STD_LOGIC;
+    signal w_c_we : STD_LOGIC;
+    signal w_tmp_we : STD_LOGIC;
+    signal w_out_port_3_we : STD_LOGIC;
+    signal w_out_port_4_we : STD_LOGIC;
+    signal w_pc_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_minus_flag : STD_LOGIC;
     signal w_equal_flag : STD_LOGIC;
-    signal mdr_data_out_sig : STD_LOGIC_VECTOR(7 downto 0);
     signal mdr_direction_sig : STD_LOGIC;
     signal write_enable_mdr_sig : STD_LOGIC;
     signal write_enable_alu_out_sig : STD_LOGIC;
@@ -85,6 +78,8 @@ architecture rtl of proc_top is
     signal w_pc_write_enable_low : STD_LOGIC;
     signal w_pc_write_enable_high : STD_LOGIC;
     signal w_ir_we : STD_LOGIC_VECTOR(0 to 1);
+    signal w_first_stage : STD_LOGIC := '0';
+    signal w_last_stage : STD_LOGIC := '0';
 
 begin
 
@@ -96,7 +91,7 @@ begin
     -- tie the MAR address output to the address output for the proc
     o_address <= w_mar_addr;
 
-    o_ram_we <= ram_write_enable_sig;
+    o_ram_we <= w_ram_write_enable;
      
    o_port_3 <= w_output_3;
    o_port_4 <= w_output_4;
@@ -108,30 +103,30 @@ begin
         i_dest_sel_def => wbus_output_we_default_sig,
         i_dest_sel_io => wbus_output_we_io_sig,
         i_io_controller_active => io_active_sig,
-        i_pc_data => pc_data_out_sig,
+        i_pc_data => w_pc_data,
         i_sp_data => sp_data_out_sig,
-        i_ir_operand_full => operand_high_out_sig & operand_low_out_sig,
+        i_ir_operand_full => w_operand_high & w_operand_low,
         i_acc_data => w_acc_data,
         i_alu_data => w_alu_data,
         i_mdr_fm_data => mdr_fm_data_out_sig,
-        i_b_data => b_data_sig,
-        i_c_data => c_data_sig, 
+        i_b_data => w_b_data,
+        i_c_data => w_c_data, 
         i_tmp_data => w_tmp_data,
         i_input_port_1_data => i_port_1,
         i_input_port_2_data => i_port_2,
         o_bus_data => w_bus_data_out_sig,
-        o_acc_we => write_enable_acc_sig,
-        o_b_we => write_enable_B_sig,
-        o_c_we => write_enable_C_sig,
-        o_tmp_we => write_enable_tmp_sig,
-        o_mar_we => w_write_enable_mar,
+        o_acc_we => w_acc_we,
+        o_b_we => w_b_we,
+        o_c_we => w_c_we,
+        o_tmp_we => w_tmp_we,
+        o_mar_we => w_mar_we,
         o_pc_we_full => w_write_enable_PC,
         o_pc_we_low => w_pc_write_enable_low,
         o_pc_we_high => w_pc_write_enable_high,
         o_mdr_tm_we => write_enable_mdr_tm_sig,
         o_ir_we => w_ir_we,
-        o_out_port_3_we => out_port_3_write_enable_sig,
-        o_out_port_4_we => out_port_4_write_enable_sig
+        o_out_port_3_we => w_out_port_3_we,
+        o_out_port_4_we => w_out_port_4_we
     );
 
     PC : entity work.program_counter
@@ -142,9 +137,9 @@ begin
             i_write_enable_full => w_write_enable_PC,
             i_write_enable_low => w_pc_write_enable_low,
             i_write_enable_high => w_pc_write_enable_high,
-            i_increment => pc_increment_sig,
+            i_increment => w_pc_increment,
             i_data => w_bus_data_out_sig,
-            o_data => pc_data_out_sig
+            o_data => w_pc_data
         );
 
     -- MEMORY ADDRESS REGISTER
@@ -153,7 +148,7 @@ begin
         port map(
             i_clk => i_clk,
             i_rst => i_rst,
-            i_write_enable => w_write_enable_mar,
+            i_write_enable => w_mar_we,
             i_data => w_bus_data_out_sig,
             o_data => w_mar_addr
             );
@@ -194,8 +189,8 @@ begin
             i_data => w_bus_data_out_sig(7 downto 0),
             i_sel_we => w_ir_we,
             o_opcode => w_ir_opcode,
-            o_operand_low => operand_low_out_sig,
-            o_operand_high => operand_high_out_sig
+            o_operand_low => w_operand_low,
+            o_operand_high => w_operand_high
         );
 
     SP : entity work.stack_pointer
@@ -218,16 +213,18 @@ begin
             o_wbus_sel => w_wbus_sel_def,
             o_alu_op => w_alu_op,
             o_wbus_control_word => wbus_output_we_default_sig,
-            o_pc_inc => pc_increment_sig,
+            o_pc_inc => w_pc_increment,
             o_mdr_fm_we => write_enable_mdr_fm_sig,
-            o_ram_we => ram_write_enable_sig,
+            o_ram_we => w_ram_write_enable,
             o_ir_clr => w_ir_clr,
             o_update_status_flags => update_status_flags_sig,
             o_controller_wait => controller_wait_sig,
             o_sp_inc => sp_increment_sig,
             o_sp_dec => sp_decrement_sig,
             o_HLTBar => w_hltbar,
-            o_stage => stage_counter_sig
+            o_stage => w_stage_counter,
+            o_first_stage => w_first_stage,
+            o_last_stage => w_last_stage
         );
         
     acc : entity work.data_register 
@@ -235,7 +232,7 @@ begin
         Port Map (
             i_clk => i_clk,
             i_rst => i_rst,
-            i_write_enable => write_enable_acc_sig,
+            i_write_enable => w_acc_we,
             i_data => w_bus_data_out_sig(7 downto 0),
             o_data => w_acc_data
         ); 
@@ -245,9 +242,9 @@ begin
     Port Map (
         i_clk => i_clk,
         i_rst => i_rst,
-        i_write_enable => write_enable_B_sig,
+        i_write_enable => w_b_we,
         i_data => w_bus_data_out_sig(7 downto 0),
-        o_data => b_data_sig
+        o_data => w_b_data
     );
 
     C : entity work.data_register 
@@ -255,9 +252,9 @@ begin
     Port Map (
         i_clk => i_clk,
         i_rst => i_rst,
-        i_write_enable => write_enable_C_sig,
+        i_write_enable => w_c_we,
         i_data => w_bus_data_out_sig(7 downto 0),
-        o_data => c_data_sig
+        o_data => w_c_data
     );
 
 
@@ -266,7 +263,7 @@ begin
     Port Map (
         i_clk => i_clk,
         i_rst => i_rst,
-        i_write_enable => write_enable_tmp_sig,
+        i_write_enable => w_tmp_we,
         i_data => w_bus_data_out_sig(7 downto 0),
         o_data => w_tmp_data
     );
@@ -288,7 +285,7 @@ begin
     port map (
         i_clk => i_clk,
         i_rst => i_rst,
-        i_write_enable => out_port_3_write_enable_sig,
+        i_write_enable => w_out_port_3_we,
         i_data => w_bus_data_out_sig(7 downto 0),
         o_data => w_output_3
     );
@@ -298,7 +295,7 @@ begin
     port map (
         i_clk => i_clk,
         i_rst => i_rst,
-        i_write_enable => out_port_4_write_enable_sig,
+        i_write_enable => w_out_port_4_we,
         i_data => w_bus_data_out_sig(7 downto 0),
         o_data => w_output_4
     );
@@ -308,7 +305,7 @@ begin
             i_clk => w_clkbar,
             i_rst => i_rst,
             i_opcode => w_ir_opcode,
-            i_portnum => operand_low_out_sig(2 downto 0),
+            i_portnum => w_operand_low(2 downto 0),
             o_bus_src_sel => w_wbus_sel_io_def,
             o_bus_dest_sel => wbus_output_we_io_sig,
             o_active => io_active_sig
@@ -316,14 +313,21 @@ begin
 
     REGISTER_LOG : process(i_clk)
     begin
-        Report "Current Simulation Time: " & time'image(now)
-            & ", PC: " & to_string(pc_data_out_sig)
-            & ", MAR: " & to_string(w_mar_addr)
-            & ", MDR: " & to_string(mdr_data_out_sig)
-            & ", OPCODE: " & to_string(w_ir_opcode)
-            & ", ACC: " & to_string(w_acc_data)
-            & ", B: " & to_string(b_data_sig)
-            & ", C: " & to_string(c_data_sig);
+        if rising_edge(i_clk) and w_last_stage = '1' then
+            Report "Current Simulation Time: " & time'image(now)
+                & ", PC: " & to_hex_string(w_pc_data)
+                & ", MAR: " & to_hex_string(w_mar_addr)
+                & ", MDR-FM: " & to_hex_string(mdr_fm_data_out_sig)
+                & ", MDR-TM: " & to_hex_string(mdr_tm_data_out_sig)
+                & ", OPCODE: " & to_hex_string(w_ir_opcode)
+                & ", ACC: " & to_hex_string(w_acc_data)
+                & ", B: " & to_hex_string(w_b_data)
+                & ", C: " & to_hex_string(w_c_data)
+                & ", TMP: " & to_hex_string(w_tmp_data)
+                & ", ALU: " & to_hex_string(w_alu_data)
+                & ", OUT-3: " & to_hex_string(w_output_3)
+                & ", OUT-4: " & to_hex_string(w_output_4);
+        end if;
     end process;
 
 end rtl;

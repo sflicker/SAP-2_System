@@ -157,7 +157,7 @@ begin
         s2_prog_run_switch => r_prog_run_switch,
 --        S4_read_write_switch => r_read_write_switch,
 --        S5_clear_start => r_clear_start,
-        S6_step_toggle => r_step_toggle,
+--        S6_step_toggle => r_step_toggle,
         S7_manual_auto_switch => r_manual_auto_switch,
         i_rx_serial => w_tb_tx_to_system_top_rx,
         o_tx_serial => w_tb_rx_from_system_top_tx,

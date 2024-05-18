@@ -7,13 +7,13 @@ entity clock_controller is
     Port(
         i_clk : IN STD_LOGIC;
         i_prog_run_switch : IN STD_LOGIC;  -- prog / run switch (prog=0, run=1)
-        i_step_toggle : IN STD_LOGIC;        -- single step  when high
+--        i_step_toggle : IN STD_LOGIC;        -- single step  when high
         i_manual_auto_switch : IN STD_LOGIC;        -- manual/auto mode. 0 manual, 1 auto
         i_hltbar : in STD_LOGIC;      -- 
         i_clrbar : in STD_LOGIC;
         o_clk : OUT STD_LOGIC;
-        o_running : OUT STD_LOGIC;
-        o_stepping : out STD_LOGIC
+        o_running : OUT STD_LOGIC
+--        o_stepping : out STD_LOGIC
     );
 end clock_controller;
 

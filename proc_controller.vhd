@@ -128,7 +128,9 @@ entity proc_controller is
     o_sp_dec : out STD_LOGIC;
     
     o_HLTBar : out STD_LOGIC;
-    o_stage : out integer
+    o_stage : out integer;
+    o_first_stage: out STD_LOGIC;
+    o_last_stage: out STD_LOGIC
     );
 end proc_controller;
 
@@ -231,10 +233,13 @@ begin
             elsif rising_edge(i_clk) then
                 if stage_var = 1 then       -- reset for fetch
                     control_word_index := "0000000000";
+                    o_first_stage <= '1';
                 elsif stage_var = 5 then    -- start the control for the opcode
                     control_word_index := ADDRESS_ROM_CONTENTS(to_integer(unsigned(i_opcode)));
+                    o_first_stage <= '0';
                 else                        -- increment the index for the next control word
                     control_word_index := std_logic_vector(unsigned(control_word_index) + 1);
+                    o_first_stage <= '0';
                 end if;
 
                 Report "Control Word Index: " & to_string(control_word_index);
@@ -252,10 +257,12 @@ begin
                         Report "NOP detected moving to next instruction";
                         stage_var := 1;
                         stage_sig <= stage_var;
+                        o_last_stage <= '1';
     --                    stage_counter <= stage;
                 else
                     -- if not finished with control program..
                     -- translate control word to output control signals 
+                    o_last_stage <= '0';
                     output_control_word(stage_var, control_word);
                     control_word_signal <= control_word;
                     control_word_index_signal <= control_word_index;
