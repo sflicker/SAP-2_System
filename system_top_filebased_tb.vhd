@@ -24,7 +24,7 @@ architecture test of system_top_filebased_tb is
 
     type t_byte_array is array (natural range <>) of std_logic_vector(7 downto 0);
 
-    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"4D");
+    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44");
     constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");
     signal program_bytes : t_byte_array(0 to 4096);
     signal program_size : unsigned(15 downto 0);
@@ -172,6 +172,7 @@ begin
     )
     port map(
         i_clk => w_clk_1MHZ,
+        i_rst => r_rst,
         i_tx_dv => r_tb_tx_dv,
         i_tx_byte => r_tb_tx_byte,
         o_tx_active => w_tb_tx_active,
@@ -186,6 +187,7 @@ begin
     )
     port map (
         i_clk => w_clk_1MHZ,
+        i_rst => r_rst,
         i_rx_serial => w_tb_rx_from_system_top_tx,
         o_rx_dv => w_to_tb_rx_dv,
         o_rx_byte => w_to_tb_rx_byte

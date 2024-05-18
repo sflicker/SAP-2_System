@@ -38,7 +38,7 @@ architecture test of memory_loader_tb is
 
     type t_byte_array is array (natural range <>) of std_logic_vector(7 downto 0);
 
-    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"4D");
+    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44");
     constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");
     signal program_bytes : t_byte_array(0 to 4096);
     signal program_size : unsigned(15 downto 0);

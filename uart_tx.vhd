@@ -10,6 +10,7 @@ entity UART_TX is
     );
     port (
         i_clk : in STD_LOGIC;
+        i_rst : in STD_LOGIC;
         i_tx_dv : in STD_LOGIC;
         i_tx_byte : in STD_LOGIC_VECTOR(7 downto 0);
         o_tx_active : out STD_LOGIC := '0';
@@ -31,7 +32,13 @@ architecture RTL of UART_TX is
 
         p_UART_TX : process(i_clk)
         begin
-            if rising_edge(i_clk) then
+            if i_rst = '1' then
+                o_tx_active <= '0';
+                o_tx_serial <= '1';     -- idle state
+                r_tx_done <= '0';
+                r_bit_index <= 0;
+                r_state <= s_idle;
+            elsif rising_edge(i_clk) then
                 case r_state is
                     when s_idle =>
                         o_tx_active <= '0';

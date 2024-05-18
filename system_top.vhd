@@ -20,7 +20,9 @@ entity system_top is
         o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
         o_running : out STD_LOGIC;
 --        o_stepping : out STD_LOGIC;
-        o_loading : out STD_LOGIC
+        o_loading : out STD_LOGIC;
+        o_mem_loader_idle : out STD_LOGIC;
+        o_debug_byte : out STD_LOGIC_VECTOR(7 downto 0)
     );
 end system_top;
 
@@ -48,10 +50,9 @@ architecture rtl of system_top is
     signal w_tx_active : STD_LOGIC;
     signal w_tx_done : STD_LOGIC;
     signal w_rx_dv : STD_LOGIC;
-    signal w_tx_serial : STD_LOGIC;
     signal w_running : STD_LOGIC;
---    signal w_stepping : STD_LOGIC;
     signal w_loading : STD_LOGIC;
+    signal w_mem_loader_idle : STD_LOGIC;
 
 begin
 
@@ -59,6 +60,9 @@ begin
     o_running <= w_running;
 --    o_stepping <= w_stepping;
     o_loading <= w_loading;
+    o_mem_loader_idle <= w_mem_loader_idle;
+
+    o_debug_byte <= w_rx_byte when S2_prog_run_switch = '0' else (others => '0');
 
     --TODO need to connect this to something like USB input
     w_input_data <= (others => '0');
@@ -151,7 +155,8 @@ begin
             o_wrt_mem_addr => w_mem_addr_from_loader,
             o_wrt_mem_data => w_mem_data_from_loader,
             o_wrt_mem_we => w_mem_we_from_loader,
-            o_loading => w_loading
+            o_loading => w_loading,
+            o_idle => w_mem_loader_idle
         );
     
 
@@ -170,11 +175,12 @@ begin
     UART_RX_INST: entity work.UART_RX
     generic map (
         ID => "ST-UART-RX",
-        g_CLKS_PER_BIT => 9
+        g_CLKS_PER_BIT => 9    -- 1 MHZ Clock, 115200 baud
     )
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => w_system_clock_1MHZ,
+        i_rst => i_rst,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => w_rx_byte
@@ -183,11 +189,12 @@ begin
     UART_TX_INST : entity work.UART_TX
     generic map (
         ID => "ST-UART-TX",
-        g_CLKS_PER_BIT => 9
+        g_CLKS_PER_BIT => 9     --1 MHZ Clock, 115200 baud
     )
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => w_system_clock_1MHZ,
+        i_rst => i_rst,
         i_tx_dv => w_rx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,

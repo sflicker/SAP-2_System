@@ -67,6 +67,30 @@ set_property IOSTANDARD LVCMOS33 [get_ports {o_seven_segment_cathodes[0]}]
 
 #LEDs
 
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[0]}]
+set_property PACKAGE_PIN V13 [get_ports {o_debug_byte[0]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[1]}]
+set_property PACKAGE_PIN V3 [get_ports {o_debug_byte[1]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[2]}]
+set_property PACKAGE_PIN W3 [get_ports {o_debug_byte[2]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[3]}]
+set_property PACKAGE_PIN U3 [get_ports {o_debug_byte[3]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[4]}]
+set_property PACKAGE_PIN P3 [get_ports {o_debug_byte[4]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[5]}]
+set_property PACKAGE_PIN N3 [get_ports {o_debug_byte[5]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[6]}]
+set_property PACKAGE_PIN P1 [get_ports {o_debug_byte[6]}]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {o_debug_byte[7]}]
+set_property PACKAGE_PIN L1 [get_ports {o_debug_byte[7]}]
+
 
 
 set_property IOSTANDARD LVCMOS33 [get_ports o_running]
@@ -74,6 +98,9 @@ set_property PACKAGE_PIN U16 [get_ports o_running]
 
 set_property IOSTANDARD LVCMOS33 [get_ports o_loading]
 set_property PACKAGE_PIN E19 [get_ports o_loading]
+
+set_property IOSTANDARD LVCMOS33 [get_ports o_mem_loader_idle]
+set_property PACKAGE_PIN U19 [get_ports o_mem_loader_idle]
 
 #set_property IOSTANDARD LVCMOS33 [get_ports o_stepping]
 #set_property PACKAGE_PIN U19 [get_ports o_stepping]

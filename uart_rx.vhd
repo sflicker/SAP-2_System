@@ -22,6 +22,7 @@ entity UART_RX is
     );
     port(
         i_clk : in STD_LOGIC;                           -- input clock
+        i_rst : in STD_LOGIC;
         i_rx_serial : in STD_LOGIC;                     -- input serial bit
         o_rx_dv : out STD_LOGIC := '0';                        -- output data valid bit. high after succcessfully byte for one clock cycle
         o_rx_byte : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0')    -- output received byte
@@ -38,7 +39,13 @@ architecture rtl of uart_rx is
 begin
     p_UART_RX : process(i_clk)
     begin
-        if rising_edge(i_clk) then
+        if i_rst = '1' then
+            r_state <= s_idol;
+            r_rx_byte <= (others => '0');
+            r_rx_dv <= '0';
+            r_clk_count <= 0;
+            r_bit_index <= 0;
+        elsif rising_edge(i_clk) then
             case r_state is
                 when s_idol =>
                     r_rx_dv <= '0';
