@@ -9,7 +9,7 @@ entity UART_top is
     );
     port (
         i_clk : in STD_LOGIC;
-        i_reset : in STD_LOGIC;
+        i_rst : in STD_LOGIC;
         i_rx_serial : in STD_LOGIC;
         o_tx_serial : out STD_LOGIC;
         o_rx_dv : out STD_LOGIC;                        -- output data valid bit. high after succcessfully byte for one clock cycle
@@ -70,7 +70,7 @@ begin
 --        generic map(g_DIV_FACTOR => 10)
                 port map(
             i_clk => i_clk,
-            i_reset => i_reset,
+            i_rst => i_rst,
             o_clk => w_clk_disp_refresh_1KHZ_sig
         );
 
@@ -80,7 +80,7 @@ begin
             display_controller : entity work.display_controller
             port map(
                i_clk => w_clk_disp_refresh_1KHZ_sig,
-               i_rst => i_reset,
+               i_rst => i_rst,
                i_data => r_display_data,
                o_anodes => o_anodes,
                o_cathodes => o_cathodes

@@ -19,7 +19,7 @@ entity system_top is
         o_seven_segment_anodes : out STD_LOGIC_VECTOR(3 downto 0);      -- maps to seven segment display
         o_seven_segment_cathodes : out STD_LOGIC_VECTOR(6 downto 0);     -- maps to seven segment display
         o_running : out STD_LOGIC;
-        o_stepping : out STD_LOGIC;
+--        o_stepping : out STD_LOGIC;
         o_loading : out STD_LOGIC
     );
 end system_top;

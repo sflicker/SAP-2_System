@@ -9,8 +9,8 @@ architecture test of uart_top_tb is
     constant c_clk_period :time := 10 ns;
     constant c_clk_per_bit : integer := 10416;
     constant c_bit_period : time := 104167 ns;
-    signal r_clock : std_logic := '0';
-    signal r_reset : std_logic := '0';
+    signal r_clk : std_logic := '0';
+    signal r_rst : std_logic := '0';
     signal w_rx_byte : std_logic_vector(7 downto 0);
     signal r_rx_serial : std_logic := '1';
     signal r_rx_dv : std_logic;
@@ -35,12 +35,12 @@ architecture test of uart_top_tb is
             Report "Finished Writing Test Byte";
         end procedure;
 begin
-    r_clock <= not r_clock after c_clk_period/2;
+    r_clk <= not r_clk after c_clk_period/2;
 
         UART_TOP_INST: entity work.UART_TOP
         port map (
-            i_clk => r_clock,
-            i_reset => r_reset,
+            i_clk => r_clk,
+            i_rst => r_rst,
             i_rx_serial => r_rx_serial,
             o_rx_dv => r_rx_dv,
             o_rx_byte => w_rx_byte,
@@ -51,9 +51,9 @@ begin
         process
         begin
             Report "Starting Test";
-            wait until rising_edge(r_clock);
+            wait until rising_edge(r_clk);
             UART_WRITE_BYTE(X"37", r_rx_serial);
-            wait until rising_edge(r_clock);
+            wait until rising_edge(r_clk);
     
             Report "Test Result = " & to_string(w_rx_byte);
             if w_rx_byte = X"37" then
@@ -63,9 +63,9 @@ begin
             end if;
     
             Report "Starting Second Test";
-            wait until rising_edge(r_clock);
+            wait until rising_edge(r_clk);
             UART_WRITE_BYTE(X"A3", r_rx_serial);
-            wait until rising_edge(r_clock);
+            wait until rising_edge(r_clk);
     
             Report "Test Result = " & to_string(w_rx_byte);
             if w_rx_byte = X"A3" then
