@@ -179,6 +179,7 @@ begin
     IR : entity work.instruction_register
         port map(
             i_clk => i_clk,
+            i_rst => i_rst,
             i_clr => w_ir_clr,
             i_data => w_bus_data_out_sig(7 downto 0),
             i_sel_we => w_ir_we,

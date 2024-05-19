@@ -230,6 +230,7 @@ begin
             if i_rst = '1' then
                 stage_var := 1;
                 stage_sig <= stage_var;
+                
             elsif rising_edge(i_clk) then
                 if stage_var = 1 then       -- reset for fetch
                     control_word_index := "0000000000";
