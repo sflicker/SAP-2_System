@@ -102,8 +102,14 @@ set_property PACKAGE_PIN E19 [get_ports o_loading]
 set_property IOSTANDARD LVCMOS33 [get_ports o_mem_loader_idle]
 set_property PACKAGE_PIN U19 [get_ports o_mem_loader_idle]
 
-#set_property IOSTANDARD LVCMOS33 [get_ports o_stepping]
-#set_property PACKAGE_PIN U19 [get_ports o_stepping]
+set_property IOSTANDARD LVCMOS33 [get_ports o_prog_run]
+set_property PACKAGE_PIN V19 [get_ports o_prog_run]
+
+set_property IOSTANDARD LVCMOS33 [get_ports o_manual_auto]
+set_property PACKAGE_PIN W18 [get_ports o_manual_auto]
+
+set_property IOSTANDARD LVCMOS33 [get_ports o_hltbar]
+set_property PACKAGE_PIN U15 [get_ports o_hltbar]
 
 
 #set_property IOSTANDARD LVCMOS33 [get_ports clear_out]

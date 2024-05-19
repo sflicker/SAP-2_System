@@ -22,7 +22,10 @@ entity system_top is
 --        o_stepping : out STD_LOGIC;
         o_loading : out STD_LOGIC;
         o_mem_loader_idle : out STD_LOGIC;
-        o_debug_byte : out STD_LOGIC_VECTOR(7 downto 0)
+        o_debug_byte : out STD_LOGIC_VECTOR(7 downto 0);
+        o_prog_run : OUT STD_LOGIC;
+        o_manual_auto : out STD_LOGIC;
+        o_hltbar : out STD_LOGIC
     );
 end system_top;
 
@@ -55,6 +58,10 @@ architecture rtl of system_top is
     signal w_mem_loader_idle : STD_LOGIC;
 
 begin
+
+    o_prog_run <= S2_prog_run_switch;
+    o_manual_auto <= S7_manual_auto_switch;
+    o_hltbar <= w_hltbar;
 
     r_system_clock_100mhz <= i_clk;
     o_running <= w_running;

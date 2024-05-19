@@ -83,7 +83,7 @@ for byte in addr_formatted_to_send:
     ser.write(byte.to_bytes(1, byteorder='little'))
     time.sleep(0.1)
 
-ser.write(addr_formatted_to_send)
+#ser.write(addr_formatted_to_send)
 
 for number in binary_numbers_array:
 
