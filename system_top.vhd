@@ -30,7 +30,6 @@ entity system_top is
 end system_top;
 
 architecture rtl of system_top is
-    signal r_system_clock_100mhz : STD_LOGIC;
     signal w_clk_display_refresh_1kHZ : STD_LOGIC;
     signal w_system_clock_1MHZ : STD_LOGIC;
     signal w_gated_cpu_clock_1MHZ : STD_LOGIC;
@@ -63,7 +62,6 @@ begin
     o_manual_auto <= S7_manual_auto_switch;
     o_hltbar <= w_hltbar;
 
-    r_system_clock_100mhz <= i_clk;
     o_running <= w_running;
 --    o_stepping <= w_stepping;
     o_loading <= w_loading;

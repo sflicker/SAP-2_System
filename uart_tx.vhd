@@ -30,7 +30,7 @@ architecture RTL of UART_TX is
     begin
         o_tx_done <= r_tx_done;
 
-        p_UART_TX : process(i_clk)
+        p_UART_TX : process(i_clk, i_rst)
         begin
             if i_rst = '1' then
                 o_tx_active <= '0';

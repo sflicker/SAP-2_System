@@ -51,7 +51,7 @@ begin
     r_rx_data <= i_rx_data when i_rx_data_dv;
     o_idle <= r_idle and not i_prog_run_mode;
 
-    p_memory_loader : process(i_clk, i_rst)
+    p_memory_loader : process(i_clk, i_rst, i_prog_run_mode)
         variable v_start_addr : std_logic_vector(15 downto 0) := (others => '0');
         variable checksum : std_logic_vector(7 downto 0) := (others => '0');
     begin

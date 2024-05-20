@@ -265,7 +265,6 @@ begin
         
     ALU : entity work.ALU
         port map (
-            i_rst => i_rst,
             i_op => w_alu_op,
             i_input_1 => w_acc_data,
             i_input_2 => w_tmp_data,
@@ -306,7 +305,7 @@ begin
             o_active => w_io_controller_active
         );
 
-    REGISTER_LOG : process(i_clk)
+    REGISTER_LOG : process(i_clk, w_last_stage)
     begin
         if rising_edge(i_clk) and w_last_stage = '1' then
             Report "Current Simulation Time: " & time'image(now)

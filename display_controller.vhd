@@ -26,7 +26,7 @@ begin
                 );
         
      digit_refresh :
-        process(w_digit_sel)
+        process(w_digit_sel, i_data)
         begin
             case w_digit_sel is
                 when "0001" => r_data_for_digit <= i_data(3 downto 0);

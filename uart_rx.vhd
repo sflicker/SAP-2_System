@@ -37,7 +37,7 @@ architecture rtl of uart_rx is
     signal r_rx_byte : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
     signal r_rx_dv : STD_LOGIC := '0';
 begin
-    p_UART_RX : process(i_clk)
+    p_UART_RX : process(i_clk, i_rst)
     begin
         if i_rst = '1' then
             r_state <= s_idol;

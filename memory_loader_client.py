@@ -67,33 +67,43 @@ while True:
             print("Unexpected response:", response)
     time.sleep(0.1)  # Polling delay
 
+checksum = 0
+
 num_bytes = binary_numbers_array.size + 4
-num_bytes_formatted_to_send = num_bytes.to_bytes(2, byteorder='little')
+num_bytes_formatted_to_send = num_bytes.to_bytes(4, byteorder='little')
+
+print(f"num_bytes: {num_bytes}, num_bytes_formatted_to_send: {num_bytes_formatted_to_send}")
 
 for byte in num_bytes_formatted_to_send:
-    print(f"Sending  {byte}")
-    ser.write(byte.to_bytes(1, byteorder='little'))
+    checksum = checksum ^ byte
+    hex_byte = byte.to_bytes(1, byteorder='little');
+    print(f"Sending  {hex_byte}")
+    ser.write(hex_byte)
     time.sleep(0.1)
 
 addr = 0
 addr_formatted_to_send = addr.to_bytes(2, byteorder='little')
 
 for byte in addr_formatted_to_send:
-    print(f"Sending {byte}")
-    ser.write(byte.to_bytes(1, byteorder='little'))
+    checksum = checksum ^ byte
+    hex_byte = byte.to_bytes(1, byteorder='little')
+    print(f"Sending {hex_byte}")
+    ser.write(hex_byte)
     time.sleep(0.1)
 
 #ser.write(addr_formatted_to_send)
 
 for number in binary_numbers_array:
+    checksum = checksum ^ number
 
     pyint = int(number)
-    hex_byte = pyint.to_bytes((pyint.bit_length() + 7) // 8, byteorder = 'big')
+    hex_byte = pyint.to_bytes((pyint.bit_length() + 7) // 8, byteorder = 'little')
     print(f"number: {number}, pyint: {pyint}, hex_byte: {hex_byte}")
     ser.write(hex_byte)
     time.sleep(0.1)
     print(f"sent: {hex_byte.hex()}")
 
+print(f"Checksum: {checksum}")
 print("Waiting for CHECKSUM response")
 while True:
     if ser.in_waiting > 0:
