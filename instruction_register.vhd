@@ -28,15 +28,18 @@ begin
             o_operand_low <= "00000000";
             o_operand_high <= "00000000";
         elsif rising_edge(i_clk) then
-            if i_sel_we = "00" then 
+            case i_sel_we is
+                when  "00" => 
                 -- all write enables off
-            elsif i_sel_we = "01" then
-                o_opcode <= i_data;
-            elsif i_sel_we = "10" then
-                o_operand_low <= i_data;
-            elsif i_sel_we = "11" then
-                o_operand_high <= i_data;
-            end if;
+                when "01" =>
+                    o_opcode <= i_data;
+                when "10" =>
+                    o_operand_low <= i_data;
+                when "11" =>
+                    o_operand_high <= i_data;
+                when others =>
+                -- all write enables off
+            end case;
         end if;
     end process;
     
