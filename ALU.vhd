@@ -8,9 +8,9 @@ entity ALU is
            i_input_1 : in STD_LOGIC_VECTOR(7 downto 0);
            i_input_2 : in STD_LOGIC_VECTOR(7 downto 0);
            i_update_status_flags : in STD_LOGIC;
-           o_out : out STD_LOGIC_VECTOR(7 downto 0);
-           o_minus_flag : out STD_LOGIC;
-           o_equal_flag : out STD_LOGIC
+           o_out : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
+           o_minus_flag : out STD_LOGIC := '0';
+           o_equal_flag : out STD_LOGIC := '0'
     );
 end ALU;
 
@@ -63,7 +63,7 @@ begin
             end if;
 
             o_out <= result;
-            
+
         end process;
 
     -- process (i_input_1, i_input_2, i_op, i_update_status_flags)

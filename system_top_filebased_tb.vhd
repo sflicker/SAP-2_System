@@ -197,6 +197,14 @@ begin
     uut: process
     begin
         Report "Starting System Top - Memory Loader Test";
+
+        r_rst <= '1';
+        wait for 50 ns;
+
+        r_rst <= '0';
+        wait for 50 ns;
+
+
         load_program_bytes(file_name, program_size, program_bytes);
         wait for 50 ns;
 

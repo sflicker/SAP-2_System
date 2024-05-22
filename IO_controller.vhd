@@ -8,9 +8,9 @@ entity IO_controller is
         i_rst : IN STD_LOGIC;
         i_opcode : IN STD_LOGIC_VECTOR(7 downto 0);
         i_portnum : IN STD_LOGIC_VECTOR(2 downto 0);      -- portnum (0 none, 1 input 1, 2 input 2, 3 output 1, 4 output 2)
-        o_bus_src_sel : OUT STD_LOGIC_VECTOR(3 downto 0);
-        o_bus_dest_sel : OUT STD_LOGIC_VECTOR(0 to 12);
-        o_active : OUT STD_LOGIC
+        o_bus_src_sel : OUT STD_LOGIC_VECTOR(3 downto 0) := (others => '0');
+        o_bus_dest_sel : OUT STD_LOGIC_VECTOR(0 to 12) := (others => '0');
+        o_active : OUT STD_LOGIC := '0'
         
     );
 end IO_controller;

@@ -12,13 +12,13 @@ entity memory_loader is
         i_tx_response_active : in STD_LOGIC;                -- response transmitter is active
         i_tx_response_done : in STD_LOGIC; 
         i_ram_data : in STD_LOGIC_VECTOR(7 downto 0);
-        o_tx_response_data : out STD_LOGIC_VECTOR(7 downto 0);   -- response byte to transmit
-        o_tx_response_dv : out STD_LOGIC;                   -- response byte is ready to transmit
-        o_wrt_mem_addr : out STD_LOGIC_VECTOR(15 downto 0); -- address of mem to write
-        o_wrt_mem_data : out STD_LOGIC_VECTOR(7 downto 0);  -- byte of data to write to mem
-        o_wrt_mem_we : out STD_LOGIC;
-        o_loading : out STD_LOGIC;                        -- ram we enable. must be high for one clock cycle to write a byte.
-        o_idle : out STD_LOGIC
+        o_tx_response_data : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');   -- response byte to transmit
+        o_tx_response_dv : out STD_LOGIC := '0';                   -- response byte is ready to transmit
+        o_wrt_mem_addr : out STD_LOGIC_VECTOR(15 downto 0) := (others => '0'); -- address of mem to write
+        o_wrt_mem_data : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');  -- byte of data to write to mem
+        o_wrt_mem_we : out STD_LOGIC := '0';
+        o_loading : out STD_LOGIC := '0';                        -- ram we enable. must be high for one clock cycle to write a byte.
+        o_idle : out STD_LOGIC := '0'
     );
 end memory_loader;
 
@@ -32,18 +32,18 @@ architecture rtl of memory_loader is
 
     signal r_state : t_state := s_init;
 --    signal r_total : STD_LOGIC_VECTOR(15 downto 0);
-    signal r_counter : unsigned(15 downto 0);
-    signal r_addr : STD_LOGIC_VECTOR(15 downto 0);
-    signal r_data : STD_LOGIC_VECTOR(7 downto 0);
-    signal r_rx_total : std_logic_vector(15 downto 0);
-    signal r_rx_start_addr : std_logic_vector(15 downto 0);
+    signal r_counter : unsigned(15 downto 0) := (others => '0');
+    signal r_addr : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+    signal r_data : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
+    signal r_rx_total : std_logic_vector(15 downto 0) := (others => '0');
+    signal r_rx_start_addr : std_logic_vector(15 downto 0) := (others => '0');
     signal r_index : integer := 0;
     --signal r_checksum : unsigned(7 downto 0) := (others => '0');
-    signal r_state_pos : integer;
-    signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0);
-    signal r_rx_data : STD_LOGIC_VECTOR(7 downto 0);
-    signal r_loading : STD_LOGIC;
-    signal r_idle : STD_LOGIC;
+    signal r_state_pos : integer := 0;
+    signal r_data_verify : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
+    signal r_rx_data : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
+    signal r_loading : STD_LOGIC := '0';
+    signal r_idle : STD_LOGIC := '0';
 begin
 
     o_loading <= r_loading and not i_prog_run_mode;
@@ -52,18 +52,33 @@ begin
     o_idle <= r_idle and not i_prog_run_mode;
 
     p_memory_loader : process(i_clk, i_rst, i_prog_run_mode)
-        variable v_start_addr : std_logic_vector(15 downto 0) := (others => '0');
+        variable start_addr : std_logic_vector(15 downto 0) := (others => '0');
         variable checksum : std_logic_vector(7 downto 0) := (others => '0');
     begin
         if i_rst = '1' then
             r_state <= s_init;
+            o_tx_response_data <= (others => '0');
+            o_tx_response_dv <= '0';
+            o_wrt_mem_addr <= (others => '0');
+            o_wrt_mem_data <= (others => '0');
+            o_wrt_mem_we <= '0';
+
+            r_addr <= (others => '0');
+            r_counter <= (others => '0');
+            r_idle <= '0';
+            r_index <= 0;
+            checksum := (others => '0');
+            start_addr := (others => '0');
+            r_loading <= '0';
+            start_addr := (others => '0');
+            r_rx_total <= (others => '0');
         elsif rising_edge(i_clk) and i_prog_run_mode = '0' then
             case r_state is 
                 when s_init => 
                     Report "Memory Loader - s_init -> s_idle";
                     r_index <= 0;
                     r_counter <= (others => '0');
-                    v_start_addr := (others => '0');
+                    start_addr := (others => '0');
                     r_addr <=  (others => '0');
                     r_data <= (others => '0');
                     r_rx_start_addr <= (others => '0');
@@ -157,15 +172,15 @@ begin
                 when s_rx_start_addr =>
                     if i_rx_data_dv = '1' then
                         if r_index = 0 then
-                            v_start_addr(7 downto 0) := i_rx_data;
+                            start_addr(7 downto 0) := i_rx_data;
                             checksum := checksum xor i_rx_data;
                             r_index <= r_index + 1;
                             r_state <= s_rx_start_addr;
                             r_counter <= r_counter + 1;
                         elsif r_index = 1 then
-                            v_start_addr(15 downto 8) := i_rx_data;
-                            r_rx_start_addr <= v_start_addr;
-                            r_addr <= v_start_addr;
+                            start_addr(15 downto 8) := i_rx_data;
+                            r_rx_start_addr <= start_addr;
+                            r_addr <= start_addr;
                             checksum := checksum xor i_rx_data;
                             r_index <= 0;
                             r_state <= s_rx_data;

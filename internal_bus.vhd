@@ -18,28 +18,28 @@ entity internal_bus is
         i_tmp_data : in STD_LOGIC_VECTOR(7 downto 0);
         i_input_port_1_data : in STD_LOGIC_VECTOR(7 downto 0);
         i_input_port_2_data : in STD_LOGIC_VECTOR(7 downto 0);
-        o_bus_data : out STD_LOGIC_VECTOR(15 downto 0);
-        o_acc_we : out STD_LOGIC;
-        o_b_we : out STD_LOGIC;
-        o_c_we : out STD_LOGIC;
-        o_tmp_we : out STD_LOGIC;
-        o_mar_we : out STD_LOGIC;
-        o_pc_we_full : out STD_LOGIC;
-        o_pc_we_low : out STD_LOGIC;
-        o_pc_we_high : out STD_LOGIC;
-        o_mdr_tm_we : out STD_LOGIC;
-        o_ir_we : out STD_LOGIC_VECTOR(0 to 1);
+        o_bus_data : out STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+        o_acc_we : out STD_LOGIC := '0';
+        o_b_we : out STD_LOGIC := '0';
+        o_c_we : out STD_LOGIC := '0';
+        o_tmp_we : out STD_LOGIC := '0';
+        o_mar_we : out STD_LOGIC := '0';
+        o_pc_we_full : out STD_LOGIC := '0';
+        o_pc_we_low : out STD_LOGIC := '0';
+        o_pc_we_high : out STD_LOGIC := '0';
+        o_mdr_tm_we : out STD_LOGIC := '0';
+        o_ir_we : out STD_LOGIC_VECTOR(0 to 1) := (others => '0');
 --        o_ir_opcode_we : out STD_LOGIC;
 --        o_ir_operand_we_low : out STD_LOGIC;
 --        o_ir_operand_we_high : out STD_LOGIC;
-        o_out_port_3_we : out STD_LOGIC;
-        o_out_port_4_we : out STD_LOGIC
+        o_out_port_3_we : out STD_LOGIC := '0';
+        o_out_port_4_we : out STD_LOGIC := '0'
   );
 end internal_bus;
 
 architecture rtl of internal_bus is
-    signal r_src_sel : STD_LOGIC_VECTOR(3 downto 0);
-    signal r_dest_sel : STD_LOGIC_VECTOR(0 to 12);
+    signal r_src_sel : STD_LOGIC_VECTOR(3 downto 0) := (others => '0');
+    signal r_dest_sel : STD_LOGIC_VECTOR(0 to 12) := (others => '0');
 begin
 
     r_src_sel <= i_src_sel_io when i_io_controller_active = '1' else i_src_sel_def;

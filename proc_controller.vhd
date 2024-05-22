@@ -115,22 +115,22 @@ entity proc_controller is
     i_equal_flag : in STD_LOGIC;
 
     -- outputs
-    o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0);
-    o_alu_op : out STD_LOGIC_VECTOR(3 downto 0);
-    o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 12);
-    o_pc_inc : out STD_LOGIC;
-    o_mdr_fm_we : out STD_LOGIC;
-    o_ram_we : out STD_LOGIC;
-    o_ir_clr : out STD_LOGIC;
-    o_update_status_flags : out STD_LOGIC;
-    o_controller_wait : out STD_LOGIC;
-    o_sp_inc : out STD_LOGIC;
-    o_sp_dec : out STD_LOGIC;
+    o_wbus_sel : out STD_LOGIC_VECTOR(3 downto 0) := (others => '0');
+    o_alu_op : out STD_LOGIC_VECTOR(3 downto 0) := (others => '0');
+    o_wbus_control_word: out STD_LOGIC_VECTOR(0 to 12) := (others => '0');
+    o_pc_inc : out STD_LOGIC := '0';
+    o_mdr_fm_we : out STD_LOGIC := '0';
+    o_ram_we : out STD_LOGIC := '0';
+    o_ir_clr : out STD_LOGIC := '0';
+    o_update_status_flags : out STD_LOGIC := '0';
+    o_controller_wait : out STD_LOGIC := '0';
+    o_sp_inc : out STD_LOGIC := '0';
+    o_sp_dec : out STD_LOGIC := '0';
     
-    o_HLTBar : out STD_LOGIC;
-    o_stage : out integer;
-    o_first_stage: out STD_LOGIC;
-    o_last_stage: out STD_LOGIC
+    o_HLTBar : out STD_LOGIC := '1';
+    o_stage : out integer := 0;
+    o_first_stage: out STD_LOGIC := '0';
+    o_last_stage: out STD_LOGIC := '0'
     );
 end proc_controller;
 
@@ -230,6 +230,7 @@ begin
             if i_rst = '1' then
                 stage_var := 1;
                 stage_sig <= stage_var;
+                o_alu_op <= (others => '0');
                 
             elsif rising_edge(i_clk) then
                 if stage_var = 1 then       -- reset for fetch
