@@ -72,11 +72,13 @@ begin
         o_filtered => w_op_dec_filtered
     );
 
-    op_controller : process(i_clk)
+    op_controller : process(i_clk, i_rst)
 
     begin
         if i_rst = '1' then
             r_op <= "0000";
+            r_inc_current <= '0';
+            r_dec_current <= '0';
         elsif rising_edge(i_clk) then
             if w_op_inc_filtered = '1' and r_inc_current = '0' then
                 Report "Incrementating OP";
@@ -105,6 +107,7 @@ begin
     alu_inst : entity work.alu
     port map(
         i_op => r_op,
+        i_rst => i_rst,
         i_input_1 => unsigned(i_a),
         i_input_2 => unsigned(i_b),
         o_out => w_alu_output,
