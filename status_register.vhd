@@ -26,36 +26,35 @@ entity status_register is
 
         i_we : in STD_LOGIC;
         i_data : in STD_LOGIC_VECTOR(7 downto 0);
-        o_data : in STD_LOGIC_VECTOR(7 downto 0)
+        o_data : out STD_LOGIC_VECTOR(7 downto 0)
     );
 end status_register;
 
 architecture rtl of status_register is
-    signal minus_flag : STD_LOGIC;
-    signal equal_flag : STD_LOGIC;
-    signal status_flags : STD_LOGIC_VECTOR(1 downto 0);
 begin
     process(i_clk, i_rst) 
         variable internal_data : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
     begin
         if i_rst = '1' then
-            minus_flag <= '0';
-            equal_flag <= '0';
-            carry_flag <= '0';
-        if rising_edge(i_clk) then
+            o_minus <= '0';
+            o_equal <= '0';
+            o_carry <= '0';
+        elsif rising_edge(i_clk) then
+            -- allow any combination to be read and stored
+            -- but no consistency checks are made.
             if i_we = '1' then
-                internal_data <= i_data;
+                internal_data := i_data;
             end if;
             if i_minus_we = '1' then 
-                internal_data(7) <= i_minus;
+                internal_data(7) := i_minus;
             end if;
 
-            if equal_we = '1' then 
-                internal_data(6) <= i_equal;
+            if i_equal_we = '1' then 
+                internal_data(6) := i_equal;
             end if;
 
-            if carry_we = '1' then 
-                internal_data(2) <= i_carry;
+            if i_carry_we = '1' then 
+                internal_data(2) := i_carry;
             end if;
         end if;
         o_minus <= internal_data(7);

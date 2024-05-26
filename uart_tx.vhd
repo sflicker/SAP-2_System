@@ -38,6 +38,9 @@ architecture RTL of UART_TX is
                 r_tx_done <= '0';
                 r_bit_index <= 0;
                 r_state <= s_idle;
+                r_clk_count <= 0;
+                r_tx_data <= (others => '0');
+                
             elsif rising_edge(i_clk) then
                 case r_state is
                     when s_idle =>

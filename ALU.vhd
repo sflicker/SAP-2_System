@@ -7,10 +7,10 @@ entity ALU is
    --        i_clk : in STD_LOGIC;
            i_rst : in STD_LOGIC;
            i_op : in STD_LOGIC_VECTOR(3 downto 0);
-           i_input_1 : in unsigned(7 downto 0);
-           i_input_2 : in unsigned(7 downto 0);
+           i_input_1 : in STD_LOGIC_VECTOR(7 downto 0);
+           i_input_2 : in STD_LOGIC_VECTOR(7 downto 0);
 --           i_update_status_flags : in STD_LOGIC;
-           o_out : out unsigned(7 downto 0) := (others => '0');
+           o_out : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
            o_minus_flag : out STD_LOGIC := '0';
            o_equal_flag : out STD_LOGIC := '0';
            o_carry_flag : out STD_LOGIC := '0'
@@ -18,6 +18,8 @@ entity ALU is
 end ALU;
 
 architecture rtl of ALU is
+    signal r_input_1 : unsigned(7 downto 0);
+    signal r_input_2 : unsigned(7 downto 0);
     signal extended_a, extended_b : unsigned(8 downto 0) := (others => '0');
     constant ONE : unsigned(8 downto 0) := "000000001";
     constant ZERO : unsigned(7 downto 0) := (others => '0');
@@ -31,8 +33,10 @@ architecture rtl of ALU is
     -- end procedure;
 begin
 
-    extended_a <= '0' & i_input_1;
-    extended_b <= '0' & i_input_2;
+    r_input_1 <= unsigned(i_input_1);
+    r_input_2 <= unsigned(i_input_2);
+    extended_a <= '0' & r_input_1;
+    extended_b <= '0' & r_input_2;
 
     process (extended_a, extended_b, i_op, i_rst)
         variable extended_result : unsigned(8 downto 0) := (others=>'0');
@@ -45,7 +49,8 @@ begin
 
         if i_rst = '1' then
             extended_result := (others => '0');
-        else 
+        else
+            extended_result := (others => '0'); 
             case i_op is
                 when "0000" =>  -- no operation
                     extended_result := extended_result;
@@ -74,7 +79,7 @@ begin
             end case;
         end if;            
 
-        o_out <= extended_result(7 downto 0);
+        o_out <= std_logic_vector(extended_result(7 downto 0));
         o_carry_flag <= extended_result(8);
         o_minus_flag <= extended_result(7);
         o_equal_flag <= '1' when extended_result(7 downto 0) = ZERO else '0';

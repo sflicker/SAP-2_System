@@ -124,6 +124,46 @@ begin
 
     end loop;
 
+        Report "Repeating test with a=11011000, b=00101010";
+
+        r_rst <= '1';
+        wait for 10 ns;
+    
+        r_rst <= '0';
+        wait for 10 ns;
+    
+        r_a <= "11011000";
+        r_b <= "00101010";
+    
+        wait for 10 ms;
+        Report "op=" & to_string(w_op) 
+         & ", r_a=" & to_string(r_a)
+         & ", r_b=" & to_string(r_b)
+         & ", Result=" & to_string(w_result)
+         & ", w_minus=" & to_string(w_minus) 
+         & ", w_equal=" & to_string(w_equal) 
+         & ", w_carry=" & to_string(w_carry);
+    
+        for j in 0 to 12 loop
+    
+            r_op_inc <= '1';
+            wait for 15 ms;
+    
+            r_op_inc <= '0';
+            wait for 15 ms;
+    
+            Report "op=" & to_string(w_op) 
+            & ", r_a=" & to_string(r_a)
+            & ", r_b=" & to_string(r_b)
+            & ", Result=" & to_string(w_result)
+            & ", w_minus=" & to_string(w_minus) 
+            & ", w_equal=" & to_string(w_equal) 
+            & ", w_carry=" & to_string(w_carry);
+    
+        end loop;
+    
+
+
     wait;
 end process;
 

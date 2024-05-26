@@ -28,7 +28,7 @@ architecture rtl of alu_top is
     signal w_system_clock_1kHZ : STD_LOGIC;
     signal w_display_data : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
     signal r_op : STD_lOGIC_VECTOR(3 downto 0) := (others => '0');
-    signal w_alu_output : unsigned(7 downto 0);
+    signal w_alu_output : STD_LOGIC_VECTOR(7 downto 0);
     signal w_op_inc_filtered : STD_LOGIC;
     signal w_op_dec_filtered : STD_LOGIC;
     constant c_OP_LIMIT : STD_LOGIC_VECTOR(3 downto 0) := "1010";
@@ -108,8 +108,8 @@ begin
     port map(
         i_op => r_op,
         i_rst => i_rst,
-        i_input_1 => unsigned(i_a),
-        i_input_2 => unsigned(i_b),
+        i_input_1 => i_a,
+        i_input_2 => i_b,
         o_out => w_alu_output,
         o_minus_flag => o_minus,
         o_equal_flag => o_equal,

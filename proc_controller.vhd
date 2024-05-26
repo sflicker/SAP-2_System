@@ -231,6 +231,19 @@ begin
                 stage_var := 1;
                 stage_sig <= stage_var;
                 o_alu_op <= (others => '0');
+                o_controller_wait <= '0';
+                o_first_stage <= '0';
+                o_ir_clr <= '0';
+                o_mdr_fm_we <= '0';
+                o_pc_inc <= '0';
+                o_last_stage <= '0';
+                o_sp_dec <= '0';
+                o_sp_inc <= '0';
+                o_update_status_flags <= '0';
+                o_wbus_control_word <= (others => '0');
+                o_wbus_sel <= (others => '0');
+                o_ram_we <= '0';
+                control_word_index := (others => '0');
                 
             elsif rising_edge(i_clk) then
                 if stage_var = 1 then       -- reset for fetch

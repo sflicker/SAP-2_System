@@ -25,7 +25,7 @@ end proc_top;
 
 architecture rtl of proc_top is
 
-    signal w_clkbar : std_logic;
+    signal r_clrbar : std_logic;
     signal w_hltbar : std_logic := '1';
     signal w_wbus_sel_def : STD_LOGIC_VECTOR(3 downto 0);
     signal w_wbus_sel_io_def : STD_LOGIC_VECTOR(3 downto 0);       
@@ -57,6 +57,10 @@ architecture rtl of proc_top is
     signal w_pc_data : STD_LOGIC_VECTOR(15 downto 0);
     signal w_minus_flag : STD_LOGIC;
     signal w_equal_flag : STD_LOGIC;
+    signal w_carry_flag : STD_LOGIC;
+    signal w_minus_flag_saved : STD_LOGIC;
+    signal w_equal_flag_saved : STD_LOGIC;
+    signal w_carry_flag_saved : STD_LOGIC;
     signal w_update_status_flags : STD_LOGIC;
     signal w_controller_wait : STD_LOGIC;
     signal w_io_controller_active : STD_LOGIC;
@@ -80,7 +84,7 @@ begin
     o_hltbar <= w_hltbar;
     o_data <= w_mdr_tm_data;
 
-    w_clkbar <= not i_clk;
+    r_clrbar <= not i_clk;
 
     -- tie the MAR address output to the address output for the proc
     o_address <= w_mar_addr;
@@ -126,7 +130,7 @@ begin
     PC : entity work.program_counter
         Generic Map(16)
         port map(
-            i_clk => w_clkbar,
+            i_clk => r_clrbar,
             i_reset => i_rst,
             i_write_enable_full => w_write_enable_PC,
             i_write_enable_low => w_pc_write_enable_low,
@@ -199,11 +203,11 @@ begin
 
     proc_controller : entity work.proc_controller
         port map(
-            i_clk => w_clkbar,
+            i_clk => r_clrbar,
             i_rst => i_rst,
             i_opcode => w_ir_opcode,
-            i_minus_flag => w_minus_flag,
-            i_equal_flag => w_equal_flag,
+            i_minus_flag => w_minus_flag_saved,
+            i_equal_flag => w_equal_flag_saved,
 
             o_wbus_sel => w_wbus_sel_def,
             o_alu_op => w_alu_op,
@@ -266,12 +270,14 @@ begin
     ALU : entity work.ALU
         port map (
             i_op => w_alu_op,
+            i_rst => i_rst,
             i_input_1 => w_acc_data,
             i_input_2 => w_tmp_data,
             o_out => w_alu_data,
-            i_update_status_flags => w_update_status_flags,
+--            i_update_status_flags => w_update_status_flags,
             o_minus_flag => w_minus_flag,
-            o_equal_flag => w_equal_flag
+            o_equal_flag => w_equal_flag,
+            o_carry_flag => w_carry_flag
             );
 
     OUTPUT_PORT_3 : entity work.data_register
@@ -296,7 +302,7 @@ begin
 
     IO : entity work.IO_controller
         Port map(
-            i_clk => w_clkbar,
+            i_clk => r_clrbar,
             i_rst => i_rst,
             i_opcode => w_ir_opcode,
             i_portnum => w_operand_low(2 downto 0),
@@ -304,6 +310,26 @@ begin
             o_bus_dest_sel => w_wbus_dest_sel_io,
             o_active => w_io_controller_active
         );
+
+    SR : entity work.status_register
+        Port map(
+            i_clk => i_clk,
+            i_rst => i_rst,
+            i_minus_we => w_update_status_flags,
+            i_minus => w_minus_flag,
+            o_minus => w_minus_flag_saved,
+            i_equal_we => w_update_status_flags,
+            i_equal => w_equal_flag,
+            o_equal => w_equal_flag_saved,
+            i_carry_we => w_update_status_flags,
+            i_carry => w_carry_flag,
+            o_carry => w_carry_flag_saved,
+            -- NEED to get these working for SAP-3
+            i_we => '0',
+            i_data => "00000000",
+            o_data => open
+        );
+    
 
     REGISTER_LOG : process(i_clk, w_last_stage)
     begin

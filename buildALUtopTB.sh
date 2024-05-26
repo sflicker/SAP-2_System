@@ -22,4 +22,4 @@ ghdl -a --std=08 -fsynopsys -v ALU_top_tb.vhd
 #run
 ghdl -e --std=08 -fsynopsys -v ALU_top_tb
 
-ghdl -r --std=08 -fsynopsys -v ALU_top_tb --stop-time=750ms --vcd=ALU_top_tb.vcd
+ghdl -r --std=08 -fsynopsys -v ALU_top_tb --stop-time=1750ms --vcd=ALU_top_tb.vcd
