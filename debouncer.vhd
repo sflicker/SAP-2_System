@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity debouncer is
     generic (
-        g_LIMIT : integer := 1
+        g_LIMIT : integer := 1000000    -- default assume 10 ms wait for with 100 mhz clock
     );
     port (
         i_clk : IN STD_LOGIC;

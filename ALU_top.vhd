@@ -3,6 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity alu_top is
+    generic (
+        g_DEBOUNCER_LIMIT : integer := 1000000 -- default assumes 10 ms sampling wait with 100 mhz
+    );
     port(
         i_clk : in STD_LOGIC;
         i_rst : in STD_LOGIC;
@@ -11,7 +14,7 @@ entity alu_top is
         i_op_inc : in STD_LOGIC;
         i_op_dec : in STD_LOGIC;
 
-        o_op : STD_LOGIC;
+        o_op : out STD_LOGIC_VECTOR(3 downto 0);
         o_result : out STD_LOGIC_VECTOR(7 downto 0);
         o_minus : out STD_LOGIC;
         o_equal : out STD_LOGIC;
@@ -24,11 +27,17 @@ end alu_top;
 architecture rtl of alu_top is
     signal w_system_clock_1kHZ : STD_LOGIC;
     signal w_display_data : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
-    signal w_op : STD_lOGIC_VECTOR(3 downto 0) := (others => '0');
+    signal r_op : STD_lOGIC_VECTOR(3 downto 0) := (others => '0');
     signal w_alu_output : unsigned(7 downto 0);
+    signal w_op_inc_filtered : STD_LOGIC;
+    signal w_op_dec_filtered : STD_LOGIC;
+    constant c_OP_LIMIT : STD_LOGIC_VECTOR(3 downto 0) := "1010";
+    signal r_inc_current : STD_LOGIC := '0';
+    signal r_dec_current : STD_LOGIC := '0';
 begin
 
     o_result <= std_logic_vector(w_alu_output);
+    o_op <= r_op;
 
     processor_clock_divider_1MHZ : entity work.clock_divider
     generic map(g_DIV_FACTOR => 100000)
@@ -47,20 +56,55 @@ begin
         o_cathodes => o_seven_segment_cathodes
     );
 
-    debouncer : entity work.up_down_toggle_debouncer
-    generic map(
-        g_DEBOUNCE_LIMIT => 25)
+    debouncer_inc : entity work.debouncer
+    generic map(g_LIMIT => g_DEBOUNCER_LIMIT)    -- 10 ms based on 100 mhz clock
     port map(
-        i_clk => w_system_clock_1kHZ,
-        i_rst => i_rst,
-        i_up => i_op_inc,
-        i_down => i_op_dec,
-        o_output => w_op
+        i_clk => i_clk,
+        i_unfiltered => i_op_inc,
+        o_filtered => w_op_inc_filtered
     );
+
+    debouncer_dec : entity work.debouncer
+    generic map(g_LIMIT => g_DEBOUNCER_LIMIT)    -- 10 ms based on 100 mhz clock
+    port map(
+        i_clk => i_clk,
+        i_unfiltered => i_op_dec,
+        o_filtered => w_op_dec_filtered
+    );
+
+    op_controller : process(i_clk)
+
+    begin
+        if i_rst = '1' then
+            r_op <= "0000";
+        elsif rising_edge(i_clk) then
+            if w_op_inc_filtered = '1' and r_inc_current = '0' then
+                Report "Incrementating OP";
+                if r_op = c_OP_LIMIT then
+                    r_op <= "0000";
+                else
+                    r_op <= std_logic_vector(unsigned(r_op) + 1);
+                end if;
+            end if;
+
+            if w_op_dec_filtered = '1' and r_dec_current = '0' then
+                Report "Decrementing OP";
+                if r_op = "0000" then
+                    r_op <= c_OP_LIMIT;
+                else
+                    r_op <= std_logic_vector(unsigned(r_op) - 1);
+                end if;
+            end if;
+
+            r_inc_current <= w_op_inc_filtered;
+            r_dec_current <= w_op_dec_filtered;
+        end if;
+    end process;
+
 
     alu_inst : entity work.alu
     port map(
-        i_op => w_op,
+        i_op => r_op,
         i_input_1 => unsigned(i_a),
         i_input_2 => unsigned(i_b),
         o_out => w_alu_output,
