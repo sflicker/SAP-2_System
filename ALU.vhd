@@ -78,9 +78,9 @@ begin
             when "1000" =>  -- Complement
                 extended_result := not extended_b;
             when "1001" =>  -- rotate left
-                extended_result := extended_b(6 downto 0) & extended_b(7);
+                extended_result := '0' & extended_b(6 downto 0) & extended_b(7);
             when "1010" =>  -- rotate right
-                extended_result := extended_b(0) & extended_b(7 downto 1);
+                extended_result := '0' & extended_b(0) & extended_b(7 downto 1);
             when others =>
                 extended_result := extended_result;
             end case;

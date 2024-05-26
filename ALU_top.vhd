@@ -11,7 +11,8 @@ entity alu_top is
         i_op_inc : in STD_LOGIC;
         i_op_dec : in STD_LOGIC;
 
-        o_op : out STD_LOGIC_VECTOR(3 downto 0);
+        o_op : STD_LOGIC;
+        o_result : out STD_LOGIC_VECTOR(7 downto 0);
         o_minus : out STD_LOGIC;
         o_equal : out STD_LOGIC;
         o_carry : out STD_LOGIC;
@@ -27,7 +28,7 @@ architecture rtl of alu_top is
     signal w_alu_output : unsigned(7 downto 0);
 begin
 
-
+    o_result <= std_logic_vector(w_alu_output);
 
     processor_clock_divider_1MHZ : entity work.clock_divider
     generic map(g_DIV_FACTOR => 100000)

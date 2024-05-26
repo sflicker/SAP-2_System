@@ -25,6 +25,9 @@ entity up_down_toggle_debouncer is
             variable r_debounce_counter : natural := 0;
         begin
             if rising_edge(i_clk) then
+                if i_rst = '1' then
+                    r_stable_up <= '0';
+                    r_last_up <= '0'
                 if i_up = '1' and r_last_up = '0' then -- rising edge 
                     if r_debounce_counter = 0 then
                         r_stable_up <= '1';
