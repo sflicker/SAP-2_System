@@ -50,7 +50,8 @@ ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test.asm" --stop-time=5ms --vcd=system_top_out_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test2.asm" --stop-time=5ms --vcd=system_top_out_test2.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/call_test.asm" --stop-time5ms --vcd=system_top_call_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/a_ana_c_test.asm" --stop-time=5ms --vcd=system_top_a_ana_c_test.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/a_ana_c_test.asm" --stop-time=5ms --vcd=system_top_a_ana_c_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/add_b_test.asm" --stop-time=5ms --vcd=system_top_add_b_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/add_c_test.asm" --stop-time=5ms --vcd=system_top_add_c_test.vcd
 
+ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_acc_10_dec_result_0F.asm" --stop-time=5ms --vcd=test_acc_10_dec_result_0F.vcd
