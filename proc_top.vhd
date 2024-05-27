@@ -269,6 +269,7 @@ begin
         
     ALU : entity work.ALU
         port map (
+            i_clk => i_clk,
             i_op => w_alu_op,
             i_rst => i_rst,
             i_input_1 => w_acc_data,
