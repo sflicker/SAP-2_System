@@ -346,6 +346,9 @@ begin
                 & ", C: " & to_hex_string(w_c_data)
                 & ", TMP: " & to_hex_string(w_tmp_data)
                 & ", ALU: " & to_hex_string(w_alu_data)
+                & ", MINUS: " & to_string(w_minus_flag)
+                & ", EQUAL: " & to_string(w_equal_flag)
+                & ", CARRY: " & to_string(w_carry_flag)
                 & ", OUT-3: " & to_hex_string(w_output_3)
                 & ", OUT-4: " & to_hex_string(w_output_4);
         end if;

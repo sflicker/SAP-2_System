@@ -53,9 +53,9 @@ use std.textio.all;
 --  BIT 17      MDR-FM WE                       -- WE for components not connected to 
 --  BIT 18      RAM WE
 --  BIT 19      Update Status Flags
---  BIT 1A      NOT M NEXT
---  BIT 1B      NOT Z Next
---  BIT 1C      NOT NZ next
+--  BIT 1A      Check M. Abort if Not M
+--  BIT 1B      Check Z. Abort if not Z
+--  BIT 1C      Check Not Z. Abort if Z
 --  BIT 1D      WAIT        -- use this if an another controller is running
 --  BIT 1E      SP INC
 --  BIT 1F      SP DEC
@@ -206,9 +206,9 @@ architecture rtl of proc_controller is
             & ", o_mdr_fm_we: " & to_string(control_word(23))
             & ", o_ram_we: " & to_string(control_word(24))
             & ", o_update_status_flags: " & to_string(control_word(25))
-            & ", not_m_next: " & to_string(control_word(26))
-            & ", not_z_next: " & to_string(control_word(27))
-            & ", not_nz_next: " & to_string(control_word(28))
+            & ", abort_if_not_m: " & to_string(control_word(26))
+            & ", abort_if_not_z: " & to_string(control_word(27))
+            & ", abort_if_z: " & to_string(control_word(28))
             & ", o_controller_wait: " & to_string(control_word(29))
             & ", sp_inc: " & to_string(control_word(30))
             & ", sp_dec: " & to_string(control_word(31));
@@ -262,7 +262,9 @@ begin
 
                 Report "Stage: " & to_string(stage_var) 
                     & ", control_word_index: " & to_string(control_word_index) 
-                    & ", control_word: " & to_string(control_word) & ", opcode: " & to_string(i_opcode);
+                    & ", control_word: " & to_string(control_word) & ", opcode: " & to_string(i_opcode)
+                    & ", minus_flag: " & to_string(i_minus_flag)
+                    & ", equal_flag: " & to_string(i_equal_flag);
 
                 -- exit OP control program if NOP reached and reset stage to 1.
                 if control_word = NOP or        -- if the control word is NOP then abort the op and go to next fext
