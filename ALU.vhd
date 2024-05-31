@@ -70,9 +70,12 @@ begin
         end if;
     end process;
 
-    o_out <= std_logic_vector(result_buffer(7 downto 0));
-    o_carry_flag <= result_buffer(8);
-    o_minus_flag <= result_buffer(7);
-    o_equal_flag <= '1' when result_buffer(7 downto 0) = ZERO else '0';
+    process(result_buffer) 
+    begin
+        o_out <= std_logic_vector(result_buffer(7 downto 0));
+        o_carry_flag <= result_buffer(8);
+        o_minus_flag <= result_buffer(7);
+        o_equal_flag <= '1' when result_buffer(7 downto 0) = "00000000" else '0';
+    end process; 
 
 end rtl;

@@ -262,20 +262,36 @@ begin
 
                 Report "Stage: " & to_string(stage_var) 
                     & ", control_word_index: " & to_string(control_word_index) 
-                    & ", control_word: " & to_string(control_word) & ", opcode: " & to_string(i_opcode)
+                    & ", control_word: " & to_string(control_word) 
+                    & ", opcode: " & to_hex_string(i_opcode)
                     & ", minus_flag: " & to_string(i_minus_flag)
-                    & ", equal_flag: " & to_string(i_equal_flag);
+                    & ", equal_flag: " & to_string(i_equal_flag)
+                    & ", AbortIfNotMinusFlag: " & to_string(control_word(26))
+                    & ", AbortIfNotZeroFlag: " & to_string(control_word(27))
+                    & ", AbortIfZeroFlag: " & to_string(control_word(28));
 
                 -- exit OP control program if NOP reached and reset stage to 1.
-                if control_word = NOP or        -- if the control word is NOP then abort the op and go to next fext
-                    (control_word(26) = '1' and i_minus_flag = '0') or    -- also abort op for conditional jumps
-                    (control_word(27) = '1' and i_equal_flag = '0') or
-                    (control_word(28) = '1' and i_equal_flag = '1') then
-                        Report "NOP detected moving to next instruction";
-                        stage_var := 1;
-                        stage_sig <= stage_var;
-                        o_last_stage <= '1';
-    --                    stage_counter <= stage;
+                if control_word = NOP then        -- if the control word is NOP then abort the op and go to next fext
+                    Report "NOP detected moving to next instruction";
+                    stage_var := 1;
+                    stage_sig <= stage_var;
+                    o_last_stage <= '1';
+--                    stage_counter <= stage;
+                elsif control_word(26) = '1' and i_minus_flag = '0' then   -- also abort op for conditional jumps
+                    Report "Abort If Not Minus detected. moving to next instruction";
+                    stage_var := 1;
+                    stage_sig <= stage_var;
+                    o_last_stage <= '1';
+                elsif control_word(27) = '1' and i_equal_flag = '0' then 
+                    Report "Abort If Not Zero detected. moving to next instruction";
+                    stage_var := 1;
+                    stage_sig <= stage_var;
+                    o_last_stage <= '1';
+                elsif control_word(28) = '1' and i_equal_flag = '1' then
+                    Report "Abort If Zero detected. moving to next instruction";
+                    stage_var := 1;
+                    stage_sig <= stage_var;
+                    o_last_stage <= '1';
                 else
                     -- if not finished with control program..
                     -- translate control word to output control signals 

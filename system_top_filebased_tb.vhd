@@ -59,7 +59,8 @@ architecture test of system_top_filebased_tb is
         variable pos : integer := 0;
         variable data : std_logic_vector(7 downto 0);
     begin 
-        Report "Loading Program for Memory Loader Test";
+        Report "Loading Program File for Memory Loader Test";
+        Report "file_name: " & file_name;
         while not endfile(f) loop
             readline(f, l);
             bread(l, data_in);

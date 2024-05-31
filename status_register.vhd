@@ -36,6 +36,7 @@ begin
         variable internal_data : STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
     begin
         if i_rst = '1' then
+            Report "Resetting Status Registers";
             o_minus <= '0';
             o_equal <= '0';
             o_carry <= '0';
@@ -43,17 +44,21 @@ begin
             -- allow any combination to be read and stored
             -- but no consistency checks are made.
             if i_we = '1' then
+                Report "Setting Full Status Register to " & to_string(i_data);
                 internal_data := i_data;
             end if;
             if i_minus_we = '1' then 
+                Report "Setting Minus Flag to " & to_string(i_minus);
                 internal_data(7) := i_minus;
             end if;
 
             if i_equal_we = '1' then 
+                Report "Setting Zero Flag to " & to_string(i_equal);
                 internal_data(6) := i_equal;
             end if;
 
             if i_carry_we = '1' then 
+                Report "Seting Carry Flag to " & to_string(i_carry);
                 internal_data(2) := i_carry;
             end if;
         end if;

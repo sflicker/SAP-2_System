@@ -44,7 +44,9 @@ ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/load_accumulator_test.asm" --stop-time=5ms --vcd=system_top_load_accumulator_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/store_accumulator_test.asm" --stop-time=5ms --vcd=system_top_store_accumulator_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/mvi_test.asm" --stop-time=5ms --vcd=system_top_mvi_test.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jmp_expect_12.asm" --stop-time=5ms --vcd=test_jmp_expect_12.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jmp_expect_12.asm" --stop-time=5ms --vcd=test_jmp_expect_12.vcd
+ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jz_expect_12.asm" --stop-time=5ms --vcd=test_jz_expect_12.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jnz_expect_12.asm" --stop-time=5ms --vcd=test_jnz_expect_12.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test.asm" --stop-time=5ms --vcd=system_top_loop_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test_with_output.asm" --stop-time=5ms --vcd=system_top_loop_test_with_output.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test.asm" --stop-time=5ms --vcd=system_top_out_test.vcd

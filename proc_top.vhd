@@ -335,12 +335,12 @@ begin
     REGISTER_LOG : process(i_clk, w_last_stage)
     begin
         if rising_edge(i_clk) and w_last_stage = '1' then
-            Report "Current Simulation Time: " & time'image(now)
+            Report "Finished Instruction Cycle - Current Simulation Time: " & time'image(now)
+                & ", OPCODE: " & to_hex_string(w_ir_opcode)
                 & ", PC: " & to_hex_string(w_pc_data)
                 & ", MAR: " & to_hex_string(w_mar_addr)
                 & ", MDR-FM: " & to_hex_string(w_mdr_fm_data)
                 & ", MDR-TM: " & to_hex_string(w_mdr_tm_data)
-                & ", OPCODE: " & to_hex_string(w_ir_opcode)
                 & ", ACC: " & to_hex_string(w_acc_data)
                 & ", B: " & to_hex_string(w_b_data)
                 & ", C: " & to_hex_string(w_c_data)
