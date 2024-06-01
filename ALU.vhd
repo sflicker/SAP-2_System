@@ -9,11 +9,12 @@ entity ALU is
            i_op : in STD_LOGIC_VECTOR(3 downto 0);
            i_input_1 : in STD_LOGIC_VECTOR(7 downto 0);
            i_input_2 : in STD_LOGIC_VECTOR(7 downto 0);
---           i_update_status_flags : in STD_LOGIC;
+           i_update_status_flags : in STD_LOGIC;
            o_out : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
            o_minus_flag : out STD_LOGIC := '0';
            o_equal_flag : out STD_LOGIC := '0';
-           o_carry_flag : out STD_LOGIC := '0'
+           o_carry_flag : out STD_LOGIC := '0';
+           o_status_flags : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0')
     );
 end ALU;
 
@@ -70,12 +71,10 @@ begin
         end if;
     end process;
 
-    process(result_buffer) 
-    begin
-        o_out <= std_logic_vector(result_buffer(7 downto 0));
-        o_carry_flag <= result_buffer(8);
-        o_minus_flag <= result_buffer(7);
-        o_equal_flag <= '1' when result_buffer(7 downto 0) = "00000000" else '0';
-    end process; 
+    o_out <= std_logic_vector(result_buffer(7 downto 0));
+    o_carry_flag <= result_buffer(8);
+    o_minus_flag <= result_buffer(7);
+    o_equal_flag <= '1' when result_buffer(7 downto 0) = "00000000" else '0';
+    o_status_flags <= o_minus_flag & o_equal_flag & "000" & o_carry_flag & "00";
 
 end rtl;

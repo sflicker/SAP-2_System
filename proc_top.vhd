@@ -58,9 +58,9 @@ architecture rtl of proc_top is
     signal w_minus_flag : STD_LOGIC;
     signal w_equal_flag : STD_LOGIC;
     signal w_carry_flag : STD_LOGIC;
-    signal w_minus_flag_saved : STD_LOGIC;
-    signal w_equal_flag_saved : STD_LOGIC;
-    signal w_carry_flag_saved : STD_LOGIC;
+--    signal w_minus_flag_saved : STD_LOGIC;
+--    signal w_equal_flag_saved : STD_LOGIC;
+--    signal w_carry_flag_saved : STD_LOGIC;
     signal w_update_status_flags : STD_LOGIC;
     signal w_controller_wait : STD_LOGIC;
     signal w_io_controller_active : STD_LOGIC;
@@ -206,8 +206,8 @@ begin
             i_clk => r_clrbar,
             i_rst => i_rst,
             i_opcode => w_ir_opcode,
-            i_minus_flag => w_minus_flag_saved,
-            i_equal_flag => w_equal_flag_saved,
+            i_minus_flag => w_minus_flag,
+            i_equal_flag => w_equal_flag,
 
             o_wbus_sel => w_wbus_sel_def,
             o_alu_op => w_alu_op,
@@ -275,7 +275,7 @@ begin
             i_input_1 => w_acc_data,
             i_input_2 => w_tmp_data,
             o_out => w_alu_data,
---            i_update_status_flags => w_update_status_flags,
+            i_update_status_flags => w_update_status_flags,
             o_minus_flag => w_minus_flag,
             o_equal_flag => w_equal_flag,
             o_carry_flag => w_carry_flag
@@ -312,24 +312,24 @@ begin
             o_active => w_io_controller_active
         );
 
-    SR : entity work.status_register
-        Port map(
-            i_clk => i_clk,
-            i_rst => i_rst,
-            i_minus_we => w_update_status_flags,
-            i_minus => w_minus_flag,
-            o_minus => w_minus_flag_saved,
-            i_equal_we => w_update_status_flags,
-            i_equal => w_equal_flag,
-            o_equal => w_equal_flag_saved,
-            i_carry_we => w_update_status_flags,
-            i_carry => w_carry_flag,
-            o_carry => w_carry_flag_saved,
-            -- NEED to get these working for SAP-3
-            i_we => '0',
-            i_data => "00000000",
-            o_data => open
-        );
+    -- SR : entity work.status_register
+    --     Port map(
+    --         i_clk => i_clk,
+    --         i_rst => i_rst,
+    --         i_minus_we => w_update_status_flags,
+    --         i_minus => w_minus_flag,
+    --         o_minus => w_minus_flag_saved,
+    --         i_equal_we => w_update_status_flags,
+    --         i_equal => w_equal_flag,
+    --         o_equal => w_equal_flag_saved,
+    --         i_carry_we => w_update_status_flags,
+    --         i_carry => w_carry_flag,
+    --         o_carry => w_carry_flag_saved,
+    --         -- NEED to get these working for SAP-3
+    --         i_we => '0',
+    --         i_data => "00000000",
+    --         o_data => open
+    --     );
     
 
     REGISTER_LOG : process(i_clk, w_last_stage)
