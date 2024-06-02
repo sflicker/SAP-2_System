@@ -60,7 +60,8 @@ architecture rtl of system_top is
 
 begin
 
-    r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
+--    r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
+    r_reset_applied <= i_rst;
     o_prog_run <= S2_prog_run_switch;
     o_manual_auto <= S7_manual_auto_switch;
     o_hltbar <= w_hltbar;
@@ -167,19 +168,19 @@ begin
             o_idle => w_mem_loader_idle
         );
     
-    p_reset_command : entity work.reset_command
-        port map(
-            i_clk => w_system_clock_1MHZ,
-            i_rst => i_rst,
-            i_prog_run_mode => S2_prog_run_switch,
-            i_rx_data => w_rx_byte,
-            i_rx_data_dv => w_rx_rv,
-            i_tx_response_active =>w_tx_active,
-            i_tx_response_done => w_tx_done,
-            o_reset_command => w_reset_command,
-            o_tx_response_data => w_tx_byte,
-            o_tx_response_dv => w_rx_dv
-        );
+    -- p_reset_command : entity work.reset_command
+    --     port map(
+    --         i_clk => w_system_clock_1MHZ,
+    --         i_rst => i_rst,
+    --         i_prog_run_mode => S2_prog_run_switch,
+    --         i_rx_data => w_rx_byte,
+    --         i_rx_data_dv => w_rx_rv,
+    --         i_tx_response_active =>w_tx_active,
+    --         i_tx_response_done => w_tx_done,
+    --         o_reset_command => w_reset_command,
+    --         o_tx_response_data => w_tx_byte,
+    --         o_tx_response_dv => w_rx_dv
+    --     );
 
 
 --    GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
