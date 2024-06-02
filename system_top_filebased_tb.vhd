@@ -26,6 +26,8 @@ architecture test of system_top_filebased_tb is
 
     constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44");
     constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");
+    constant c_reset_str : t_byte_array := (x"4C", x"4F", x"41", x"44");   --   "LOAD"
+
     signal program_bytes : t_byte_array(0 to 4096);
     signal program_size : unsigned(15 downto 0);
     signal total_size : unsigned(15 downto 0);
@@ -257,6 +259,11 @@ begin
         Report "Finished Loading Test Program into Memory";
 
         Report "Resetting System";
+
+        -- Report "Sending Reset Command";
+        -- send_bytes_to_loader(w_clk_100mhz, c_reset_str'length, c_reset_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        -- receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
+
 
         r_prog_run_switch <= '1' ;
         wait for 50 ns;

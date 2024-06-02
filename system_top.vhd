@@ -55,9 +55,12 @@ architecture rtl of system_top is
     signal w_running : STD_LOGIC;
     signal w_loading : STD_LOGIC;
     signal w_mem_loader_idle : STD_LOGIC;
+    signal w_reset_command : STD_LOGIC;
+    signal r_reset_applied : STD_LOGIC;
 
 begin
 
+    r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
     o_prog_run <= S2_prog_run_switch;
     o_manual_auto <= S7_manual_auto_switch;
     o_hltbar <= w_hltbar;
@@ -104,7 +107,7 @@ begin
     sap_2_core : entity work.proc_top
         port map (
             i_clk => w_gated_cpu_clock_1MHZ,
-            i_rst => i_rst,
+            i_rst => r_reset_applied,
             i_data => w_ram_data_out,
             o_data => w_mdr_tm_data, 
             o_address => w_mar_addr,
@@ -164,13 +167,27 @@ begin
             o_idle => w_mem_loader_idle
         );
     
+    p_reset_command : entity work.reset_command
+        port map(
+            i_clk => w_system_clock_1MHZ,
+            i_rst => i_rst,
+            i_prog_run_mode => S2_prog_run_switch,
+            i_rx_data => w_rx_byte,
+            i_rx_data_dv => w_rx_rv,
+            i_tx_response_active =>w_tx_active,
+            i_tx_response_done => w_tx_done,
+            o_reset_command => w_reset_command,
+            o_tx_response_data => w_tx_byte,
+            o_tx_response_dv => w_rx_dv
+        );
+
 
 --    GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
 --    generate  
         display_controller : entity work.display_controller
         port map(
             i_clk => w_clk_display_refresh_1kHZ,
-            i_rst => i_rst,
+            i_rst => r_reset_applied,
             i_data => w_display_data,
             o_anodes => o_seven_segment_anodes,
             o_cathodes => o_seven_segment_cathodes
@@ -185,7 +202,7 @@ begin
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => w_system_clock_1MHZ,
-        i_rst => i_rst,
+        i_rst => r_reset_applied,
         i_rx_serial => i_rx_serial,
         o_rx_dv => w_rx_rv,
         o_rx_byte => w_rx_byte
@@ -199,7 +216,7 @@ begin
     port map(
 --        i_clk => w_system_clock_1MHZ,
         i_clk => w_system_clock_1MHZ,
-        i_rst => i_rst,
+        i_rst => r_reset_applied,
         i_tx_dv => w_rx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,

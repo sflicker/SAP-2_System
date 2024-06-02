@@ -24,6 +24,7 @@ ghdl -a --std=08 -fsynopsys -v instruction_register.vhd
 ghdl -a --std=08 -fsynopsys -v ALU.vhd
 ghdl -a --std=08 -fsynopsys -v IO_controller.vhd
 ghdl -a --std=08 -fsynopsys -v memory_loader.vhd
+ghdl -a --std=08 -fsynopsys -v reset_command.vhd
 ghdl -a --std=08 -fsynopsys -v uart_rx.vhd
 ghdl -a --std=08 -fsynopsys -v uart_tx.vhd
 ghdl -a --std=08 -fsynopsys -v ram_bank.vhd
