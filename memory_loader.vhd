@@ -17,7 +17,7 @@ entity memory_loader is
         o_wrt_mem_addr : out STD_LOGIC_VECTOR(15 downto 0) := (others => '0'); -- address of mem to write
         o_wrt_mem_data : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');  -- byte of data to write to mem
         o_wrt_mem_we : out STD_LOGIC := '0';
-        o_loading : out STD_LOGIC := '0';                        -- ram we enable. must be high for one clock cycle to write a byte.
+        o_active : out STD_LOGIC := '0';                        -- ram we enable. must be high for one clock cycle to write a byte.
         o_idle : out STD_LOGIC := '0'
     );
 end memory_loader;
@@ -27,8 +27,8 @@ architecture rtl of memory_loader is
     type t_state is (s_init, s_idle, s_rx_start, s_tx_start_resp, s_rx_total,
         s_rx_start_addr, s_rx_data, s_wrt_data, s_verify_data, s_tx_checksum, s_tx_checksum_finish, s_cleanup);
     
-    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44");   --   "LOAD"
-    constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");   -- "READY"
+    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44", x"0D", x"0A");   --   "LOAD"
+    constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59", x"0D", x"0A");   -- "READY"
 
     signal r_state : t_state := s_init;
 --    signal r_total : STD_LOGIC_VECTOR(15 downto 0);
@@ -46,7 +46,7 @@ architecture rtl of memory_loader is
     signal r_idle : STD_LOGIC := '0';
 begin
 
-    o_loading <= r_loading and not i_prog_run_mode;
+    o_active <= r_loading and not i_prog_run_mode;
     r_state_pos <= t_state'POS(r_state);
     r_rx_data <= i_rx_data when i_rx_data_dv;
     o_idle <= r_idle and not i_prog_run_mode;
@@ -108,11 +108,11 @@ begin
                     end if;
 
                 when s_rx_start =>
-                    r_idle <= '0';
-                    r_loading <= '1';
                     if i_rx_data_dv = '1' then
                         if i_rx_data = c_load_str(r_index) then
                             r_data <= i_rx_data;
+                            r_idle <= '0';
+                            r_loading <= '1';
                             if r_index = c_load_str'length-1 then
                                 r_index <= 0;
                                 r_state <= s_tx_start_resp;

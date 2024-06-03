@@ -29,6 +29,7 @@ ghdl -a --std=08 -fsynopsys -v uart_rx.vhd
 ghdl -a --std=08 -fsynopsys -v uart_tx.vhd
 ghdl -a --std=08 -fsynopsys -v ram_bank.vhd
 ghdl -a --std=08 -fsynopsys -v internal_bus.vhd
+#ghdl -a --std=08 -fsynopsys -v command_processor.vhd
 #ghdl -a --std=08 -fsynopsys -v status_register.vhd
 ghdl -a --std=08 -fsynopsys -v proc_controller.vhd
 ghdl -a --std=08 -fsynopsys -v proc_top.vhd

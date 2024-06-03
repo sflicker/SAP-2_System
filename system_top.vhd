@@ -51,17 +51,29 @@ architecture rtl of system_top is
     signal w_rx_rv : STD_LOGIC;
     signal w_tx_active : STD_LOGIC;
     signal w_tx_done : STD_LOGIC;
-    signal w_rx_dv : STD_LOGIC;
+    signal w_tx_dv : STD_LOGIC;
     signal w_running : STD_LOGIC;
     signal w_loading : STD_LOGIC;
     signal w_mem_loader_idle : STD_LOGIC;
     signal w_reset_command : STD_LOGIC;
     signal r_reset_applied : STD_LOGIC;
+    signal w_reset_command_active : STD_LOGIC;
+    signal w_reset_command_idle : STD_LOGIC;
+    signal w_tx_byte_loader : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_tx_dv_loader : STD_LOGIC;
+    signal w_tx_byte_reset_command : STD_LOGIC_VECTOR(7 downto 0);
+    signal w_tx_dv_reset_command : STD_LOGIC;
+    signal w_run_command : STD_LOGIC;
+    signal r_run_applied : STD_LOGIC;
+--    signal w_command_processor_active : STD_LOGIC;
+--    signal w_command_processor_idle : STD_LOGIC;
+    
 
 begin
 
---    r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
-    r_reset_applied <= i_rst;
+    r_run_applied <= '1' when (w_run_command = '1' or S7_manual_auto_switch = '1') else '0';
+    r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
+--    r_reset_applied <= i_rst;
     o_prog_run <= S2_prog_run_switch;
     o_manual_auto <= S7_manual_auto_switch;
     o_hltbar <= w_hltbar;
@@ -97,7 +109,7 @@ begin
             i_clk => w_system_clock_1MHZ,
             i_prog_run_switch => S2_prog_run_switch,
 --            i_step_toggle => S6_step_toggle,
-            i_manual_auto_switch => S7_manual_auto_switch,
+            i_manual_auto_switch => r_run_applied,
             i_hltbar => w_hltbar,
             i_clrbar => not i_rst,
             o_clk => w_gated_cpu_clock_1MHZ,
@@ -149,6 +161,22 @@ begin
                 o_write_enable => w_ram_write_enable
         );
 
+    -- p_command_process : entity work.command_processor
+    --         port map(
+    --             i_clk => w_system_clock_1MHZ,
+    --             i_rst => i_rst,
+    --             i_prog_run_mode => S2_prog_run_switch,
+    --             i_rx_data => w_rx_byte,
+    --             i_rx_data_dv => w_rx_rv,
+    --             i_tx_response_action => w_tx_active,
+    --             i_tx_response_done => w_tx_done,
+    --             o_tx_response_data => w_tx_byte_loader,
+    --             o_tx_response_dv => w_tx_dv_loader,
+    --             o_active => w_command_processor_active,
+    --             o_idle => w_command_processor_idle
+    --         );
+
+
     mem_loader : entity work.memory_loader
         port map(
             i_clk => w_system_clock_1MHZ,
@@ -159,28 +187,33 @@ begin
             i_tx_response_active =>w_tx_active,
             i_tx_response_done => w_tx_done,
             i_ram_data => w_ram_data_out,
-            o_tx_response_data =>w_tx_byte,
-            o_tx_response_dv => w_rx_dv,
+            o_tx_response_data =>w_tx_byte_loader,
+            o_tx_response_dv => w_tx_dv_loader,
             o_wrt_mem_addr => w_mem_addr_from_loader,
             o_wrt_mem_data => w_mem_data_from_loader,
             o_wrt_mem_we => w_mem_we_from_loader,
-            o_loading => w_loading,
+            o_active => w_loading,
             o_idle => w_mem_loader_idle
         );
     
-    -- p_reset_command : entity work.reset_command
-    --     port map(
-    --         i_clk => w_system_clock_1MHZ,
-    --         i_rst => i_rst,
-    --         i_prog_run_mode => S2_prog_run_switch,
-    --         i_rx_data => w_rx_byte,
-    --         i_rx_data_dv => w_rx_rv,
-    --         i_tx_response_active =>w_tx_active,
-    --         i_tx_response_done => w_tx_done,
-    --         o_reset_command => w_reset_command,
-    --         o_tx_response_data => w_tx_byte,
-    --         o_tx_response_dv => w_rx_dv
-    --     );
+     p_reset_command : entity work.reset_command
+         port map(
+             i_clk => w_system_clock_1MHZ,
+             i_rst => i_rst,
+             i_prog_run_mode => S2_prog_run_switch,
+             i_rx_data => w_rx_byte,
+             i_rx_data_dv => w_rx_rv,
+             i_tx_response_active =>w_tx_active,
+             i_tx_response_done => w_tx_done,
+             o_reset_command => w_reset_command,
+             o_run_command => w_run_command,
+             i_hltbar => w_hltbar,
+             i_display_data => w_display_data,
+             o_tx_response_data => w_tx_byte_reset_command,
+             o_tx_response_dv => w_tx_dv_reset_command,
+             o_active => w_reset_command_active,
+             o_idle => w_reset_command_idle
+         );
 
 
 --    GENERATING_FPGA_OUTPUT : if SIMULATION_MODE = false
@@ -218,12 +251,19 @@ begin
 --        i_clk => w_system_clock_1MHZ,
         i_clk => w_system_clock_1MHZ,
         i_rst => r_reset_applied,
-        i_tx_dv => w_rx_dv,
+        i_tx_dv => w_tx_dv,
         i_tx_byte => w_tx_byte,
         o_tx_active => w_tx_active,
         o_tx_serial => o_tx_serial,
         o_tx_done => w_tx_done
     );
 
+    w_tx_dv <= w_tx_dv_loader when w_loading = '1' else
+        w_tx_dv_reset_command when w_reset_command_active = '1' else
+            '0';
+
+    w_tx_byte <= w_tx_byte_loader when w_loading = '1' else
+        w_tx_byte_reset_command when w_reset_command_active = '1' else
+            (others => '0');
 
 end rtl;

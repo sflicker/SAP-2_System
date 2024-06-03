@@ -24,10 +24,9 @@ architecture test of system_top_filebased_tb is
 
     type t_byte_array is array (natural range <>) of std_logic_vector(7 downto 0);
 
-    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44");
-    constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59");
-    constant c_reset_str : t_byte_array := (x"4C", x"4F", x"41", x"44");   --   "LOAD"
-
+    constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44", x"0D", x"0A"); -- "LOAD"
+    constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59", x"0D", x"0A"); --"READY";
+    constant c_reset_str : t_byte_array :=  (x"52", x"45", x"53", x"45", x"54", x"0D", x"0A");   --   "RESET"
     signal program_bytes : t_byte_array(0 to 4096);
     signal program_size : unsigned(15 downto 0);
     signal total_size : unsigned(15 downto 0);
@@ -97,6 +96,24 @@ architecture test of system_top_filebased_tb is
 --            wait_cycles(clk, 16);
         end loop;
     end;
+
+    procedure receive_results_bytes (
+        signal clk : in std_logic;
+        constant data_size : in integer;
+        signal response_data : in std_logic_vector(7 downto 0);
+        signal response_dv : in std_logic
+    ) is
+    begin
+        Report "Receiving Results" & to_string(data_size) & " bytes.";
+        for i in 0 to data_size - 1 loop
+            wait until response_dv = '1';
+            Report "Receiving Results Bytes - response_dv: " & to_string(response_dv) & 
+                ", " & to_string(response_data); 
+            wait until response_dv = '0';
+        end loop;
+        Report "Finished receiving bytes.";
+    end;
+
 
     procedure receive_and_validate_bytes (
         signal clk : in std_logic;
@@ -260,19 +277,20 @@ begin
 
         Report "Resetting System";
 
-        -- Report "Sending Reset Command";
-        -- send_bytes_to_loader(w_clk_100mhz, c_reset_str'length, c_reset_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
-        -- receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
+        Report "Sending Reset Command";
+        send_bytes_to_loader(w_clk_100mhz, c_reset_str'length, c_reset_str, r_tb_tx_byte, r_tb_tx_dv, w_tb_tx_active);
+        receive_results_bytes(w_clk_100mhz, 2, w_to_tb_rx_byte, w_to_tb_rx_dv);
+        receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
 
 
-        r_prog_run_switch <= '1' ;
-        wait for 50 ns;
+--        r_prog_run_switch <= '1' ;
+--        wait for 50 ns;
 
-        r_rst <= '1';
-        wait for 50 ns;
+        --r_rst <= '1';
+        --wait for 50 ns;
 
-        r_rst <= '0';
-        wait for 50 ns;
+        --r_rst <= '0';
+        --wait for 50 ns;
 
 --        r_clear_start <= '1';
 --        wait for 50 ns;
@@ -280,7 +298,7 @@ begin
 --        r_clear_start <= '0';
 --        wait for 50 ns;
 
-        r_manual_auto_switch <= '1';
+--        r_manual_auto_switch <= '1';
 
         wait;
 

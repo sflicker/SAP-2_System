@@ -34,7 +34,8 @@ begin
     o_clk <= i_clk and r_gate;
     o_running <= r_gate;
 
-    r_gate <= i_manual_auto_switch and i_prog_run_switch and i_hltbar and i_clrbar;
+--    r_gate <= i_manual_auto_switch and i_prog_run_switch and i_hltbar and i_clrbar;
+    r_gate <= i_manual_auto_switch and i_hltbar and i_clrbar;
 
 
     
