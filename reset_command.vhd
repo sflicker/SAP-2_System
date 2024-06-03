@@ -14,6 +14,7 @@ entity reset_command is
         i_tx_response_done : in STD_LOGIC;
         o_reset_command : out STD_LOGIC := '0';
         o_run_command : out STD_LOGIC := '0';
+        o_prog_run_command : out STD_LOGIC := '0';
         i_display_data : in STD_LOGIC_VECTOR(15 downto 0);
         o_tx_response_data : out STD_LOGIC_VECTOR(7 downto 0) := (others => '0');
         o_tx_response_dv : out STD_LOGIC := '0';
@@ -45,6 +46,8 @@ begin
             r_idle <= '0';
             r_active <= '0';
             o_run_command <= '0';
+            o_reset_command <= '0';
+            o_prog_run_command <= '0';
         elsif rising_edge(i_clk) and i_prog_run_mode = '0' then
             case r_state is
                 when s_init =>
@@ -92,6 +95,7 @@ begin
                 when s_start_run =>
                     o_reset_command <= '0';
                     o_run_command <= '1';
+                    o_prog_run_command <= '1';
                     r_state <= s_wait_for_run_finish;
                 when s_wait_for_run_finish =>
                     if i_hltbar = '0' then 
@@ -102,6 +106,7 @@ begin
                 when s_send_results =>
                     o_reset_command <= '0';
                     o_run_command <= '0';
+                    o_prog_run_command <= '0';
                     r_active <= '1';
                     r_idle <= '0';
                     if i_tx_response_done = '1' then 

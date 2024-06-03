@@ -104,11 +104,11 @@ architecture test of system_top_filebased_tb is
         signal response_dv : in std_logic
     ) is
     begin
-        Report "Receiving Results" & to_string(data_size) & " bytes.";
+        Report "Receiving Results " & to_string(data_size) & " bytes.";
         for i in 0 to data_size - 1 loop
             wait until response_dv = '1';
             Report "Receiving Results Bytes - response_dv: " & to_string(response_dv) & 
-                ", " & to_string(response_data); 
+                ", " & to_hex_string(response_data); 
             wait until response_dv = '0';
         end loop;
         Report "Finished receiving bytes.";

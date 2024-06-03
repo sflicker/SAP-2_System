@@ -65,16 +65,19 @@ architecture rtl of system_top is
     signal w_tx_dv_reset_command : STD_LOGIC;
     signal w_run_command : STD_LOGIC;
     signal r_run_applied : STD_LOGIC;
+    signal w_prog_run_command : STD_LOGIC;
+    signal r_prog_run_applied : std_logic;
 --    signal w_command_processor_active : STD_LOGIC;
 --    signal w_command_processor_idle : STD_LOGIC;
     
 
 begin
 
+    r_prog_run_applied <= '1' when (w_prog_run_command = '1' or S2_prog_run_switch = '1') else '0';
     r_run_applied <= '1' when (w_run_command = '1' or S7_manual_auto_switch = '1') else '0';
     r_reset_applied <= '1' when (i_rst = '1' or w_reset_command = '1') else '0'; 
 --    r_reset_applied <= i_rst;
-    o_prog_run <= S2_prog_run_switch;
+    o_prog_run <= r_prog_run_applied;
     o_manual_auto <= S7_manual_auto_switch;
     o_hltbar <= w_hltbar;
 
@@ -83,7 +86,7 @@ begin
     o_loading <= w_loading;
     o_mem_loader_idle <= w_mem_loader_idle;
 
-    o_debug_byte <= w_rx_byte when S2_prog_run_switch = '0' else (others => '0');
+    o_debug_byte <= w_rx_byte when r_prog_run_applied = '0' else (others => '0');
 
     --TODO need to connect this to something like USB input
     w_input_data <= (others => '0');
@@ -145,7 +148,7 @@ begin
 
     ram_bank_input : entity work.memory_input_multiplexer            
         port map(
-                i_prog_run_select => S2_prog_run_switch,
+                i_prog_run_select => r_prog_run_applied,
                 
                 i_prog_data => w_mem_data_from_loader,
                 i_prog_addr => w_mem_addr_from_loader,
@@ -207,6 +210,7 @@ begin
              i_tx_response_done => w_tx_done,
              o_reset_command => w_reset_command,
              o_run_command => w_run_command,
+             o_prog_run_command => w_prog_run_command,
              i_hltbar => w_hltbar,
              i_display_data => w_display_data,
              o_tx_response_data => w_tx_byte_reset_command,
