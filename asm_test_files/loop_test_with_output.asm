@@ -1,2 +1,0 @@
-MVI C, 10H
-HLT
