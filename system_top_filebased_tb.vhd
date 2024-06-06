@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use IEEE.std_logic_textio.all;
 use std.textio.all;
 
 entity system_top_filebased_tb is
@@ -50,28 +51,167 @@ architecture test of system_top_filebased_tb is
         end loop;
     end procedure wait_cycles;
 
-    procedure load_program_bytes(constant c_file_name : String;
-            signal data_size : out unsigned(15 downto 0);
-            signal data_bytes : out t_byte_array
-        ) is
+    procedure load_program_bytes(
+        constant c_file_name : String;
+        signal data_size : out unsigned(15 downto 0);
+        signal data_bytes : out t_byte_array
+    ) is
         File f : TEXT OPEN READ_MODE is c_file_name;
         variable l : LINE;
-        variable data_in : std_logic_vector(7 downto 0);
         variable pos : integer := 0;
         variable data : std_logic_vector(7 downto 0);
-    begin 
-        Report "Loading Program File for Memory Loader Test";
-        Report "file_name: " & file_name;
+        variable hex_str : String(1 to 2);
+        variable line_str : String(1 to 256);
+        variable address_str: String(1 to 5);
+        variable line_len : integer;
+        variable i : integer;
+        variable current_char : character;
+        variable end_of_line : boolean;
+
+        function hex_to_std_logic_vector(hex : in String) return std_logic_vector is
+            variable result : std_logic_vector(7 downto 0);
+--            variable int_val : integer;
+--            variable h : std_logic_vector(7 downto 0);
+        begin
+            Report "Converting Hex - " & hex & " to binary";
+  --          h := (others => '0');
+            for j in 1 to hex'length loop
+                Report "Convertering Nibble - " & hex(j);
+                case hex(j) is
+                    when '0' => result((j-1)*4 + 3 downto (j-1)*4) := "0000";
+                    when '1' => result((j-1)*4 + 3 downto (j-1)*4) := "0001";
+                    when '2' => result((j-1)*4 + 3 downto (j-1)*4) := "0010";
+                    when '3' => result((j-1)*4 + 3 downto (j-1)*4) := "0011";
+                    when '4' => result((j-1)*4 + 3 downto (j-1)*4) := "0100";
+                    when '5' => result((j-1)*4 + 3 downto (j-1)*4) := "0101";
+                    when '6' => result((j-1)*4 + 3 downto (j-1)*4) := "0110";
+                    when '7' => result((j-1)*4 + 3 downto (j-1)*4) := "0111";
+                    when '8' => result((j-1)*4 + 3 downto (j-1)*4) := "1000";
+                    when '9' => result((j-1)*4 + 3 downto (j-1)*4) := "1001";
+                    when 'A' | 'a' => result((j-1)*4 + 3 downto (j-1)*4) := "1010";
+                    when 'B' | 'b' => result((j-1)*4 + 3 downto (j-1)*4) := "1011";
+                    when 'C' | 'c' => result((j-1)*4 + 3 downto (j-1)*4) := "1100";
+                    when 'D' | 'd' => result((j-1)*4 + 3 downto (j-1)*4) := "1101";
+                    when 'E' | 'e' => result((j-1)*4 + 3 downto (j-1)*4) := "1110";
+                    when 'F' | 'f' => result((j-1)*4 + 3 downto (j-1)*4) := "1111";
+                    when others => null;
+                end case;
+            end loop; 
+            return result;
+        end function;
+    begin
+        report "Loading program file";
+        report "file_name: " & c_file_name;
         while not endfile(f) loop
             readline(f, l);
-            bread(l, data_in);
-            data_bytes(pos) <= data_in;
-            pos := pos + 1;
+
+            -- skip the address and colon
+            i := 1;
+            while i <= l'length loop
+                read(l, current_char);
+                report to_string(current_char);
+                if current_char = ':' then
+                    report "colon found - address: " & address_str;
+
+                    exit;
+                else 
+                    address_str(i) := current_char;
+                end if;
+                i := i + 1;
+            end loop;
+
+            -- read the hex bytes
+            end_of_line := false;
+            while not ((l = null) or (l'length = 0)) and not end_of_line loop
+                -- skip spaces
+                while not ((l = null) or (l'length = 0)) loop
+                    read(l, current_char);
+                    if current_char /= ' ' then
+                        exit;
+                    end if;
+                end loop;
+
+                -- read hex byte
+                if not ((l = null) or (l'length = 0)) then
+                    hread(l, data);
+                    data_bytes(pos) <= data;
+                    pos := pos + 1;
+                else
+                    end_of_line := true;  -- stop at the comment or end of line
+                end if;
+            end loop;
         end loop;
-        data_size <= unsigned(to_unsigned(pos, 16));
+
+
+        --     if line_len > 0 then
+
+        --         -- skip the address and colon
+        --         i := 1;
+        --         while i <= line_len and line_str(i) /= ':' loop
+        --             i := i + 1;
+        --         end loop;
+
+        --         if i > line_len then
+        --             report "No colon found in line. Skipping line." severity warning;
+        --             next;
+        --         end if;
+
+        --         i := i + 1;  -- move past the colon
+
+
+        --         -- read the hex bytes
+        --         end_of_line := false;
+        --         while i <= line_len and not end_of_line loop
+        --             -- skip spaces
+        --             while i <= line_len and line_str(i) = ' ' loop
+        --                 i := i + 1;
+        --             end loop;
+
+        --             -- read hex byte
+        --             if i + 1 <= line_len and line_str(i) /= '-' then
+        --                 hex_str := line_str(i to i+1);
+        --                 i := i + 2;
+        --                 data := hex_to_std_logic_vector(hex_str);
+        --                 data_bytes(pos) <= data;
+        --                 pos := pos + 1;
+        --             else
+        --                 end_of_line := true;
+        --             end if;
+        --         end loop;
+        --     end if;
+        -- end loop;
+
+        data_size <= to_unsigned(pos, 16);
         wait for 0 ns;
-        Report "Finished Loading Program For Memory Loader Test";
-    end; 
+        report "Finished Loading Program for Memory Loader Test";
+    end procedure;
+
+
+
+
+
+    -- procedure load_program_bytes(constant c_file_name : String;
+    --         signal data_size : out unsigned(15 downto 0);
+    --         signal data_bytes : out t_byte_array
+    --     ) is
+    --     File f : TEXT OPEN READ_MODE is c_file_name;
+    --     variable l : LINE;
+    --     variable data_in : std_logic_vector(7 downto 0);
+    --     variable pos : integer := 0;
+    --     variable data : std_logic_vector(7 downto 0);
+    -- begin 
+    --     Report "Loading Program File for Memory Loader Test";
+    --     Report "file_name: " & file_name;
+    --     while not endfile(f) loop
+    --         readline(f, l);
+    --         bread(l, data_in);
+    --         data_bytes(pos) <= data_in;
+    --         pos := pos + 1;
+    --     end loop;
+    --     data_size <= unsigned(to_unsigned(pos, 16));
+    --     wait for 0 ns;
+    --     Report "Finished Loading Program For Memory Loader Test";
+    -- end; 
 
     procedure send_bytes_to_loader (
         signal clk : in std_logic;
@@ -226,6 +366,10 @@ begin
 
 
         load_program_bytes(file_name, program_size, program_bytes);
+        for i in 0 to to_integer(program_size) - 1 loop
+            report "Byte " & integer'image(i) & ": " & to_hex_string(program_bytes(i));
+        end loop;
+
         wait for 50 ns;
 
         Report "Program Size: " & to_string(program_size);

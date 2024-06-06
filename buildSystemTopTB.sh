@@ -48,7 +48,7 @@ ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/mvi_test.asm" --stop-time=5ms --vcd=system_top_mvi_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jmp_expect_12.asm" --stop-time=5ms --vcd=test_jmp_expect_12.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jz_expect_12.asm" --stop-time=5ms --vcd=test_jz_expect_12.vcd
-ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jnz_expect_12.asm" --stop-time=5ms --vcd=test_jnz_expect_12.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_jnz_expect_12.asm" --stop-time=5ms --vcd=test_jnz_expect_12.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test.asm" --stop-time=5ms --vcd=system_top_loop_test.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/loop_test_with_output.asm" --stop-time=5ms --vcd=system_top_loop_test_with_output.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/out_test.asm" --stop-time=5ms --vcd=system_top_out_test.vcd
@@ -60,3 +60,4 @@ ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_fil
 
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_acc_10_dec_result_0F.asm" --stop-time=5ms --vcd=test_acc_10_dec_result_0F.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_acc_53_inc_result_54.asm" --stop-time=5ms --vcd=test_acc_53_inc_result_54.vcd
+ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_sub_a_90_b_28_expect_68.asm" --stop-time=5ms --vcd=test_sub_a_90_b_28_expect_68.vcd
