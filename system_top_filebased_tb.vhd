@@ -63,10 +63,15 @@ architecture test of system_top_filebased_tb is
         variable hex_str : String(1 to 2);
         variable line_str : String(1 to 256);
         variable address_str: String(1 to 5);
+        variable hex_byte : std_logic_vector(7 downto 0);
+        variable address_bytes : std_logic_vector(15 downto 0);
         variable line_len : integer;
         variable i : integer;
         variable current_char : character;
         variable end_of_line : boolean;
+        variable read_result : boolean;
+        variable digit_count : integer;
+        variable address_state : boolean;
 
         function hex_to_std_logic_vector(hex : in String) return std_logic_vector is
             variable result : std_logic_vector(7 downto 0);
@@ -99,48 +104,143 @@ architecture test of system_top_filebased_tb is
             end loop; 
             return result;
         end function;
+        function is_whitespace(c : character) return Boolean is
+        begin
+            case c is 
+                when ' ' | HT => 
+                    return True;
+                when others => 
+                    return False;
+            end case;
+        end function;
+        
+        function is_hex_digit(c : character) return boolean is
+        begin
+            case c is
+                when '0' to '9' | 'A' to 'F' | 'a' to 'a' =>
+                    return True;
+                when others =>
+                    return False;
+            end case;
+        end function;
+
+        subtype nibble is std_logic_vector(3 downto 0);
+
+        function conv_hex_digit_to_nibble(c : character) return nibble
+        is
+        begin
+            case c is
+                when '0' => return "0000";
+                when '1' => return "0001";
+                when '2' => return "0010";
+                when '3' => return "0011";
+                when '4' => return "0100";
+                when '5' => return "0101";
+                when '6' => return "0110";
+                when '7' => return "0111";
+                when '8' => return "1000";
+                when '9' => return "1001";
+                when 'a' | 'A' => return "1010";
+                when 'b' | 'B' => return "1011";
+                when 'c' | 'C' => return "1100";
+                when 'd' | 'D' => return "1101";
+                when 'e' | 'E' => return "1110";
+                when 'f' | 'F' => return "1111";
+                when others => 
+                    assert false report "bad hex digit" severity failure;
+            end case;
+        end function;
+
     begin
         report "Loading program file";
         report "file_name: " & c_file_name;
-        while not endfile(f) loop
+        line_loop: while not endfile(f) loop
+            Report "Reading Line";
             readline(f, l);
+            Report "line length: " & to_string(l'length);
 
             -- skip the address and colon
             i := 1;
-            while i <= l'length loop
-                read(l, current_char);
-                report to_string(current_char);
+            line_len := l'length;
+            digit_count := 0;
+            address_state := true;
+            address_bytes := (others => '0');
+            hex_byte := (others => '0');
+
+            -- TODO need to add the hex bytes to the program bytes array when 
+            -- finished parsing it (if activity parsing it) which would occur when we get to a white space, 
+            -- comment or end of line.
+            character_loop : while i <= line_len loop
+                read(l, current_char, read_result);
                 if current_char = ':' then
-                    report "colon found - address: " & address_str;
-
-                    exit;
-                else 
-                    address_str(i) := current_char;
-                end if;
-                i := i + 1;
-            end loop;
-
-            -- read the hex bytes
-            end_of_line := false;
-            while not ((l = null) or (l'length = 0)) and not end_of_line loop
-                -- skip spaces
-                while not ((l = null) or (l'length = 0)) loop
-                    read(l, current_char);
-                    if current_char /= ' ' then
-                        exit;
+                    Report "Found colon";
+                    address_state := False;
+                elsif current_char = '-' then 
+                    Report "Found comment";
+                    -- goto next line
+                    exit line_loop;
+                elsif is_whitespace(current_char) then
+                    Report "Found Whitespace";
+                    digit_count := 0;
+                    -- TODO need to save current hex_byte if actively parsing one
+                    -- to program bytes 
+                    hex_byte := (others => '0');
+                elsif is_hex_digit(current_char) then
+                    Report "Found Hex Digit";
+                    if address_state then
+                        address_bytes((4-digit_count)*4-1 downto (3-digit_count)*4) 
+                            := conv_hex_digit_to_nibble(current_char); 
+                        report "address_bytes: " & to_string(address_bytes);
+                    else
+                        hex_byte((2-digit_count)*4-1 downto (1-digit_count)*4)
+                            := conv_hex_digit_to_nibble(current_char); 
+                        report "hex_btye: " & to_string(hex_byte);
                     end if;
-                end loop;
+                    digit_count := digit_count + 1;
 
-                -- read hex byte
-                if not ((l = null) or (l'length = 0)) then
-                    hread(l, data);
-                    data_bytes(pos) <= data;
-                    pos := pos + 1;
-                else
-                    end_of_line := true;  -- stop at the comment or end of line
                 end if;
-            end loop;
-        end loop;
+                report "i: " & to_string(i) & ", current_char: " & to_string(current_char) & ", read_result: " & to_string(read_result); 
+                i := i + 1;
+            end loop character_loop;
+
+
+--             while i <= l'length loop
+--                 read(l, current_char);
+--                 report to_string(current_char);
+--                 if current_char = ':' then
+--                     report "colon found - address: " & address_str;
+
+--                     exit;
+--                 else 
+--                     address_str(i) := current_char;
+--                 end if;
+--                 i := i + 1;
+--             end loop;
+
+--             -- read the hex bytes
+--             end_of_line := false;
+--             while not ((l = null) or (l'length = 0)) and not end_of_line loop
+--                 -- skip spaces
+--                 while not ((l = null) or (l'length = 0)) loop
+--                     read(l, current_char);
+--                     if current_char /= ' ' then
+--                         exit;
+--                     end if;
+--                 end loop;
+
+--                 -- read hex byte
+--                 if not ((l = null) or (l'length = 0)) then
+--                     read(l, current_char, read_result);
+--                     report "current_char: " & to_string(current_char) & ", read_result: " & to_string(read_result);
+-- --                    hread(l, data, read_result);
+-- --                    report "Data: " & to_string(data) & ", Read_Result: " & to_string(read_result);
+-- --                    data_bytes(pos) <= data;
+-- --                    pos := pos + 1;
+--                 else
+--                     end_of_line := true;  -- stop at the comment or end of line
+--                 end if;
+--             end loop;
+        end loop line_loop;
 
 
         --     if line_len > 0 then
