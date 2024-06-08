@@ -24,6 +24,7 @@ architecture test of system_top_filebased_tb is
     signal w_seven_segment_cathodes : STD_LOGIC_VECTOR(6 downto 0);
 
     type t_byte_array is array (natural range <>) of std_logic_vector(7 downto 0);
+    type t_opcode_count_array is array(0 to 255) of integer range 0 to integer'high;
 
     constant c_load_str : t_byte_array := (x"4C", x"4F", x"41", x"44", x"0D", x"0A"); -- "LOAD"
     constant c_ready_str : t_byte_array := (x"52", x"45", x"41", x"44", x"59", x"0D", x"0A"); --"READY";
@@ -43,6 +44,9 @@ architecture test of system_top_filebased_tb is
     signal w_to_tb_rx_dv : std_logic;
     signal w_to_tb_rx_byte : std_logic_vector(7 downto 0);
     signal w_clk_1MHZ : std_logic;
+    signal r_opcode_code_counts : t_opcode_count_array := (others => 0);
+
+
 
     procedure wait_cycles(signal clk : in std_logic; cycles : in natural) is
     begin
@@ -51,14 +55,25 @@ architecture test of system_top_filebased_tb is
         end loop;
     end procedure wait_cycles;
 
+    -- format consists of multiple lines for line
+    -- (4 hex digits) (:) [(whsp) (2 hex digits)]* (whsp) (-)
+    -- the rest of the line following - will be ignored. 
+    -- the first four digits form the current address of the bytes.
+    -- each of the 2 hex digits form a program byte. these are added
+    -- to add array of bytes.
+    -- the Address must be immediately followed by a colon.
+    -- each byte must be preceeded and followed by a whitespace character.
+    
     procedure load_program_bytes(
         constant c_file_name : String;
         signal data_size : out unsigned(15 downto 0);
-        signal data_bytes : out t_byte_array
+        signal data_bytes : out t_byte_array;
+        signal opcode_count : inout t_opcode_count_array
     ) is
         File f : TEXT OPEN READ_MODE is c_file_name;
         variable l : LINE;
         variable pos : integer := 0;
+        variable line_byte_count : integer := 0;
         variable data : std_logic_vector(7 downto 0);
         variable hex_str : String(1 to 2);
         variable line_str : String(1 to 256);
@@ -71,39 +86,11 @@ architecture test of system_top_filebased_tb is
         variable end_of_line : boolean;
         variable read_result : boolean;
         variable digit_count : integer;
-        variable address_state : boolean;
+        variable line_count : integer := 1;
 
-        function hex_to_std_logic_vector(hex : in String) return std_logic_vector is
-            variable result : std_logic_vector(7 downto 0);
---            variable int_val : integer;
---            variable h : std_logic_vector(7 downto 0);
-        begin
-            Report "Converting Hex - " & hex & " to binary";
-  --          h := (others => '0');
-            for j in 1 to hex'length loop
-                Report "Convertering Nibble - " & hex(j);
-                case hex(j) is
-                    when '0' => result((j-1)*4 + 3 downto (j-1)*4) := "0000";
-                    when '1' => result((j-1)*4 + 3 downto (j-1)*4) := "0001";
-                    when '2' => result((j-1)*4 + 3 downto (j-1)*4) := "0010";
-                    when '3' => result((j-1)*4 + 3 downto (j-1)*4) := "0011";
-                    when '4' => result((j-1)*4 + 3 downto (j-1)*4) := "0100";
-                    when '5' => result((j-1)*4 + 3 downto (j-1)*4) := "0101";
-                    when '6' => result((j-1)*4 + 3 downto (j-1)*4) := "0110";
-                    when '7' => result((j-1)*4 + 3 downto (j-1)*4) := "0111";
-                    when '8' => result((j-1)*4 + 3 downto (j-1)*4) := "1000";
-                    when '9' => result((j-1)*4 + 3 downto (j-1)*4) := "1001";
-                    when 'A' | 'a' => result((j-1)*4 + 3 downto (j-1)*4) := "1010";
-                    when 'B' | 'b' => result((j-1)*4 + 3 downto (j-1)*4) := "1011";
-                    when 'C' | 'c' => result((j-1)*4 + 3 downto (j-1)*4) := "1100";
-                    when 'D' | 'd' => result((j-1)*4 + 3 downto (j-1)*4) := "1101";
-                    when 'E' | 'e' => result((j-1)*4 + 3 downto (j-1)*4) := "1110";
-                    when 'F' | 'f' => result((j-1)*4 + 3 downto (j-1)*4) := "1111";
-                    when others => null;
-                end case;
-            end loop; 
-            return result;
-        end function;
+        type t_parsing_state is (s_address, s_colon, s_whitespace, s_byte);
+        variable parsing_state : t_parsing_state := s_address;
+
         function is_whitespace(c : character) return Boolean is
         begin
             case c is 
@@ -154,47 +141,57 @@ architecture test of system_top_filebased_tb is
     begin
         report "Loading program file";
         report "file_name: " & c_file_name;
+
         line_loop: while not endfile(f) loop
-            Report "Reading Line";
+            Report "Reading Line - " & to_string(line_count);
             readline(f, l);
             Report "line length: " & to_string(l'length);
-
+            line_count := line_count + 1;
+            parsing_state := s_address;
             -- skip the address and colon
             i := 1;
+            line_byte_count := 0;
             line_len := l'length;
             digit_count := 0;
-            address_state := true;
             address_bytes := (others => '0');
             hex_byte := (others => '0');
 
-            -- TODO need to add the hex bytes to the program bytes array when 
-            -- finished parsing it (if activity parsing it) which would occur when we get to a white space, 
-            -- comment or end of line.
             character_loop : while i <= line_len loop
                 read(l, current_char, read_result);
                 if current_char = ':' then
                     Report "Found colon";
-                    address_state := False;
+                    parsing_state := s_colon;
                 elsif current_char = '-' then 
-                    Report "Found comment";
+                    Report "Found comment - skipping rest of line";
                     -- goto next line
-                    exit line_loop;
+                    exit character_loop;
                 elsif is_whitespace(current_char) then
                     Report "Found Whitespace";
+                    if parsing_state = s_byte then
+                        data_bytes(pos) <= hex_byte;
+                        pos := pos + 1;
+                        if line_byte_count = 0 then
+                            opcode_count(to_integer(unsigned(hex_byte))) 
+                                <= opcode_count(to_integer(unsigned(hex_byte))) + 1;
+                        end if;
+                        line_byte_count := line_byte_count + 1;
+                    end if;
+                    parsing_state := s_whitespace;
                     digit_count := 0;
-                    -- TODO need to save current hex_byte if actively parsing one
-                    -- to program bytes 
+
                     hex_byte := (others => '0');
                 elsif is_hex_digit(current_char) then
                     Report "Found Hex Digit";
-                    if address_state then
+                    if parsing_state = s_address then
                         address_bytes((4-digit_count)*4-1 downto (3-digit_count)*4) 
                             := conv_hex_digit_to_nibble(current_char); 
                         report "address_bytes: " & to_string(address_bytes);
-                    else
-                        hex_byte((2-digit_count)*4-1 downto (1-digit_count)*4)
-                            := conv_hex_digit_to_nibble(current_char); 
-                        report "hex_btye: " & to_string(hex_byte);
+                    elsif parsing_state = s_whitespace then
+                        hex_byte(7 downto 4) := conv_hex_digit_to_nibble(current_char);
+                        parsing_state := s_byte;
+                    elsif parsing_state = s_byte then 
+                        hex_byte(3 downto 0) := conv_hex_digit_to_nibble(current_char); 
+                        report "hex_byte: " & to_string(hex_byte);
                     end if;
                     digit_count := digit_count + 1;
 
@@ -202,116 +199,25 @@ architecture test of system_top_filebased_tb is
                 report "i: " & to_string(i) & ", current_char: " & to_string(current_char) & ", read_result: " & to_string(read_result); 
                 i := i + 1;
             end loop character_loop;
+            Report "Finished character loop";
 
-
---             while i <= l'length loop
---                 read(l, current_char);
---                 report to_string(current_char);
---                 if current_char = ':' then
---                     report "colon found - address: " & address_str;
-
---                     exit;
---                 else 
---                     address_str(i) := current_char;
---                 end if;
---                 i := i + 1;
---             end loop;
-
---             -- read the hex bytes
---             end_of_line := false;
---             while not ((l = null) or (l'length = 0)) and not end_of_line loop
---                 -- skip spaces
---                 while not ((l = null) or (l'length = 0)) loop
---                     read(l, current_char);
---                     if current_char /= ' ' then
---                         exit;
---                     end if;
---                 end loop;
-
---                 -- read hex byte
---                 if not ((l = null) or (l'length = 0)) then
---                     read(l, current_char, read_result);
---                     report "current_char: " & to_string(current_char) & ", read_result: " & to_string(read_result);
--- --                    hread(l, data, read_result);
--- --                    report "Data: " & to_string(data) & ", Read_Result: " & to_string(read_result);
--- --                    data_bytes(pos) <= data;
--- --                    pos := pos + 1;
---                 else
---                     end_of_line := true;  -- stop at the comment or end of line
---                 end if;
---             end loop;
         end loop line_loop;
 
-
-        --     if line_len > 0 then
-
-        --         -- skip the address and colon
-        --         i := 1;
-        --         while i <= line_len and line_str(i) /= ':' loop
-        --             i := i + 1;
-        --         end loop;
-
-        --         if i > line_len then
-        --             report "No colon found in line. Skipping line." severity warning;
-        --             next;
-        --         end if;
-
-        --         i := i + 1;  -- move past the colon
-
-
-        --         -- read the hex bytes
-        --         end_of_line := false;
-        --         while i <= line_len and not end_of_line loop
-        --             -- skip spaces
-        --             while i <= line_len and line_str(i) = ' ' loop
-        --                 i := i + 1;
-        --             end loop;
-
-        --             -- read hex byte
-        --             if i + 1 <= line_len and line_str(i) /= '-' then
-        --                 hex_str := line_str(i to i+1);
-        --                 i := i + 2;
-        --                 data := hex_to_std_logic_vector(hex_str);
-        --                 data_bytes(pos) <= data;
-        --                 pos := pos + 1;
-        --             else
-        --                 end_of_line := true;
-        --             end if;
-        --         end loop;
+        -- file_open(report_file, "opcode_report.txt", WRITE_MODE);
+        -- for j in 0 to 255 loop
+        --     if opcode_count(j) > 0 then
+        --         write(l, string'("Opcode " & to_hstring(std_logic_vector(to_unsigned(j, 8))) & " : " & integer'image(opcode_count(j))));
+        --         writeline(report_file, l);
         --     end if;
         -- end loop;
+    
+        -- file_close(report_file);
+
 
         data_size <= to_unsigned(pos, 16);
         wait for 0 ns;
         report "Finished Loading Program for Memory Loader Test";
     end procedure;
-
-
-
-
-
-    -- procedure load_program_bytes(constant c_file_name : String;
-    --         signal data_size : out unsigned(15 downto 0);
-    --         signal data_bytes : out t_byte_array
-    --     ) is
-    --     File f : TEXT OPEN READ_MODE is c_file_name;
-    --     variable l : LINE;
-    --     variable data_in : std_logic_vector(7 downto 0);
-    --     variable pos : integer := 0;
-    --     variable data : std_logic_vector(7 downto 0);
-    -- begin 
-    --     Report "Loading Program File for Memory Loader Test";
-    --     Report "file_name: " & file_name;
-    --     while not endfile(f) loop
-    --         readline(f, l);
-    --         bread(l, data_in);
-    --         data_bytes(pos) <= data_in;
-    --         pos := pos + 1;
-    --     end loop;
-    --     data_size <= unsigned(to_unsigned(pos, 16));
-    --     wait for 0 ns;
-    --     Report "Finished Loading Program For Memory Loader Test";
-    -- end; 
 
     procedure send_bytes_to_loader (
         signal clk : in std_logic;
@@ -327,13 +233,12 @@ architecture test of system_top_filebased_tb is
             tx_data_dv <= '1';
             wait until tx_active = '1';
             Report "Transmitter is reporting Active";
-  --          wait_cycles(clk, 1);
-  --          tx_data_dv <= '0';
+
             wait until tx_active = '0';
             Report "Transmitter is report not Active";
             tx_data_dv <= '0';
             wait_cycles(clk, 1);
---            wait_cycles(clk, 16);
+
         end loop;
     end;
 
@@ -415,9 +320,7 @@ begin
         i_clk => w_clk_100mhz,
         i_rst => r_rst,
         s2_prog_run_switch => r_prog_run_switch,
---        S4_read_write_switch => r_read_write_switch,
---        S5_clear_start => r_clear_start,
---        S6_step_toggle => r_step_toggle,
+
         S7_manual_auto_switch => r_manual_auto_switch,
         i_rx_serial => w_tb_tx_to_system_top_rx,
         o_tx_serial => w_tb_rx_from_system_top_tx,
@@ -455,6 +358,9 @@ begin
 
 
     uut: process
+        variable l : LINE;
+        File report_file : TEXT;
+
     begin
         Report "Starting System Top - Memory Loader Test";
 
@@ -464,18 +370,27 @@ begin
         r_rst <= '0';
         wait for 50 ns;
 
-
-        load_program_bytes(file_name, program_size, program_bytes);
+        load_program_bytes(file_name, program_size, program_bytes, r_opcode_code_counts);
         for i in 0 to to_integer(program_size) - 1 loop
             report "Byte " & integer'image(i) & ": " & to_hex_string(program_bytes(i));
         end loop;
+
+        
+        file_open(report_file, "opcode_report.txt", WRITE_MODE);
+        for j in 0 to 255 loop
+            if r_opcode_code_counts(j) > 0 then
+                report "Opcode " & to_hstring(std_logic_vector(to_unsigned(j, 8))) & " : " & integer'image(r_opcode_code_counts(j));
+                write(l, string'("Opcode " & to_hstring(std_logic_vector(to_unsigned(j, 8))) & " : " & integer'image(r_opcode_code_counts(j))));
+                writeline(report_file, l);
+            end if;
+        end loop;
+        
+        file_close(report_file);
 
         wait for 50 ns;
 
         Report "Program Size: " & to_string(program_size);
 
---        r_prog_run_switch <= '0';
---        r_manual_auto_switch <= '0';
         wait for 50 ns;
 
         Report "Sending Load Command";
@@ -526,30 +441,8 @@ begin
         receive_results_bytes(w_clk_100mhz, 2, w_to_tb_rx_byte, w_to_tb_rx_dv);
         receive_and_validate_bytes(w_clk_100mhz, c_ready_str'length, c_ready_str, w_to_tb_rx_byte, w_to_tb_rx_dv);
 
-
---        r_prog_run_switch <= '1' ;
---        wait for 50 ns;
-
-        --r_rst <= '1';
-        --wait for 50 ns;
-
-        --r_rst <= '0';
-        --wait for 50 ns;
-
---        r_clear_start <= '1';
---        wait for 50 ns;
-
---        r_clear_start <= '0';
---        wait for 50 ns;
-
---        r_manual_auto_switch <= '1';
-
         wait;
 
-
-
     end process;
-
-
 
 end test;

@@ -50,7 +50,7 @@ begin
             when s_IDLE =>
                 if (i_opcode = c_IN_byte_OPCODE and (i_portnum = "001" or i_portnum = "010"))
                                 or (i_opcode = c_OUT_byte_OPCODE and (i_portnum = "011" or i_portnum = "100")) then
-                    Report "IO Opcode detected activating";
+                    Report "IO opcode detected activating";
                     r_next_state <= s_EXECUTE;
                 end if;
             
