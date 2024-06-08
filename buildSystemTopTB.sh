@@ -40,31 +40,30 @@ ghdl -e --std=08 -fsynopsys -v system_top_filebased_tb
 #echo "Running Test Bench"
 #run
 
-test_dir="./asm_test_files"
+ test_dir="./asm_test_files"
 
 for file in "$test_dir"/test*.asm; do
-    echo file="$file"
+     echo file="$file"
     
-    base_name=$(basename $file .asm)
-    echo base_name=$base_name
+     base_name=$(basename $file .asm)
+     echo base_name=$base_name
 
-    vcd_file=${base_name}.vcd
-    echo vcd_file=$vcd_file
+     vcd_file=${base_name}.vcd
+     echo vcd_file=$vcd_file
     
-    vcd_dir=./vcd_files
-    echo vcd_dir=$vcd_dir
+     vcd_dir=./vcd_files
+     echo vcd_dir=$vcd_dir
 
-    vcd_path=${vcd_dir}/${vcd_file}
-    echo vcd_path=vc$vcd_path
-
+     vcd_path=${vcd_dir}/${vcd_file}
+     echo vcd_path=vc$vcd_path
     
-    ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name=$file --stop-time=5ms --vcd=$vcd_path
+     ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name=$file --stop-time=5ms --vcd=$vcd_path
 done
 
 
 
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb --stop-time=5ms --vcd=system_top_filebased_tb.vcd
-#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_add_a_18_c_2a_expect_42.asm" --stop-time=5ms --vcd=test_add_a_18_c_2a_expect_42.vcd
+#ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_cma_a_AA_expect_55.asm" --stop-time=5ms --vcd=test_cma_a_AA_expect_55.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_call_expect_20.asm" --stop-time=5ms --vcd=test_call_expect_20.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_inr_c_53_expect_54.asm" --stop-time=5ms --vcd=test_inr_c_53_expect_54.vcd
 #ghdl -r --std=08 -fsynopsys -v system_top_filebased_tb -gfile_name="asm_test_files/test_mov_expect_FF.asm" --stop-time=5ms --vcd=test_mov_expect_FF.vcd
